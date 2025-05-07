@@ -6,14 +6,98 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 // Define the cost of generating an image
 const IMAGE_GENERATION_COST = 1; // Cost in tokens
+const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY;
+
+async function verifySessionCookie(sessionCookie: string) {
+    try {
+        const decodedClaims = await getAuth(adminApp).verifySessionCookie(sessionCookie, true);
+        return decodedClaims.uid;
+    } catch (error) {
+        console.error('Invalid session cookie:', error);
+        throw new Error('Unauthorized: Invalid session');
+    }
+}
+
+async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firestore) {
+    const userRef = db.collection('users').doc(userId).collection('private').doc('data');
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+        throw new Error('User profile not found');
+    }
+
+    const userData = userDoc.data();
+    const currentTokens = userData?.tokens || 0;
+
+    if (currentTokens < IMAGE_GENERATION_COST) {
+        throw new Error('Insufficient tokens');
+    }
+
+    await db.runTransaction(async (transaction) => {
+        const userDocInTransaction = await transaction.get(userRef);
+        if (!userDocInTransaction.exists) {
+            throw new Error('User document does not exist');
+        }
+
+        const userDataInTransaction = userDocInTransaction.data();
+        const updatedTokens = (userDataInTransaction?.tokens || 0) - IMAGE_GENERATION_COST;
+
+        if (updatedTokens < 0) {
+            throw new Error('Insufficient tokens');
+        }
+
+        transaction.update(userRef, { tokens: updatedTokens });
+    });
+
+    console.log(`Deducted ${IMAGE_GENERATION_COST} tokens from user ${userId}`);
+    return currentTokens - IMAGE_GENERATION_COST;
+}
+
+async function generateImage(prompt: string, width: number, height: number, style: string) {
+    const url = "https://api.runpod.ai/v2/k7649vd0rf6sof/run";
+
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${RUNPOD_API_KEY}`
+        },
+        body: JSON.stringify({
+            input: {
+                prompt,
+                width,
+                height,
+                style
+            },
+            webhook: "https://influencer-gen.vercel.app/api/webhook"
+        })
+    });
+
+    console.log(response.body)
+
+    if (!response.ok) {
+        throw new Error('Failed to generate image');
+    }
+
+    const data = await response.json();
+    return data; // Return the entire response data
+}
+
+async function createJobDocument(db: FirebaseFirestore.Firestore, userId: string, jobData: any, metadata: any) {
+    const jobRef = db.collection('jobs').doc(jobData.id);
+    await jobRef.set({
+        userId,
+        status: jobData.status,
+        metadata,
+        createdAt: new Date().toISOString(),
+    });
+}
 
 export async function POST(request: NextRequest) {
     try {
-        // Check authentication using session cookie
         const cookieStore = await cookies();
         const sessionCookie = cookieStore.get('session')?.value;
 
-        // If no session cookie exists, return unauthorized
         if (!sessionCookie) {
             return NextResponse.json(
                 { error: 'Unauthorized: No session found' },
@@ -21,27 +105,11 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Verify the session cookie and get user ID
-        let userId;
-        try {
-            const decodedClaims = await getAuth(adminApp).verifySessionCookie(sessionCookie, true);
-            userId = decodedClaims.uid;
-            console.log('Authenticated user:', userId);
-        } catch (error) {
-            console.error('Invalid session cookie:', error);
-            return NextResponse.json(
-                { error: 'Unauthorized: Invalid session' },
-                { status: 401 }
-            );
-        }
+        const userId = await verifySessionCookie(sessionCookie);
 
-        // Parse the request body
         const body = await request.json();
+        const { prompt, width = 512, height = 512, style = 'default' } = body;
 
-        // Extract parameters from the request
-        const { prompt, width, height, style } = body;
-
-        // Validate required parameters
         if (!prompt) {
             return NextResponse.json(
                 { error: 'Prompt is required' },
@@ -49,95 +117,28 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Get Firestore instance
         const db = getFirestore(adminApp);
+        const tokensRemaining = await checkAndDeductTokens(userId, db);
 
-        // Check user's token balance
-        const userRef = db.collection('users').doc(userId);
-        const userDoc = await userRef.get();
+        console.log('Image generation requested:', { prompt, width, height, style });
 
-        if (!userDoc.exists) {
-            return NextResponse.json(
-                { error: 'User profile not found' },
-                { status: 404 }
-            );
-        }
+        const jobData = await generateImage(prompt, width, height, style);
 
-        const userData = userDoc.data();
-        const currentTokens = userData?.tokens || 0;
+        // Create a job document in Firestore
+        await createJobDocument(db, userId, jobData, { prompt, width, height, style });
 
-        // Check if user has enough tokens
-        if (currentTokens < IMAGE_GENERATION_COST) {
-            return NextResponse.json(
-                {
-                    error: 'Insufficient tokens',
-                    currentTokens,
-                    requiredTokens: IMAGE_GENERATION_COST
-                },
-                { status: 403 }
-            );
-        }
-
-        // Update token balance in a transaction to ensure atomicity
-        try {
-            await db.runTransaction(async (transaction) => {
-                // Get the latest user data within the transaction
-                const userDocInTransaction = await transaction.get(userRef);
-                if (!userDocInTransaction.exists) {
-                    throw new Error('User document does not exist');
-                }
-
-                const userDataInTransaction = userDocInTransaction.data();
-                const updatedTokens = (userDataInTransaction?.tokens || 0) - IMAGE_GENERATION_COST;
-
-                if (updatedTokens < 0) {
-                    throw new Error('Insufficient tokens');
-                }
-
-                // Update the token balance
-                transaction.update(userRef, { tokens: updatedTokens });
-            });
-
-            console.log(`Deducted ${IMAGE_GENERATION_COST} tokens from user ${userId}`);
-        } catch (error) {
-            console.error('Failed to update token balance:', error);
-            return NextResponse.json(
-                { error: 'Failed to process token deduction' },
-                { status: 500 }
-            );
-        }
-
-        // Log the request
-        console.log('Image generation requested:', {
-            prompt,
-            width: width || 512,
-            height: height || 512,
-            style: style || 'default'
-        });
-
-        // Here you would normally call your image generation service
-        // But we're returning a dummy response instead
-
-        // Dummy response
-        const dummyResponse = {
+        const response = {
             success: true,
-            imageUrl: 'https://example.com/generated-image.png',
-            parameters: {
-                prompt,
-                width: width || 512,
-                height: height || 512,
-                style: style || 'default'
-            },
-            generationTime: '1.2s',
-            tokensRemaining: currentTokens - IMAGE_GENERATION_COST
+            jobId: jobData.id,
+            tokensRemaining
         };
 
-        return NextResponse.json(dummyResponse);
+        return NextResponse.json(response);
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error in image generation endpoint:', error);
         return NextResponse.json(
-            { error: 'Failed to process image generation request' },
+            { error: error.message || 'Failed to process image generation request' },
             { status: 500 }
         );
     }

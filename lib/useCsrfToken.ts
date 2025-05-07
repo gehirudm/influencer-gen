@@ -6,7 +6,7 @@ export function useCsrfToken() {
     useEffect(() => {
         const fetchCsrfToken = async () => {
             try {
-                const response = await fetch("/api/csrf");
+                const response = await fetch("/api/auth/csrf");
                 const data = await response.json();
                 setCsrfToken(data.csrfToken);
             } catch (error) {

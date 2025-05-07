@@ -99,6 +99,8 @@ export default function AuthPage() {
 					signInWithEmailAndPassword(auth, values.email, values.password) :
 					createUserWithEmailAndPassword(auth, values.email, values.password));
 
+			console.log(userCredential);
+
 			const idToken = await userCredential.user.getIdToken();
 
 			const res = await fetch("/api/auth/session-login", {
