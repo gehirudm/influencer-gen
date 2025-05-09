@@ -1,0 +1,99 @@
+interface ImageGenerationMetadata {
+    height: number;
+    width: number;
+    prompt: string;
+    neg_prompt?: string;
+    cfg?: number;
+    seed?: string;
+    n_samples?: number;
+    guidance_scale?: number;
+}
+
+interface CharacterAttribute {
+    name: string;
+    value: string;
+}
+
+// Interface for the 'users' collection
+interface UserProfile {
+    username: string;
+    displayName: string;
+    createdAt: string;
+    bio: string;
+    avatar: string;
+}
+
+// Interface for the 'users/{userid}/private' collection
+interface UserPrivateProfileData {
+    password: string;
+    tokens: number;
+}
+
+// Interface for the 'projects' collection
+interface UserProject {
+    userId: string;
+    name: string;
+    description: string;
+}
+
+// Interface for the 'characters' collection
+interface UserCharacter {
+    userId: string;
+    name: string;
+    imageIds: string[];
+    createdAt: string;
+    description: string;
+    characteristics: CharacterAttribute[];
+}
+
+// Interface for the 'images' collection
+interface UserImage {
+    userId: string;
+    projectId: string;
+    characterId: string;
+    isPublic: boolean;
+    metadata: ImageGenerationMetadata;
+    createdAt: string;
+}
+
+// Interface for the 'likes' collection
+interface ImageLike {
+    imageId: string;
+    userId: string;
+    createdAt: string;
+}
+
+// Interface for the 'comments' collection
+interface ImageComment {
+    imageId: string;
+    userId: string;
+    text: string;
+    createdAt: string;
+}
+
+// Interface for the 'jobs' collection
+interface ImageGenerationJob {
+    status: string;
+    prompt: string;
+    createdAt: string;
+    delayTime: number;
+    executionTime: number;
+    imageIds: string[];
+    metadata: ImageGenerationMetadata;
+    statusTimestamps: {
+        [key: string]: string;
+    };
+    updatedAt: string;
+    userId: string;
+    tokens: number;
+}
+
+interface RunPodsCompletedResponseData {
+    "delayTime": number,      // Time in queue (ms)
+    "executionTime": number, // Processing time (ms)
+    "id": string, // Job ID
+    "output": {
+        "image": string, // Base64 encoded image data
+    }[],
+    "status": string
+}

@@ -1,17 +1,38 @@
 "use client"
 
-import { useState } from 'react';
-import { Container, Grid, TextInput, Button, Image, Modal, Group, FileInput } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import { Container, Grid, TextInput, Button, Image, Modal, Group, FileInput, Loader } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { ImageGenCard } from '@/components/ImageGenCard';
+import { useForm } from '@mantine/form';
+import { collection, getDocs, getFirestore, orderBy, query, where } from 'firebase/firestore';
+import { getAuth, User } from 'firebase/auth';
+import app from '@/lib/firebase';
+import { useUserJobs } from '@/hooks/useUserJobs';
+import { useUserProjects } from '@/hooks/useUserProjects';
 
 export default function ImageGeneratorPage() {
-    const [prompt, setPrompt] = useState('');
-    const [negativePrompt, setNegativePrompt] = useState('');
-    const [selectedImage, setSelectedImage] = useState<File | null>(null);
-    const [generatedImages, setGeneratedImages] = useState<string[]>([]);
-    const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+    const form = useForm({
+        initialValues: {
+            prompt: '',
+            negativePrompt: '',
+            width: 720, // Default width for 720p portrait
+            height: 1280, // Default height for 720p portrait
+            selectedImage: null as File | null,
+        },
+    });
+
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const user = auth.currentUser;
+    const { jobs: userJobs } = useUserJobs();
+    const { projects: userProjects } = useUserProjects();
+    const [loading, setLoading] = useState(false);
 
     const handleGenerate = async () => {
+        const { prompt, negativePrompt, width, height } = form.values;
+        setLoading(true);
+
         try {
             const response = await fetch('/api/generate', {
                 method: 'POST',
@@ -21,6 +42,8 @@ export default function ImageGeneratorPage() {
                 body: JSON.stringify({
                     prompt,
                     negativePrompt,
+                    width,
+                    height,
                 }),
             });
 
@@ -28,84 +51,80 @@ export default function ImageGeneratorPage() {
                 throw new Error('Failed to generate image');
             }
 
-            const data = await response.json();
+            const data: RunPodsCompletedResponseData = await response.json();
             console.log(data);
-            // Assuming the response contains a URL to the generated image
-            // setGeneratedImages([...generatedImages, data.imageUrl]);
         } catch (error: any) {
             notifications.show({
                 title: 'Error',
                 message: error.message || 'Failed to generate image',
                 color: 'red',
             });
+        } finally {
+            setLoading(false);
         }
-    };
-
-    const handleImageClick = (image: string) => {
-        setEnlargedImage(image);
-    };
-
-    const handleCloseModal = () => {
-        setEnlargedImage(null);
     };
 
     return (
         <>
             <Grid grow>
                 <Grid.Col span={4}>
-                    <TextInput
-                        label="Image Prompt"
-                        placeholder="Enter image prompt"
-                        value={prompt}
-                        onChange={(event) => setPrompt(event.currentTarget.value)}
-                        mb="md"
-                    />
-                    <TextInput
-                        label="Negative Prompt"
-                        placeholder="Enter negative prompt"
-                        value={negativePrompt}
-                        onChange={(event) => setNegativePrompt(event.currentTarget.value)}
-                        mb="md"
-                    />
-                    <FileInput
-                        label="Image Picker"
-                        placeholder="Select an image"
-                        value={selectedImage}
-                        onChange={setSelectedImage}
-                        mb="md"
-                    />
-                    <Button onClick={handleGenerate}>Generate Image</Button>
+                    <form onSubmit={form.onSubmit(handleGenerate)}>
+                        <TextInput
+                            label="Image Prompt"
+                            placeholder="Enter image prompt"
+                            {...form.getInputProps('prompt')}
+                            mb="md"
+                        />
+                        <TextInput
+                            label="Negative Prompt"
+                            placeholder="Enter negative prompt"
+                            {...form.getInputProps('negativePrompt')}
+                            mb="md"
+                        />
+                        <TextInput
+                            label="Width"
+                            placeholder="Enter width"
+                            type="number"
+                            {...form.getInputProps('width')}
+                            mb="md"
+                        />
+                        <TextInput
+                            label="Height"
+                            placeholder="Enter height"
+                            type="number"
+                            {...form.getInputProps('height')}
+                            mb="md"
+                        />
+                        <FileInput
+                            label="Image Picker"
+                            placeholder="Select an image"
+                            {...form.getInputProps('selectedImage')}
+                            mb="md"
+                        />
+                        <Button type="submit" disabled={loading}>
+                            {loading ? <Loader size="sm" /> : 'Generate Image'}
+                        </Button>
+                    </form>
                 </Grid.Col>
 
                 <Grid.Col span={8}>
                     <Group>
-                        {generatedImages.map((image, index) => (
-                            <Image
+                        {userJobs.map((job, index) => (
+                            <ImageGenCard
                                 key={index}
-                                radius="md"
-                                h={200}
-                                w="auto"
-                                fit="contain"
-                                src={image}
-                                onClick={() => handleImageClick(image)}
-                                style={{ cursor: 'pointer' }}
+                                jobId={job.id}
+                                status={job.status}
+                                prompt={job.metadata.prompt}
+                                imageUrls={job.imageUrls ? job.imageUrls : []}
+                                imageIds={job.imageIds ? job.imageIds : []}
+                                generationTime={job.executionTime}
+                                dimensions={{ width: job.metadata.width, height: job.metadata.height }}
+                                userProjects={userProjects}
                             />
                         ))}
                     </Group>
                 </Grid.Col>
             </Grid>
-
-            <Modal opened={!!enlargedImage} onClose={handleCloseModal}>
-                {enlargedImage && (
-                    <div>
-                        <Image src={enlargedImage} alt="Enlarged" width="100%" mb="md" />
-                        <Button fullWidth mb="sm">Delete Image</Button>
-                        <Button fullWidth mb="sm">Image to Image Generate</Button>
-                        <Button fullWidth mb="sm">Add to Project</Button>
-                        <Button fullWidth>Create Character</Button>
-                    </div>
-                )}
-            </Modal>
         </>
     );
 }

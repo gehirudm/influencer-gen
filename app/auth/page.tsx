@@ -7,7 +7,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, se
 import app from "@/lib/firebase";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from 'next/navigation'
-import { useCsrfToken } from "@/lib/useCsrfToken";
+import { useCsrfToken } from "@/hooks/useCsrfToken";
 
 
 const auth = getAuth(app);

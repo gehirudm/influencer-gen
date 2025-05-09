@@ -53,8 +53,19 @@ async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firest
     return currentTokens - IMAGE_GENERATION_COST;
 }
 
-async function generateImage(prompt: string, width: number, height: number, style: string) {
+async function generateImage(metadata: ImageGenerationMetadata) {
     const url = "https://api.runpod.ai/v2/k7649vd0rf6sof/run";
+
+    const input: any = {
+        prompt: metadata.prompt,
+        width: metadata.width,
+        height: metadata.height,
+        negative_prompt: metadata.neg_prompt
+    };
+
+    if (metadata.cfg !== undefined) input.cfg_scale = metadata.cfg;
+    if (metadata.seed !== undefined) input.seed = metadata.seed;
+    if (metadata.n_samples !== undefined) input.batch_size = metadata.n_samples;
 
     const response = await fetch(url, {
         method: "POST",
@@ -63,28 +74,28 @@ async function generateImage(prompt: string, width: number, height: number, styl
             "Authorization": `Bearer ${RUNPOD_API_KEY}`
         },
         body: JSON.stringify({
-            input: {
-                prompt,
-                width,
-                height,
-                style
-            },
-            webhook: "https://influencer-gen.vercel.app/api/webhook"
+            input,
+            webhook: "https://2d6e-2402-d000-8128-246d-b0aa-de6b-c23b-d4c6.ngrok-free.app/api/webhook"
         })
     });
 
-    console.log(response.body)
+    console.log(response.body);
 
     if (!response.ok) {
         throw new Error('Failed to generate image');
     }
 
-    const data = await response.json();
+    const data: RunPodsCompletedResponseData = await response.json();
     return data; // Return the entire response data
 }
 
-async function createJobDocument(db: FirebaseFirestore.Firestore, userId: string, jobData: any, metadata: any) {
-    const jobRef = db.collection('jobs').doc(jobData.id);
+async function createJobDocument(
+    db: FirebaseFirestore.Firestore,
+    userId: string,
+    jobData: RunPodsCompletedResponseData,
+    metadata: ImageGenerationMetadata
+) {
+    const jobRef = db.collection('jobs').doc(jobData.id.toString());
     await jobRef.set({
         userId,
         status: jobData.status,
@@ -107,8 +118,8 @@ export async function POST(request: NextRequest) {
 
         const userId = await verifySessionCookie(sessionCookie);
 
-        const body = await request.json();
-        const { prompt, width = 512, height = 512, style = 'default' } = body;
+        const body: Partial<ImageGenerationMetadata> = await request.json();
+        const { prompt, width = 720, height = 1024, neg_prompt = "ugly, distorted, low quality", cfg, seed, n_samples } = body;
 
         if (!prompt) {
             return NextResponse.json(
@@ -120,12 +131,24 @@ export async function POST(request: NextRequest) {
         const db = getFirestore(adminApp);
         const tokensRemaining = await checkAndDeductTokens(userId, db);
 
-        console.log('Image generation requested:', { prompt, width, height, style });
+        console.log('Image generation requested:', { prompt, width, height, neg_prompt, cfg, seed, n_samples });
 
-        const jobData = await generateImage(prompt, width, height, style);
+        // Create metadata object without undefined fields
+        const metadata: ImageGenerationMetadata = {
+            height,
+            width,
+            prompt,
+            neg_prompt,
+            ...(cfg !== undefined && { cfg }),
+            ...(seed !== undefined && { seed }),
+            ...(n_samples !== undefined && { n_samples }),
+            ...(cfg !== undefined && { guidance_scale: cfg })
+        };
+
+        const jobData = await generateImage(metadata);
 
         // Create a job document in Firestore
-        await createJobDocument(db, userId, jobData, { prompt, width, height, style });
+        await createJobDocument(db, userId, jobData, metadata);
 
         const response = {
             success: true,

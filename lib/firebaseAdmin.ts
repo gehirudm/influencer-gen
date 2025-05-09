@@ -6,6 +6,7 @@ const appAdmin = getApps().length
   ? getApp()
   : initializeApp({
       credential: cert(serviceAccount),
+      storageBucket: "influncer-gen.firebasestorage.app"
     });
 
 export default appAdmin;

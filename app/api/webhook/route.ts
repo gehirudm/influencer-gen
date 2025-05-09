@@ -15,9 +15,21 @@ async function getJobData(db: FirebaseFirestore.Firestore, jobId: string) {
 }
 
 async function saveImage(storage: Storage, userId: string, imageId: string, imageData: string) {
-    const buffer = Buffer.from(imageData.split(',')[1], 'base64');
+    if (!imageData) {
+        throw new Error('Image data is undefined or empty');
+    }
+
+    const base64Data = imageData;
+    // Print the first few bytes of image data for debugging
+    console.log(imageData.slice(0, 30));
+
+    if (!base64Data) {
+        throw new Error('Invalid image data format');
+    }
+
+    const buffer = Buffer.from(base64Data, 'base64');
     const filePath = `generated-images/${userId}/${imageId}.png`;
-    const file = storage.bucket().file(filePath);
+    const file = storage.bucket("influncer-gen.firebasestorage.app").file(filePath);
 
     await file.save(buffer, {
         metadata: { contentType: 'image/png' },
@@ -84,7 +96,6 @@ export async function POST(request: NextRequest) {
             status,
             delayTime,
             executionTime,
-            workerId,
             updatedAt: new Date().toISOString(),
             [`statusTimestamps.${status}`]: new Date().toISOString(),
         };
@@ -92,10 +103,7 @@ export async function POST(request: NextRequest) {
         if (status === 'COMPLETED' && output && output.images) {
             console.log('Processing completed job with images');
             const imageIds = await processImages(storage, db, userId, id, output, jobData); // Pass jobData here
-            updateData.output = {
-                ...output,
-                imageIds,  // Store image IDs
-            };
+            updateData.imageIds = imageIds;
         }
 
         await db.collection('jobs').doc(id).update(updateData);

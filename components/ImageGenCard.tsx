@@ -1,69 +1,166 @@
-import { IconBookmark, IconHeart, IconShare } from '@tabler/icons-react';
+import { useState } from 'react';
+import { IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
 import {
-  ActionIcon,
-  Avatar,
-  Badge,
-  Card,
-  Center,
-  Group,
-  Image,
-  Text,
-  useMantineTheme,
+    ActionIcon,
+    Badge,
+    Card,
+    Group,
+    Image,
+    Text,
+    Tooltip,
+    useMantineTheme,
+    Modal,
+    Select,
+    Button,
+    Pill,
 } from '@mantine/core';
+import { getFirestore, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import app from '@/lib/firebase';
+import { getAuth, User } from 'firebase/auth';
+import { notifications } from '@mantine/notifications';
 import classes from './ImageGenCard.module.css';
 
-export function ImageGenCard() {
-  const linkProps = { href: 'https://mantine.dev', target: '_blank', rel: 'noopener noreferrer' };
-  const theme = useMantineTheme();
+interface ImageGenCardProps {
+    jobId: string;
+    status: string;
+    prompt: string;
+    imageUrls: string[];
+	imageIds: string[];
+    generationTime: number | null;
+    dimensions: { width: number; height: number } | null;
+    userProjects: Project[];
+}
 
-  return (
-    <Card withBorder radius="md" className={classes.card}>
-      <Card.Section>
-        <a {...linkProps}>
-          <Image src="https://i.imgur.com/Cij5vdL.png" height={180} />
-        </a>
-      </Card.Section>
+interface Project {
+    id: string;
+    name: string;
+}
 
-      <Badge className={classes.rating} variant="gradient" gradient={{ from: 'yellow', to: 'red' }}>
-        outstanding
-      </Badge>
+export function ImageGenCard({
+    jobId,
+    status,
+    prompt,
+    imageUrls,
+	imageIds,
+    generationTime,
+    dimensions,
+    userProjects,
+}: ImageGenCardProps) {
+    const [projectModalOpen, setProjectModalOpen] = useState(false);
+    const [selectedProject, setSelectedProject] = useState<string | null>(null);
+    const theme = useMantineTheme();
 
-      <Text className={classes.title} fw={500} component="a" {...linkProps}>
-        Resident Evil Village review
-      </Text>
+    const auth = getAuth(app);
+    const user = auth.currentUser as User;
+    const db = getFirestore(app);
 
-      <Text fz="sm" c="dimmed" lineClamp={4}>
-        Resident Evil Village is a direct sequel to 2017’s Resident Evil 7, but takes a very
-        different direction to its predecessor, namely the fact that this time round instead of
-        fighting against various mutated zombies, you’re now dealing with more occult enemies like
-        werewolves and vampires.
-      </Text>
+    const handleDelete = async () => {
+        if (!imageIds[0]) return;
 
-      <Group justify="space-between" className={classes.footer}>
-        <Center>
-          <Avatar
-            src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png"
-            size={24}
-            radius="xl"
-            mr="xs"
-          />
-          <Text fz="sm" inline>
-            Bill Wormeater
-          </Text>
-        </Center>
+        try {
+            const imageDocRef = doc(db, 'images', imageIds[0]);
+            await deleteDoc(imageDocRef);
 
-        <Group gap={8} mr={0}>
-          <ActionIcon className={classes.action}>
-            <IconHeart size={16} color={theme.colors.red[6]} />
-          </ActionIcon>
-          <ActionIcon className={classes.action}>
-            <IconBookmark size={16} color={theme.colors.yellow[7]} />
-          </ActionIcon>
-          <ActionIcon className={classes.action}>
-            <IconShare size={16} color={theme.colors.blue[6]} />
-          </ActionIcon>
-        </Group>
-      </Group>
-    </Card>
-  );
+            notifications.show({
+                title: 'Success',
+                message: 'Image deleted successfully!',
+                color: 'green',
+            });
+        } catch (error) {
+            console.error('Error deleting image:', error);
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to delete image.',
+                color: 'red',
+            });
+        }
+    };
+
+    const handleConfirmAddToProject = async () => {
+        if (!selectedProject || !imageIds[0]) return;
+
+        const project = userProjects.find(p => p.name === selectedProject);
+        if (!project) return;
+
+        try {
+            const imageDocRef = doc(db, 'images', imageIds[0]);
+            await updateDoc(imageDocRef, { projectId: project.id });
+
+            notifications.show({
+                title: 'Success',
+                message: `Image added to project ${selectedProject} successfully!`,
+                color: 'green',
+            });
+        } catch (error) {
+            console.error('Error updating image document:', error);
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to add image to project.',
+                color: 'red',
+            });
+        }
+
+        setProjectModalOpen(false);
+    };
+
+    return (
+        <Card withBorder radius="md" className={classes.card}>
+            <Card.Section>
+                {status === 'COMPLETED' && <Image h={400} src={imageUrls[0]}/>}
+            </Card.Section>
+
+            <Badge className={classes.rating} variant="gradient" gradient={{ from: 'cyan', to: 'green' }}>
+                {status}
+            </Badge>
+
+            <Text className={classes.title} fw={500} fz={14}>
+                Prompt
+            </Text>
+
+            <Text fz="sm" c="dimmed" lineClamp={4}>
+                {prompt}
+            </Text>
+
+            {generationTime !== null && (
+                <Text fz="sm" c="dimmed">
+                    Generation Time: {generationTime} ms
+                </Text>
+            )}
+
+            <Pill>{dimensions?.height}x{dimensions?.width}</Pill>
+
+            <Group justify="flex-end" className={classes.footer}>
+                <Group gap={8} mr={0}>
+                    <Tooltip label="Add to Project">
+                        <ActionIcon className={classes.action} onClick={() => setProjectModalOpen(true)}>
+                            <IconPlus size={16} color={theme.colors.blue[6]} />
+                        </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Edit">
+                        <ActionIcon className={classes.action} onClick={() => console.log('Edit clicked')}>
+                            <IconPencil size={16} color={theme.colors.blue[6]} />
+                        </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Delete">
+                        <ActionIcon className={classes.action} onClick={handleDelete}>
+                            <IconTrash size={16} color={theme.colors.red[4]} />
+                        </ActionIcon>
+                    </Tooltip>
+                </Group>
+            </Group>
+
+            <Modal opened={projectModalOpen} onClose={() => setProjectModalOpen(false)} title="Select Project">
+                <Select
+                    label="Project"
+                    placeholder="Pick one"
+                    data={userProjects.map(project => project.name)} // Use project names for selection
+                    value={selectedProject}
+                    onChange={setSelectedProject}
+                />
+                <Button fullWidth mt="md" onClick={handleConfirmAddToProject}>
+                    Confirm
+                </Button>
+            </Modal>
+        </Card>
+    );
 }
