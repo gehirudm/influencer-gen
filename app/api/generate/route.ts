@@ -75,7 +75,7 @@ async function generateImage(metadata: ImageGenerationMetadata) {
         },
         body: JSON.stringify({
             input,
-            webhook: "https://2d6e-2402-d000-8128-246d-b0aa-de6b-c23b-d4c6.ngrok-free.app/api/webhook"
+            webhook: "https://influencer-gen.vercel.app//api/webhook"
         })
     });
 
