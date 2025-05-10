@@ -43,6 +43,7 @@ export default function ImageGeneratorPage() {
                     negativePrompt,
                     width,
                     height,
+                    ...(selectedImage !== null && { base_img: selectedImage }),
                 }),
             });
 
@@ -73,6 +74,7 @@ export default function ImageGeneratorPage() {
 
     const handleImageSelect = async (imageUrl: string) => {
         setImageLoading(true); // Set image loading to true
+        setEditModalOpen(false);
         try {
             const response = await fetch(imageUrl);
             const blob = await response.blob();
@@ -80,7 +82,6 @@ export default function ImageGeneratorPage() {
     
             reader.onloadend = () => {
                 const dataUrl = reader.result as string;
-                console.log('Selected image DataURL:', dataUrl);
                 setSelectedImage(dataUrl);
             };
     
@@ -94,7 +95,6 @@ export default function ImageGeneratorPage() {
             });
         } finally {
             setImageLoading(false); // Set image loading to false
-            setEditModalOpen(false);
         }
     };
 

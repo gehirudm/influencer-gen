@@ -103,6 +103,8 @@ async function createJobDocument(
     jobData: RunPodsCompletedResponseData,
     metadata: ImageGenerationMetadata
 ) {
+    // @ts-ignore
+    metadata.base_img = null;
     const jobRef = db.collection('jobs').doc(jobData.id.toString());
     await jobRef.set({
         userId,
@@ -139,7 +141,7 @@ export async function POST(request: NextRequest) {
         const db = getFirestore(adminApp);
         const tokensRemaining = await checkAndDeductTokens(userId, db);
 
-        console.log('Image generation requested:', { prompt, width, height, neg_prompt, cfg, seed, n_samples });
+        console.log('Image generation requested:', { prompt, width, height, neg_prompt, cfg, seed, n_samples, base_img: base_img?.slice(0, 20) + '...' });
 
         // Create metadata object without undefined fields
         const metadata: ImageGenerationMetadata = {
