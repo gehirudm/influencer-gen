@@ -25,10 +25,11 @@ interface ImageGenCardProps {
     status: string;
     prompt: string;
     imageUrls: string[];
-	imageIds: string[];
+    imageIds: string[];
     generationTime: number | null;
     dimensions: { width: number; height: number } | null;
     userProjects: Project[];
+    onEdit: (jobId: string) => void; // New prop for edit handler
 }
 
 interface Project {
@@ -41,10 +42,11 @@ export function ImageGenCard({
     status,
     prompt,
     imageUrls,
-	imageIds,
+    imageIds,
     generationTime,
     dimensions,
     userProjects,
+    onEdit, // Destructure the new prop
 }: ImageGenCardProps) {
     const [projectModalOpen, setProjectModalOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<string | null>(null);
@@ -106,7 +108,7 @@ export function ImageGenCard({
     return (
         <Card withBorder radius="md" className={classes.card}>
             <Card.Section>
-                {status === 'COMPLETED' && <Image h={400} src={imageUrls[0]}/>}
+                {status === 'COMPLETED' && <Image h={400} src={imageUrls[0]} />}
             </Card.Section>
 
             <Badge className={classes.rating} variant="gradient" gradient={{ from: 'cyan', to: 'green' }}>
@@ -137,7 +139,7 @@ export function ImageGenCard({
                         </ActionIcon>
                     </Tooltip>
                     <Tooltip label="Edit">
-                        <ActionIcon className={classes.action} onClick={() => console.log('Edit clicked')}>
+                        <ActionIcon className={classes.action} onClick={() => onEdit(jobId)}>
                             <IconPencil size={16} color={theme.colors.blue[6]} />
                         </ActionIcon>
                     </Tooltip>

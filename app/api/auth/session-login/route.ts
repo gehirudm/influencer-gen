@@ -15,28 +15,44 @@ export async function POST(request: NextRequest) {
 
     const auth = getAuth(adminApp);
 
-    if (!csrfToken) {
-        return NextResponse.json({ error: "CSRF token not provided" }, { status: 403 });
-    }
-
-    if (!tokens.verify(secret, csrfToken)) {
+    if (!csrfToken || !tokens.verify(secret, csrfToken)) {
         return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
     }
 
-    let decoded: DecodedIdToken;
-
     try {
-        decoded = await auth.verifyIdToken(idToken);
+        const decoded = await verifyIdToken(auth, idToken);
+        const sessionCookie = await createSessionCookie(auth, idToken, remember);
+        const cookie = createCookie(sessionCookie, remember);
+
+        const nextPage = await ensureUserDocumentExists(decoded);
+
+        const response = NextResponse.json({ message: "ok", next: nextPage });
+        response.headers.set("Set-Cookie", cookie);
+
+        return response;
     } catch (error) {
-        return NextResponse.json({ error: "Invalid ID token" }, { status: 403 });
+        console.error('Error processing request:', error);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
     }
+}
 
-    const userId = decoded.uid;
+async function verifyIdToken(auth: any, idToken: string): Promise<DecodedIdToken> {
+    try {
+        return await auth.verifyIdToken(idToken);
+    } catch (error) {
+        throw new Error("Invalid ID token");
+    }
+}
 
-    const sessionCookie = await auth.createSessionCookie(idToken, {
-        expiresIn: 60 * 60 * 24 * 5 * 1000,
-    });
+async function createSessionCookie(auth: any, idToken: string, remember: boolean): Promise<string> {
+    const expiresIn = remember ? 60 * 60 * 24 * 14 * 1000 : 60 * 60 * 24 * 5 * 1000;
+    return await auth.createSessionCookie(idToken, { expiresIn });
+}
 
+function createCookie(sessionCookie: string, remember: boolean): string {
     const cookieOptions: any = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -48,37 +64,31 @@ export async function POST(request: NextRequest) {
         cookieOptions.maxAge = 60 * 60 * 24 * 14;
     }
 
-    const cookie = serialize("session", sessionCookie, cookieOptions);
+    return serialize("session", sessionCookie, cookieOptions);
+}
 
-    try {
-        const userRef = db.collection('users').doc(userId);
-        const userDoc = await userRef.get();
+async function ensureUserDocumentExists(decoded: DecodedIdToken): Promise<string> {
+    const userId = decoded.uid;
+    const userRef = db.collection('users').doc(userId);
+    const userDoc = await userRef.get();
 
-        if (!userDoc.exists) {
-            // Create a new user document with default tokens
-            await userRef.set({
-                createdAt: new Date().toISOString(),
-            });
+    if (!userDoc.exists) {
+        const userData = {
+            createdAt: new Date().toISOString(),
+            email: decoded.email || null,
+            avatarUrl: decoded.picture || null,
+            displayName: decoded.name || null,
+        };
 
-            // Set tokens in the private subcollection
-            await userRef.collection('private').doc('data').set({
-                tokens: 100,
-            });
+        await userRef.set(userData);
 
-            console.log(`User document created for user ID: ${userId}`);
-        }
+        await userRef.collection('private').doc('data').set({
+            tokens: 100,
+        });
 
-        const nextPage = userDoc.exists ? "/discover" : "/landing";
-
-        const response = NextResponse.json({ message: "ok", next: nextPage });
-        response.headers.set("Set-Cookie", cookie);
-
-        return response;
-    } catch (error) {
-        console.error('Error verifying session or checking/creating user document:', error);
-        return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-        );
+        console.log(`User document created for user ID: ${userId}`);
+        return "/landing";
     }
+
+    return "/discover";
 }

@@ -20,8 +20,6 @@ async function saveImage(storage: Storage, userId: string, imageId: string, imag
     }
 
     const base64Data = imageData;
-    // Print the first few bytes of image data for debugging
-    console.log(imageData.slice(0, 30));
 
     if (!base64Data) {
         throw new Error('Invalid image data format');
@@ -101,7 +99,6 @@ export async function POST(request: NextRequest) {
         };
 
         if (status === 'COMPLETED' && output && output.images) {
-            console.log('Processing completed job with images');
             const imageIds = await processImages(storage, db, userId, id, output, jobData); // Pass jobData here
             updateData.imageIds = imageIds;
         }

@@ -66,6 +66,14 @@ async function generateImage(metadata: ImageGenerationMetadata) {
     if (metadata.cfg !== undefined) input.cfg_scale = metadata.cfg;
     if (metadata.seed !== undefined) input.seed = metadata.seed;
     if (metadata.n_samples !== undefined) input.batch_size = metadata.n_samples;
+    if (metadata.base_img !== undefined) {
+        if (metadata.base_img.startsWith('data:image')) {
+            // Strip the data URL prefix to get only the base64 encoded data
+            input.base_img = metadata.base_img.split(',')[1];
+        } else {
+            input.base_img = metadata.base_img;
+        }
+    }
 
     const response = await fetch(url, {
         method: "POST",
@@ -119,7 +127,7 @@ export async function POST(request: NextRequest) {
         const userId = await verifySessionCookie(sessionCookie);
 
         const body: Partial<ImageGenerationMetadata> = await request.json();
-        const { prompt, width = 720, height = 1024, neg_prompt = "ugly, distorted, low quality", cfg, seed, n_samples } = body;
+        const { prompt, width = 720, height = 1024, neg_prompt = "ugly, distorted, low quality", cfg, seed, n_samples, base_img } = body;
 
         if (!prompt) {
             return NextResponse.json(
@@ -142,7 +150,8 @@ export async function POST(request: NextRequest) {
             ...(cfg !== undefined && { cfg }),
             ...(seed !== undefined && { seed }),
             ...(n_samples !== undefined && { n_samples }),
-            ...(cfg !== undefined && { guidance_scale: cfg })
+            ...(cfg !== undefined && { guidance_scale: cfg }),
+            ...(base_img !== undefined && { base_img: base_img }),
         };
 
         const jobData = await generateImage(metadata);

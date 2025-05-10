@@ -1,15 +1,13 @@
 "use client"
 
-import { useEffect, useState } from 'react';
-import { Container, Grid, TextInput, Button, Image, Modal, Group, FileInput, Loader } from '@mantine/core';
+import { useState } from 'react';
+import { Grid, TextInput, Button, Group, FileInput, Loader, Modal, Image } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { ImageGenCard } from '@/components/ImageGenCard';
 import { useForm } from '@mantine/form';
-import { collection, getDocs, getFirestore, orderBy, query, where } from 'firebase/firestore';
-import { getAuth, User } from 'firebase/auth';
-import app from '@/lib/firebase';
 import { useUserJobs } from '@/hooks/useUserJobs';
 import { useUserProjects } from '@/hooks/useUserProjects';
+import { FileDropzonePreview } from '@/components/FileDropzonePreview';
 
 export default function ImageGeneratorPage() {
     const form = useForm({
@@ -22,12 +20,13 @@ export default function ImageGeneratorPage() {
         },
     });
 
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const user = auth.currentUser;
     const { jobs: userJobs } = useUserJobs();
     const { projects: userProjects } = useUserProjects();
     const [loading, setLoading] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [selectedJobImages, setSelectedJobImages] = useState<string[]>([]);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [imageLoading, setImageLoading] = useState(false);
 
     const handleGenerate = async () => {
         const { prompt, negativePrompt, width, height } = form.values;
@@ -64,6 +63,42 @@ export default function ImageGeneratorPage() {
         }
     };
 
+    const handleEdit = (jobId: string) => {
+        const job = userJobs.find(job => job.id === jobId);
+        if (job && job.imageUrls) {
+            setSelectedJobImages(job.imageUrls);
+            setEditModalOpen(true);
+        }
+    };
+
+    const handleImageSelect = async (imageUrl: string) => {
+        setImageLoading(true); // Set image loading to true
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const reader = new FileReader();
+    
+            reader.onloadend = () => {
+                const dataUrl = reader.result as string;
+                console.log('Selected image DataURL:', dataUrl);
+                setSelectedImage(dataUrl);
+            };
+    
+            reader.readAsDataURL(blob);
+        } catch (error) {
+            console.error('Error fetching image data URL:', error);
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to load image data.',
+                color: 'red',
+            });
+        } finally {
+            setImageLoading(false); // Set image loading to false
+            setEditModalOpen(false);
+        }
+    };
+
+
     return (
         <>
             <Grid grow>
@@ -95,11 +130,10 @@ export default function ImageGeneratorPage() {
                             {...form.getInputProps('height')}
                             mb="md"
                         />
-                        <FileInput
-                            label="Image Picker"
-                            placeholder="Select an image"
-                            {...form.getInputProps('selectedImage')}
-                            mb="md"
+                        <FileDropzonePreview
+                            selectedImage={selectedImage}
+                            setSelectedImage={setSelectedImage}
+                            loading={imageLoading}
                         />
                         <Button type="submit" disabled={loading}>
                             {loading ? <Loader size="sm" /> : 'Generate Image'}
@@ -120,11 +154,27 @@ export default function ImageGeneratorPage() {
                                 generationTime={job.executionTime}
                                 dimensions={{ width: job.metadata.width, height: job.metadata.height }}
                                 userProjects={userProjects}
+                                onEdit={handleEdit} // Pass the edit handler
                             />
                         ))}
                     </Group>
                 </Grid.Col>
             </Grid>
+
+            <Modal opened={editModalOpen} onClose={() => setEditModalOpen(false)} title="Select Image to Edit">
+                <Grid>
+                    {selectedJobImages.map((url, index) => (
+                        <Grid.Col span={4} key={index}>
+                            <Image
+                                src={url}
+                                alt={`Image ${index}`}
+                                onClick={() => handleImageSelect(url)}
+                                style={{ cursor: 'pointer' }}
+                            />
+                        </Grid.Col>
+                    ))}
+                </Grid>
+            </Modal>
         </>
     );
 }

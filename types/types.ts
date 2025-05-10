@@ -7,6 +7,7 @@ interface ImageGenerationMetadata {
     seed?: string;
     n_samples?: number;
     guidance_scale?: number;
+    base_img?: string;
 }
 
 interface CharacterAttribute {
