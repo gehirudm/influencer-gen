@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import adminApp from '@/lib/firebaseAdmin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage, Storage } from 'firebase-admin/storage';
-import { encode } from 'blurhash';
-import { createCanvas, loadImage } from 'canvas';
+import { getPlaiceholder } from "plaiceholder";
 
 async function getJobData(db: FirebaseFirestore.Firestore, jobId: string) {
     const jobRef = db.collection('jobs').doc(jobId);
@@ -50,15 +49,8 @@ async function createImageDocument(db: FirebaseFirestore.Firestore, imageId: str
 
 async function generateBlurHash(imageData: string): Promise<string> {
     const buffer = Buffer.from(imageData, 'base64');
-    const img = await loadImage(buffer);
-    const canvas = createCanvas(img.width, img.height);
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, img.width, img.height);
-
-    const imageDataObj = ctx.getImageData(0, 0, img.width, img.height);
-    const blurHash = encode(imageDataObj.data, imageDataObj.width, imageDataObj.height, 4, 4);
-
-    return blurHash;
+    const { base64 } =  await getPlaiceholder(buffer);
+    return base64;
 }
 
 async function processImages(storage: any, db: FirebaseFirestore.Firestore, userId: string, jobId: string, output: any, jobData: any) {
