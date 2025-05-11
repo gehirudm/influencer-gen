@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import adminApp from '@/lib/firebaseAdmin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage, Storage } from 'firebase-admin/storage';
+import { encode } from 'blurhash';
+import { createCanvas, loadImage } from 'canvas';
 
 async function getJobData(db: FirebaseFirestore.Firestore, jobId: string) {
     const jobRef = db.collection('jobs').doc(jobId);
@@ -34,23 +36,38 @@ async function saveImage(storage: Storage, userId: string, imageId: string, imag
     });
 }
 
-async function createImageDocument(db: FirebaseFirestore.Firestore, imageId: string, userId: string, jobData: any) {
+async function createImageDocument(db: FirebaseFirestore.Firestore, imageId: string, userId: string, jobData: any, blurHash: string) {
     const imageDocRef = db.collection('images').doc(imageId);
     await imageDocRef.set({
         userId,
         projectId: jobData.projectId || null,
-        isPublic: false, // Default to false, adjust as needed
+        isPublic: false, // Default to false
         metadata: jobData.metadata,
         createdAt: new Date().toISOString(),
+        blurHash,
     });
+}
+
+async function generateBlurHash(imageData: string): Promise<string> {
+    const buffer = Buffer.from(imageData, 'base64');
+    const img = await loadImage(buffer);
+    const canvas = createCanvas(img.width, img.height);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, img.width, img.height);
+
+    const imageDataObj = ctx.getImageData(0, 0, img.width, img.height);
+    const blurHash = encode(imageDataObj.data, imageDataObj.width, imageDataObj.height, 4, 4);
+
+    return blurHash;
 }
 
 async function processImages(storage: any, db: FirebaseFirestore.Firestore, userId: string, jobId: string, output: any, jobData: any) {
     return Promise.all(output.images.map(async (imageData: string, index: number) => {
-        const imageId = `${jobId}-image_${index}`; // Assuming imageId is derived from job id and index
+        const imageId = `${jobId}-image_${index}`;
         await saveImage(storage, userId, imageId, imageData);
-        await createImageDocument(db, imageId, userId, jobData); // Pass jobData here
-        return imageId; // Return only the image ID
+        const blurHash = await generateBlurHash(imageData);
+        await createImageDocument(db, imageId, userId, jobData, blurHash);
+        return imageId; 
     }));
 }
 
@@ -69,6 +86,7 @@ export async function POST(request: NextRequest) {
             executionTime,
             workerId,
             outputSummary: output ? `Images count: ${output.images.length}` : 'No output',
+            parameters: output.parameters ? output.parameters : {},
         });
 
         if (!id || !status) {
