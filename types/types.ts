@@ -8,6 +8,7 @@ interface ImageGenerationMetadata {
     n_samples?: number;
     guidance_scale?: number;
     base_img?: string;
+    batch_size?: number;
 }
 
 interface CharacterAttribute {

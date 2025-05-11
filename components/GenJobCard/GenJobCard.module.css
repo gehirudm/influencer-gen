@@ -1,0 +1,47 @@
+.price {
+  color: var(--mantine-color-bright);
+}
+
+.carousel {
+  @mixin hover {
+    .carouselControls {
+      opacity: 1;
+    }
+  }
+}
+
+.carouselControls {
+  transition: opacity 150ms ease;
+  opacity: 0;
+}
+
+.carouselIndicator {
+  width: 4px;
+  height: 4px;
+  transition: width 250ms ease;
+
+  &[data-active] {
+    width: 16px;
+  }
+}
+
+.card {
+  background-color: var(--mantine-color-body);
+  width: 18rem;
+}
+
+.title {
+  font-family: Outfit, var(--mantine-font-family);
+  font-weight: 450;
+  margin-top: var(--mantine-spacing-xs);
+}
+
+.footer {
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-lg);
+  margin-top: var(--mantine-spacing-md);
+  border-top: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+}
+
+.image {
+  max-height: 350px;
+}

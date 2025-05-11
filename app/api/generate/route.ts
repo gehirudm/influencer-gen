@@ -8,11 +8,19 @@ import { getStorage } from 'firebase-admin/storage';
 // Define the cost of generating an image
 const IMAGE_GENERATION_COST = 1; // Cost in tokens
 const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY;
+// const WEBHOOK_URL = "https://influencer-gen.vercel.app/api/webhook";
+const WEBHOOK_URL = "https://cd7a-2402-d000-8128-246d-bcaf-852a-7387-dae2.ngrok-free.app/api/webhook";
 
-const MODEL_ENDPOINTS = [
-    { modelName: "realism", modelEndpoint: "https://api.runpod.ai/v2/9c6y8ue4f8ie0e/run" },
-    { modelName: "lustify", modelEndpoint: "https://api.runpod.ai/v2/k7649vd0rf6sof/run" },
-]
+// Valid keys for request body validation
+const VALID_INPUT_KEYS = [
+    'prompt', 'negative_prompt', 'width', 'height', 'steps', 'cfg_scale',
+    'seed', 'batch_size', 'solver_order', 'base_img', 'strength', 'mask_img', 'model_name'
+] as const;
+
+const MODEL_ENDPOINTS = {
+    "realism": "https://api.runpod.ai/v2/9c6y8ue4f8ie0e/run",
+    "lustify": "https://api.runpod.ai/v2/k7649vd0rf6sof/run",
+}
 
 async function verifySessionCookie(sessionCookie: string) {
     try {
@@ -59,6 +67,37 @@ async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firest
     return currentTokens - IMAGE_GENERATION_COST;
 }
 
+async function handleBaseAndMaskImages(storage: any, userId: string, jobId: string, cleanedBody: Partial<StableDiffusionRequestInput>) {
+    // Handle image uploads if present
+    const imageFiles: { baseImagePath?: string, maskImagePath?: string } = {};
+
+    // Upload base_img if present
+    if (cleanedBody.base_img) {
+        const baseImagePath = await uploadImageToStorage(
+            storage,
+            userId,
+            jobId,
+            cleanedBody.base_img as string,
+            'base.png'
+        );
+        imageFiles.baseImagePath = baseImagePath;
+    }
+
+    // Upload mask_img if present
+    if (cleanedBody.mask_img) {
+        const maskImagePath = await uploadImageToStorage(
+            storage,
+            userId,
+            jobId,
+            cleanedBody.mask_img as string,
+            'mask.png'
+        );
+        imageFiles.maskImagePath = maskImagePath;
+    }
+
+    return imageFiles;
+}
+
 async function uploadImageToStorage(storage: any, userId: string, jobId: string, imageData: string, fileName: string) {
     // Remove the data URL prefix (e.g., "data:image/png;base64,")
     const base64Data = imageData.split(',')[1];
@@ -76,10 +115,8 @@ async function uploadImageToStorage(storage: any, userId: string, jobId: string,
     return filePath;
 }
 
-async function generateImage(input: Partial<StableDiffusionRequestInput>) {
-    const url = "https://api.runpod.ai/v2/k7649vd0rf6sof/run";
-
-    const response = await fetch(url, {
+async function generateImage(input: Partial<ImageGenerationRequestInput>) {
+    const response = await fetch(MODEL_ENDPOINTS[input.model_name ? input.model_name : "lustify"], {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -87,17 +124,18 @@ async function generateImage(input: Partial<StableDiffusionRequestInput>) {
         },
         body: JSON.stringify({
             input,
-            webhook: "https://influencer-gen.vercel.app//api/webhook"
+            webhook: WEBHOOK_URL
         })
     });
-
-    console.log(response.body);
+    
+    const bodyJson = await response.json();
+    console.log(bodyJson);
 
     if (!response.ok) {
         throw new Error('Failed to generate image');
     }
 
-    const data: RunPodsCompletedResponseData = await response.json();
+    const data: RunPodsCompletedResponseData = bodyJson;
     return data;
 }
 
@@ -146,13 +184,9 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json();
 
-        const cleanedBody: Partial<StableDiffusionRequestInput> = {};
-        const validKeys: (keyof StableDiffusionRequestInput)[] = [
-            'prompt', 'negative_prompt', 'width', 'height', 'steps', 'cfg_scale',
-            'seed', 'batch_size', 'solver_order', 'base_img', 'strength', 'mask_img'
-        ];
+        const cleanedBody: Partial<ImageGenerationRequestInput> = {};
 
-        for (const key of validKeys) {
+        for (const key of VALID_INPUT_KEYS) {
             if (body[key] !== undefined) {
                 cleanedBody[key] = body[key];
             }
@@ -180,32 +214,7 @@ export async function POST(request: NextRequest) {
         const jobData = await generateImage(cleanedBody);
         const jobId = jobData.id.toString();
 
-        // Handle image uploads if present
-        const imageFiles: { baseImagePath?: string, maskImagePath?: string } = {};
-
-        // Upload base_img if present
-        if (cleanedBody.base_img) {
-            const baseImagePath = await uploadImageToStorage(
-                storage,
-                userId,
-                jobId,
-                cleanedBody.base_img as string,
-                'base.png'
-            );
-            imageFiles.baseImagePath = baseImagePath;
-        }
-
-        // Upload mask_img if present
-        if (cleanedBody.mask_img) {
-            const maskImagePath = await uploadImageToStorage(
-                storage,
-                userId,
-                jobId,
-                cleanedBody.mask_img as string,
-                'mask.png'
-            );
-            imageFiles.maskImagePath = maskImagePath;
-        }
+        const imageFiles = await handleBaseAndMaskImages(storage, userId, jobId, cleanedBody);
 
         // Create a job document in Firestore
         await createJobDocument(db, userId, jobData, cleanedBody, imageFiles);

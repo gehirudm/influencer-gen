@@ -7,6 +7,7 @@ import {
     IconCompass,
     IconPlus,
     IconSwitchHorizontal,
+    IconUser,
 } from '@tabler/icons-react';
 import { Group } from '@mantine/core';
 import { useRouter } from 'next/navigation';
@@ -17,6 +18,7 @@ const data = [
     { link: '/discover', label: 'Discover', icon: IconCompass },
     { link: '/create', label: 'Create', icon: IconPlus },
     { link: '/video', label: 'Video', icon: IconVideo },
+    { link: '/character', label: 'Character', icon: IconUser },
     { link: '/projects', label: 'Projects', icon: IconFileText },
     { link: '/pricing', label: 'Pricing', icon: IconCurrencyDollar },
 ];

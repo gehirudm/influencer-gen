@@ -36,7 +36,6 @@ export function useUserJobs() {
 
             for (const doc of querySnapshot.docs) {
                 const jobData = doc.data() as JobData;
-                console.log('New Job data:', jobData);
                 jobData.id = doc.id;
 
                 if (jobData.status === 'COMPLETED' && jobData.imageIds) {
