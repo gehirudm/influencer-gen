@@ -9,19 +9,23 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mantine/carousel": "7.17",
     "@mantine/core": "^7.17.5",
     "@mantine/dropzone": "^7.17.7",
     "@mantine/form": "^7.17.5",
     "@mantine/hooks": "^7.17.5",
     "@mantine/notifications": "^7.17.7",
     "@tabler/icons-react": "^3.31.0",
+    "blurhash": "^2.0.5",
     "cookie": "^1.0.2",
     "csrf": "^3.1.0",
+    "fabric": "^6.6.4",
     "firebase": "^11.6.1",
     "firebase-admin": "^13.3.0",
     "next": "15.3.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-timeago": "^8.2.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.4",
