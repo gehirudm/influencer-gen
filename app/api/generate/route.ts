@@ -8,8 +8,8 @@ import { getStorage } from 'firebase-admin/storage';
 // Define the cost of generating an image
 const IMAGE_GENERATION_COST = 1; // Cost in tokens
 const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY;
-// const WEBHOOK_URL = "https://influencer-gen.vercel.app/api/webhook";
-const WEBHOOK_URL = "https://cd7a-2402-d000-8128-246d-bcaf-852a-7387-dae2.ngrok-free.app/api/webhook";
+const WEBHOOK_URL = "https://influencer-gen.vercel.app/api/webhook";
+// const WEBHOOK_URL = "https://cd7a-2402-d000-8128-246d-bcaf-852a-7387-dae2.ngrok-free.app/api/webhook";
 
 // Valid keys for request body validation
 const VALID_INPUT_KEYS = [
