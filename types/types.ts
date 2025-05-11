@@ -98,3 +98,74 @@ interface RunPodsCompletedResponseData {
     }[],
     "status": string
 }
+
+interface StableDiffusionRequestInput {
+    /**
+     * The text prompt to guide image generation (required)
+     */
+    prompt: string;
+
+    /**
+     * Text prompt specifying what should not appear in the image
+     * @default "ugly, distorted, low quality"
+     */
+    negative_prompt?: string;
+
+    /**
+     * Width of the generated image in pixels
+     * @default 1024
+     */
+    width?: number;
+
+    /**
+     * Height of the generated image in pixels
+     * @default 1024
+     */
+    height?: number;
+
+    /**
+     * Number of denoising steps (more steps = higher quality but slower)
+     * @default 30
+     */
+    steps?: number;
+
+    /**
+     * Classifier-free guidance scale (how closely to follow the prompt)
+     * @default 3
+     */
+    cfg_scale?: number;
+
+    /**
+     * Random seed for reproducible results (if not provided, a random seed is used)
+     */
+    seed?: number;
+
+    /**
+     * Number of images to generate in a single request (1-4)
+     * @default 1
+     * @min 1
+     * @max 4
+     */
+    batch_size?: number;
+
+    /**
+     * DPM++ solver order (2 or 3)
+     * @default 2
+     */
+    solver_order?: 2 | 3;
+
+    /**
+     * Base64-encoded image for img2img generation
+     * If provided, the model will transform this image rather than generate from scratch
+     */
+    base_img?: string;
+
+    /**
+     * Strength of transformation for img2img (0.0 = no change, 1.0 = complete change)
+     * Only used when base_img is provided
+     * @default 0.75
+     * @min 0
+     * @max 1
+     */
+    strength?: number;
+}

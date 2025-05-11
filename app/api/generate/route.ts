@@ -8,6 +8,11 @@ import { getFirestore } from 'firebase-admin/firestore';
 const IMAGE_GENERATION_COST = 1; // Cost in tokens
 const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY;
 
+const MODEL_ENDPOINTS = [
+    {modelName: "realism", modelEndpoint: "https://api.runpod.ai/v2/9c6y8ue4f8ie0e/run"},
+    {modelName: "lustify", modelEndpoint: "https://api.runpod.ai/v2/k7649vd0rf6sof/run"},
+]
+
 async function verifySessionCookie(sessionCookie: string) {
     try {
         const decodedClaims = await getAuth(adminApp).verifySessionCookie(sessionCookie, true);
@@ -53,27 +58,8 @@ async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firest
     return currentTokens - IMAGE_GENERATION_COST;
 }
 
-async function generateImage(metadata: ImageGenerationMetadata) {
+async function generateImage(input: Partial<StableDiffusionRequestInput>) {
     const url = "https://api.runpod.ai/v2/k7649vd0rf6sof/run";
-
-    const input: any = {
-        prompt: metadata.prompt,
-        width: metadata.width,
-        height: metadata.height,
-        negative_prompt: metadata.neg_prompt
-    };
-
-    if (metadata.cfg !== undefined) input.cfg_scale = metadata.cfg;
-    if (metadata.seed !== undefined) input.seed = metadata.seed;
-    if (metadata.n_samples !== undefined) input.batch_size = metadata.n_samples;
-    if (metadata.base_img !== undefined) {
-        if (metadata.base_img.startsWith('data:image')) {
-            // Strip the data URL prefix to get only the base64 encoded data
-            input.base_img = metadata.base_img.split(',')[1];
-        } else {
-            input.base_img = metadata.base_img;
-        }
-    }
 
     const response = await fetch(url, {
         method: "POST",
@@ -94,23 +80,22 @@ async function generateImage(metadata: ImageGenerationMetadata) {
     }
 
     const data: RunPodsCompletedResponseData = await response.json();
-    return data; // Return the entire response data
+    return data;
 }
 
 async function createJobDocument(
     db: FirebaseFirestore.Firestore,
     userId: string,
     jobData: RunPodsCompletedResponseData,
-    metadata: ImageGenerationMetadata
+    metadata: Partial<StableDiffusionRequestInput>
 ) {
-    // @ts-ignore
-    metadata.base_img = null;
     const jobRef = db.collection('jobs').doc(jobData.id.toString());
     await jobRef.set({
         userId,
         status: jobData.status,
         metadata,
         createdAt: new Date().toISOString(),
+        ["statusTimestamps.IN_QUEUE"]: new Date().toISOString(),
     });
 }
 
@@ -128,8 +113,21 @@ export async function POST(request: NextRequest) {
 
         const userId = await verifySessionCookie(sessionCookie);
 
-        const body: Partial<ImageGenerationMetadata> = await request.json();
-        const { prompt, width = 720, height = 1024, neg_prompt = "ugly, distorted, low quality", cfg, seed, n_samples, base_img } = body;
+        const body = await request.json();
+
+        const cleanedBody: Partial<StableDiffusionRequestInput> = {};
+        const validKeys: (keyof StableDiffusionRequestInput)[] = [
+            'prompt', 'negative_prompt', 'width', 'height', 'steps', 'cfg_scale',
+            'seed', 'batch_size', 'solver_order', 'base_img', 'strength'
+        ];
+
+        for (const key of validKeys) {
+            if (body[key] !== undefined) {
+                cleanedBody[key] = body[key];
+            }
+        }
+
+        const { prompt } = cleanedBody;
 
         if (!prompt) {
             return NextResponse.json(
@@ -141,25 +139,15 @@ export async function POST(request: NextRequest) {
         const db = getFirestore(adminApp);
         const tokensRemaining = await checkAndDeductTokens(userId, db);
 
-        console.log('Image generation requested:', { prompt, width, height, neg_prompt, cfg, seed, n_samples, base_img: base_img?.slice(0, 20) + '...' });
+        console.log('Image generation requested:', {
+            ...cleanedBody,
+            base_img: cleanedBody.base_img? cleanedBody.base_img.slice(0, 30) : null,
+        });
 
-        // Create metadata object without undefined fields
-        const metadata: ImageGenerationMetadata = {
-            height,
-            width,
-            prompt,
-            neg_prompt,
-            ...(cfg !== undefined && { cfg }),
-            ...(seed !== undefined && { seed }),
-            ...(n_samples !== undefined && { n_samples }),
-            ...(cfg !== undefined && { guidance_scale: cfg }),
-            ...(base_img !== undefined && { base_img: base_img }),
-        };
-
-        const jobData = await generateImage(metadata);
+        const jobData = await generateImage(cleanedBody);
 
         // Create a job document in Firestore
-        await createJobDocument(db, userId, jobData, metadata);
+        await createJobDocument(db, userId, jobData, cleanedBody);
 
         const response = {
             success: true,
