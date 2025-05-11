@@ -161,6 +161,12 @@ interface StableDiffusionRequestInput {
     base_img?: string;
 
     /**
+     * Base64-encoded image for img2img generation
+     * If provided, the model will transform this image rather than generate from scratch
+     */
+    mask_img?: string;
+
+    /**
      * Strength of transformation for img2img (0.0 = no change, 1.0 = complete change)
      * Only used when base_img is provided
      * @default 0.75
@@ -169,3 +175,5 @@ interface StableDiffusionRequestInput {
      */
     strength?: number;
 }
+
+type ImageGenerationRequestInput = StableDiffusionRequestInput & { model_name: "lustify" | "realism" };

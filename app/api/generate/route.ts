@@ -3,14 +3,15 @@ import { cookies } from 'next/headers';
 import { getAuth } from 'firebase-admin/auth';
 import adminApp from '@/lib/firebaseAdmin';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 
 // Define the cost of generating an image
 const IMAGE_GENERATION_COST = 1; // Cost in tokens
 const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY;
 
 const MODEL_ENDPOINTS = [
-    {modelName: "realism", modelEndpoint: "https://api.runpod.ai/v2/9c6y8ue4f8ie0e/run"},
-    {modelName: "lustify", modelEndpoint: "https://api.runpod.ai/v2/k7649vd0rf6sof/run"},
+    { modelName: "realism", modelEndpoint: "https://api.runpod.ai/v2/9c6y8ue4f8ie0e/run" },
+    { modelName: "lustify", modelEndpoint: "https://api.runpod.ai/v2/k7649vd0rf6sof/run" },
 ]
 
 async function verifySessionCookie(sessionCookie: string) {
@@ -58,6 +59,23 @@ async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firest
     return currentTokens - IMAGE_GENERATION_COST;
 }
 
+async function uploadImageToStorage(storage: any, userId: string, jobId: string, imageData: string, fileName: string) {
+    // Remove the data URL prefix (e.g., "data:image/png;base64,")
+    const base64Data = imageData.split(',')[1];
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    const filePath = `job-meta-images/${userId}/${jobId}/${fileName}`;
+    const file = storage.bucket().file(filePath);
+
+    await file.save(buffer, {
+        metadata: {
+            contentType: 'image/png'
+        }
+    });
+
+    return filePath;
+}
+
 async function generateImage(input: Partial<StableDiffusionRequestInput>) {
     const url = "https://api.runpod.ai/v2/k7649vd0rf6sof/run";
 
@@ -87,13 +105,26 @@ async function createJobDocument(
     db: FirebaseFirestore.Firestore,
     userId: string,
     jobData: RunPodsCompletedResponseData,
-    metadata: Partial<StableDiffusionRequestInput>
+    metadata: Partial<StableDiffusionRequestInput>,
+    imageFiles: { baseImagePath?: string, maskImagePath?: string }
 ) {
+    // Create a sanitized copy of metadata without large base64 strings
+    const sanitizedMetadata = {
+        ...metadata,
+        // Set base_img to true if it exists in the metadata, and set the path if it does
+        base_img: !!metadata.base_img,
+        ...(metadata.base_img && { base_img_path: imageFiles.baseImagePath }),
+
+        // Set mask_img to true if it exists in the metadata, and set the path if it does
+        mask_img: !!metadata.mask_img,
+        ...(metadata.mask_img && { mask_img_path: imageFiles.maskImagePath }),
+    };
+
     const jobRef = db.collection('jobs').doc(jobData.id.toString());
-    await jobRef.set({
+    await jobRef.create({
         userId,
         status: jobData.status,
-        metadata,
+        metadata: sanitizedMetadata,
         createdAt: new Date().toISOString(),
         ["statusTimestamps.IN_QUEUE"]: new Date().toISOString(),
     });
@@ -118,7 +149,7 @@ export async function POST(request: NextRequest) {
         const cleanedBody: Partial<StableDiffusionRequestInput> = {};
         const validKeys: (keyof StableDiffusionRequestInput)[] = [
             'prompt', 'negative_prompt', 'width', 'height', 'steps', 'cfg_scale',
-            'seed', 'batch_size', 'solver_order', 'base_img', 'strength'
+            'seed', 'batch_size', 'solver_order', 'base_img', 'strength', 'mask_img'
         ];
 
         for (const key of validKeys) {
@@ -137,17 +168,47 @@ export async function POST(request: NextRequest) {
         }
 
         const db = getFirestore(adminApp);
+        const storage = getStorage(adminApp);
         const tokensRemaining = await checkAndDeductTokens(userId, db);
 
         console.log('Image generation requested:', {
             ...cleanedBody,
-            base_img: cleanedBody.base_img? cleanedBody.base_img.slice(0, 30) : null,
+            base_img: cleanedBody.base_img ? 'base_img present' : null,
+            mask_img: cleanedBody.mask_img ? 'mask_img present' : null,
         });
 
         const jobData = await generateImage(cleanedBody);
+        const jobId = jobData.id.toString();
+
+        // Handle image uploads if present
+        const imageFiles: { baseImagePath?: string, maskImagePath?: string } = {};
+
+        // Upload base_img if present
+        if (cleanedBody.base_img) {
+            const baseImagePath = await uploadImageToStorage(
+                storage,
+                userId,
+                jobId,
+                cleanedBody.base_img as string,
+                'base.png'
+            );
+            imageFiles.baseImagePath = baseImagePath;
+        }
+
+        // Upload mask_img if present
+        if (cleanedBody.mask_img) {
+            const maskImagePath = await uploadImageToStorage(
+                storage,
+                userId,
+                jobId,
+                cleanedBody.mask_img as string,
+                'mask.png'
+            );
+            imageFiles.maskImagePath = maskImagePath;
+        }
 
         // Create a job document in Firestore
-        await createJobDocument(db, userId, jobData, cleanedBody);
+        await createJobDocument(db, userId, jobData, cleanedBody, imageFiles);
 
         const response = {
             success: true,
