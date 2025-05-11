@@ -39,7 +39,7 @@ export default function ImageGeneratorPage() {
 		}
 	});
 
-	const { jobs: userJobs } = useUserJobs();
+	const { jobs: userJobs, deleteJob } = useUserJobs();
 	const { projects: userProjects } = useUserProjects();
 	const [loading, setLoading] = useState(false);
 	const [editModalOpen, setEditModalOpen] = useState(false);
@@ -252,18 +252,6 @@ export default function ImageGeneratorPage() {
 		// Actual implementation would involve checking the job status from the server
 	};
 
-	const handleDelete = async (job: any) => {
-		// Implementation would be similar to the ImageGenCard's delete functionality
-		notifications.show({
-			title: 'Deleting',
-			message: 'Deleting job...',
-			loading: true,
-			autoClose: 2000,
-		});
-
-		// Actual implementation would involve deleting the job from the server
-	};
-
 	return (
 		<>
 			<Grid>
@@ -404,6 +392,7 @@ export default function ImageGeneratorPage() {
 
 							return (
 								<GenJobCard
+									key={job.id}
 									prompt={job.metadata?.prompt || ""}
 									status={job.status}
 									imageUrls={job.imageUrls || []}
@@ -417,7 +406,7 @@ export default function ImageGeneratorPage() {
 									onInpaint={() => handleInpaint(job)}
 									onAddToProject={() => handleAddToProject(job)}
 									onRecheckStatus={() => handleRecheckStatus(job)}
-									onDelete={() => handleDelete(job)}
+									onDelete={() => deleteJob(job.id)}
 								/>
 							);
 						})}

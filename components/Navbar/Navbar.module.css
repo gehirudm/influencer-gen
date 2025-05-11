@@ -1,6 +1,7 @@
 .container {
     display: flex;
     height: 100vh;
+    width: 100%
 }
 
 .content {
@@ -11,7 +12,8 @@
 
 .navbar {
     height: 100vh;
-    width: 300px;
+    width: 280px; /* Fixed width for expanded navbar */
+    min-width: 280px; /* Ensure it doesn't shrink */
     padding: var(--mantine-spacing-md);
     display: flex;
     flex-direction: column;
@@ -72,4 +74,35 @@
     margin-right: var(--mantine-spacing-sm);
     width: 25px;
     height: 25px;
+}
+
+/* Add these styles to your existing Navbar.module.css */
+.collapsedNavbar {
+  width: 80px;
+  height: 100vh;
+  padding: var(--mantine-spacing-md);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--mantine-color-body);
+  border-right: 1px solid var(--mantine-color-gray-3);
+}
+
+.collapsedLink {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--mantine-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mantine-color-gray-7);
+  margin-bottom: var(--mantine-spacing-sm);
+}
+
+.collapsedLink:hover {
+  background-color: var(--mantine-color-gray-0);
+}
+
+.collapsedLink[data-active] {
+  background-color: var(--mantine-color-blue-light);
+  color: var(--mantine-color-blue-light-color);
 }
