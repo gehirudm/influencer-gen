@@ -21,7 +21,7 @@ const mockdata = [
     { imageCount: 0, title: 'Winter vacation', image: icons[3], createdAt: new Date('2024-07-10') },
 ];
 
-export function ImageCheckboxes() {
+function ImageCheckboxes() {
     const items = mockdata.map((item) => <ProjectCheckBox {...item} key={item.title} />);
     return <SimpleGrid cols={{ base: 1, sm: 2 }}>{items}</SimpleGrid>;
 }
