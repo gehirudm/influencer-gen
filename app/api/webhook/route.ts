@@ -3,6 +3,7 @@ import adminApp from '@/lib/firebaseAdmin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage, Storage } from 'firebase-admin/storage';
 import { getPlaiceholder } from "plaiceholder";
+import { randomUUID } from 'crypto';
 
 async function getJobData(db: FirebaseFirestore.Firestore, jobId: string) {
     const jobRef = db.collection('jobs').doc(jobId);
@@ -13,6 +14,13 @@ async function getJobData(db: FirebaseFirestore.Firestore, jobId: string) {
     }
 
     return jobDoc.data();
+}
+
+function getImageUrls(filePath: string, userId: string) {
+    return {
+        privateUrl: `https://firebasestorage.googleapis.com/v0/b/influncer-gen.firebasestorage.app/o/${encodeURIComponent(filePath)}?alt=media&token=${userId}`,
+        publicUrl: `https://firebasestorage.googleapis.com/v0/b/influncer-gen.firebasestorage.app/o/${encodeURIComponent(filePath)}?alt=media&token=${randomUUID()}`,
+    };
 }
 
 async function saveImage(storage: Storage, userId: string, imageId: string, imageData: string) {
@@ -33,9 +41,11 @@ async function saveImage(storage: Storage, userId: string, imageId: string, imag
     await file.save(buffer, {
         metadata: { contentType: 'image/png' },
     });
+
+    return getImageUrls(filePath, userId);
 }
 
-async function createImageDocument(db: FirebaseFirestore.Firestore, imageId: string, userId: string, jobData: any, blurHash: string) {
+async function createImageDocument(db: FirebaseFirestore.Firestore, imageId: string, userId: string, jobData: any, blurHash: string, imageURLs: { publicUrl: string, privateUrl: string }) {
     const imageDocRef = db.collection('images').doc(imageId);
     await imageDocRef.set({
         userId,
@@ -44,6 +54,7 @@ async function createImageDocument(db: FirebaseFirestore.Firestore, imageId: str
         metadata: jobData.metadata,
         createdAt: new Date().toISOString(),
         blurHash,
+        ...imageURLs
     });
 }
 
@@ -53,13 +64,13 @@ async function generateBlurHash(imageData: string): Promise<string> {
     return base64;
 }
 
-async function processImages(storage: any, db: FirebaseFirestore.Firestore, userId: string, jobId: string, output: any, jobData: any) {
+async function processImages(storage: any, db: FirebaseFirestore.Firestore, userId: string, jobId: string, output: any, jobData: any): Promise<{ imageId: string, imageURLs: { privateUrl: string, publicUrl: string } }[]> {
     return Promise.all(output.images.map(async (imageData: string, index: number) => {
         const imageId = `${jobId}-image_${index}`;
-        await saveImage(storage, userId, imageId, imageData);
+        const imageURLs = await saveImage(storage, userId, imageId, imageData);
         const blurHash = await generateBlurHash(imageData);
-        await createImageDocument(db, imageId, userId, jobData, blurHash);
-        return imageId;
+        await createImageDocument(db, imageId, userId, jobData, blurHash, imageURLs);
+        return { imageId, imageURLs };
     }));
 }
 
@@ -109,10 +120,12 @@ export async function POST(request: NextRequest) {
 
         if (status === 'COMPLETED' && output && (output.images || output.image_ids)) {
             if (output.images !== undefined) {
-                const imageIds = await processImages(storage, db, userId, id, output, jobData); // Pass jobData here
-                updateData.imageIds = imageIds;
+                const imageData = await processImages(storage, db, userId, id, output, jobData); // Pass jobData here
+                updateData.imageIds = imageData.map((imageData) => imageData.imageId);
+                updateData.imageUrls = imageData.map((imageData) => imageData.imageURLs);
             } else {
                 updateData.imageIds = output.image_ids;
+                updateData.imageUrls = output.image_ids.map((imageId: string) => getImageUrls(imageId, userId));
             }
         }
 

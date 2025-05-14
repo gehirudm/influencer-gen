@@ -23,13 +23,8 @@ const MODEL_ENDPOINTS = {
 }
 
 async function verifySessionCookie(sessionCookie: string) {
-    try {
-        const decodedClaims = await getAuth(adminApp).verifySessionCookie(sessionCookie, true);
-        return decodedClaims.uid;
-    } catch (error) {
-        console.error('Invalid session cookie:', error);
-        throw new Error('Unauthorized: Invalid session');
-    }
+    const decodedClaims = await getAuth(adminApp).verifySessionCookie(sessionCookie, true);
+    return decodedClaims.uid;
 }
 
 async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firestore) {
@@ -127,7 +122,7 @@ async function generateImage(input: Partial<ImageGenerationRequestInput & { user
             webhook: WEBHOOK_URL
         })
     });
-    
+
     const bodyJson = await response.json();
     console.log(bodyJson);
 
@@ -180,11 +175,20 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const userId = await verifySessionCookie(sessionCookie);
+        let userId: string;
+
+        try {
+            userId = await verifySessionCookie(sessionCookie);
+        } catch (error) {
+            return NextResponse.json(
+                { error: 'Unauthorized: Unable to verify session' },
+                { status: 401 }
+            );
+        }
 
         const body = await request.json();
 
-        const cleanedBody: Partial<ImageGenerationRequestInput> = { };
+        const cleanedBody: Partial<ImageGenerationRequestInput> = {};
 
         for (const key of VALID_INPUT_KEYS) {
             if (body[key] !== undefined) {

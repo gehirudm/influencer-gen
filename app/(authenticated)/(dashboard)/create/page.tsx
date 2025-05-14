@@ -11,6 +11,7 @@ import EditImageModel from '@/components/Models/EditImageModel';
 import { GenJobCard } from '@/components/GenJobCard/GenJobCard';
 import { IconBrandInstagram, IconCropLandscape, IconCropPortrait, IconSquare, IconTrash } from '@tabler/icons-react';
 import ImageMaskEditor from '@/components/ImageMaskEditor';
+import { useRouter } from 'next/navigation';
 
 function AspectRatioLabel(props: { label: string, ratio: string, Icon: any }) {
 	return (
@@ -61,6 +62,8 @@ export default function ImageGeneratorPage() {
 	const [maskImage, setMaskImage] = useState<string | null>(null);
 	const [imageLoading, setImageLoading] = useState(false);
 	const [maskEditorOpen, setMaskEditorOpen] = useState(false);
+
+	const router = useRouter();
 
 	// Get dimensions based on selected aspect ratio
 	const getDimensions = () => {
@@ -117,12 +120,21 @@ export default function ImageGeneratorPage() {
 				body: JSON.stringify(payload),
 			});
 
+			if (response.status === 401) {
+				notifications.show({
+					title: 'Session Expired',
+					message: 'Please log in again to continue generating images.',
+					color: 'blue'
+				});
+				router.push('/auth');
+				setLoading(false);
+				return;
+			}
+
 			if (!response.ok) {
 				const errorData = await response.json();
 				throw new Error(errorData.error || 'Failed to generate image');
 			}
-
-			const data = await response.json();
 
 			notifications.show({
 				title: 'Success',
@@ -149,7 +161,7 @@ export default function ImageGeneratorPage() {
 	const handleEdit = (jobId: string) => {
 		const job = userJobs.find(job => job.id === jobId);
 		if (job && job.imageUrls) {
-			setSelectedJobImages(job.imageUrls);
+			setSelectedJobImages(job.imageUrls.map(url => url.privateUrl));
 			setEditModalOpen(true);
 		}
 	};
@@ -448,7 +460,7 @@ export default function ImageGeneratorPage() {
 
 				<Grid.Col span={7}>
 					<Group>
-						{userJobs.map((job, index) => {
+						{userJobs.map((job) => {
 							// Calculate aspect ratio string
 							const width = job.metadata?.width || 512;
 							const height = job.metadata?.height || 512;
@@ -459,7 +471,7 @@ export default function ImageGeneratorPage() {
 									key={job.id}
 									prompt={job.metadata?.prompt || ""}
 									status={job.status}
-									imageUrls={job.imageUrls || []}
+									imageUrls={job.imageUrls?.map(url => url.privateUrl) || []}
 									generationTime={job.executionTime ? job.executionTime / 1000 : undefined}
 									dimensions={{ width, height }}
 									aspectRatio={aspectRatio}

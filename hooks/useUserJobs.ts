@@ -11,21 +11,23 @@ interface JobData {
     status: string;
     metadata: ImageGenerationMetadata;
     createdAt: string;
-    imageUrls?: string[];
+    imageUrls?: ImageURLS[];
     imageIds?: string[];
     executionTime: number;
     baseImagePath?: string;
     maskImagePath?: string;
 }
 
+interface ImageURLS { publicUrl: string, privateUrl: string };
+
 export function useUserJobs() {
     const auth = getAuth(app);
     const user = auth.currentUser;
-    
+
     const [jobs, setJobs] = useState<JobData[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const imageUrlsCache = new Map<string, string[]>();
+    const imageUrlsCache = new Map<string, ImageURLS[]>();
 
     const deleteJob = async (jobId: string, onComplete?: () => void, onError?: (error: Error) => void) => {
         if (!user?.uid) {
@@ -50,22 +52,22 @@ export function useUserJobs() {
         try {
             const db = getFirestore(app);
             const storage = getStorage(app);
-            
+
             // Get the job document
             const jobRef = doc(db, 'jobs', jobId);
             const jobDoc = await getDoc(jobRef);
-            
+
             if (!jobDoc.exists()) {
                 throw new Error('Job not found');
             }
-            
+
             const jobData = jobDoc.data() as JobData;
-            
+
             // Verify the job belongs to the user
             if (jobData.userId !== user.uid) {
                 throw new Error('You do not have permission to delete this job');
             }
-            
+
             // Delete generated images if they exist
             if (jobData.imageIds && Array.isArray(jobData.imageIds)) {
                 const deleteImagePromises = jobData.imageIds.map(async (imageId: string) => {
@@ -79,10 +81,10 @@ export function useUserJobs() {
                         // Continue with deletion even if some images fail to delete
                     }
                 });
-                
+
                 await Promise.all(deleteImagePromises);
             }
-            
+
             // Delete base image if it exists
             if (jobData.baseImagePath) {
                 try {
@@ -93,7 +95,7 @@ export function useUserJobs() {
                     console.error(`Error deleting base image ${jobData.baseImagePath}:`, error);
                 }
             }
-            
+
             // Delete mask image if it exists
             if (jobData.maskImagePath) {
                 try {
@@ -104,10 +106,10 @@ export function useUserJobs() {
                     console.error(`Error deleting mask image ${jobData.maskImagePath}:`, error);
                 }
             }
-            
+
             // Delete the job document
             await deleteDoc(jobRef);
-            
+
             notifications.update({
                 id: notificationId,
                 title: 'Success',
@@ -117,11 +119,11 @@ export function useUserJobs() {
                 autoClose: 3000,
                 withCloseButton: true,
             });
-            
+
             if (onComplete) onComplete();
         } catch (error: any) {
             console.error('Error deleting job:', error);
-            
+
             notifications.update({
                 id: notificationId,
                 title: 'Error',
@@ -131,7 +133,7 @@ export function useUserJobs() {
                 autoClose: 5000,
                 withCloseButton: true,
             });
-            
+
             if (onError) onError(error);
         }
     };
@@ -151,21 +153,24 @@ export function useUserJobs() {
                 const jobData = doc.data() as JobData;
                 jobData.id = doc.id;
 
-                if (jobData.status === 'COMPLETED' && jobData.imageIds) {
-                    if (imageUrlsCache.has(jobData.id)) {
-                        jobData.imageUrls = imageUrlsCache.get(jobData.id);
-                    } else {
-                        const imageUrls = await Promise.all(
-                            jobData.imageIds.map(async (imageId: string) => {
-                                const imageRef = ref(storage, `generated-images/${user.uid}/${imageId}.png`);
-                                return getDownloadURL(imageRef);
-                            })
-                        );
+                // if (jobData.status === 'COMPLETED' && jobData.imageIds && jobData.imageUrls != undefined) {
+                //     if (imageUrlsCache.has(jobData.id)) {
+                //         jobData.imageUrls = imageUrlsCache.get(jobData.id);
+                //     } else {
+                //         const imageUrls = (await Promise.all(
+                //             jobData.imageIds.map(async (imageId: string) => {
+                //                 const imageRef = ref(storage, `generated-images/${user.uid}/${imageId}.png`);
+                //                 return getDownloadURL(imageRef);
+                //             })
+                //         )).map(imageUrl => ({ publicUrl: imageUrl, privateUrl: imageUrl}));
 
-                        jobData.imageUrls = imageUrls;
-                        imageUrlsCache.set(jobData.id, imageUrls);
-                    }
-                }
+                //         jobData.imageUrls = imageUrls;
+                //         imageUrlsCache.set(jobData.id, imageUrls);
+                //     }
+                // }
+
+                if (jobData.status === 'COMPLETED' && !jobData.imageUrls)
+                    continue;
 
                 jobsData.push(jobData);
             }
