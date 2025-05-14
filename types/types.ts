@@ -177,4 +177,8 @@ interface StableDiffusionRequestInput {
     strength?: number;
 }
 
-type ImageGenerationRequestInput = StableDiffusionRequestInput & { model_name: "lustify" | "realism" };
+type ImageGenerationRequestInput =
+    StableDiffusionRequestInput &
+    {
+        model_name: "lustify" | "realism"
+    };

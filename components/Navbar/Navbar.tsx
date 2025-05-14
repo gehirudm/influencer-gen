@@ -10,7 +10,7 @@ import {
     IconUser,
 } from '@tabler/icons-react';
 import { Avatar, Center, Group, Stack, Tooltip, UnstyledButton, Text, Mark } from '@mantine/core';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import classes from './Navbar.module.css';
 import collapsedClasses from './NavbarCollapsed.module.css';
 import { UserButton } from '../UserButton';
@@ -29,12 +29,21 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
     const [active, setActive] = useState('Discover');
     const [collapsed, setCollapsed] = useState(false);
     const router = useRouter();
+    const pathname = usePathname();
     const isSmallScreen = useMediaQuery('(max-width: 56.25em)');
 
     // Set collapsed state based on screen size only on initial render and when screen size changes
     useEffect(() => {
         setCollapsed(isSmallScreen ? isSmallScreen : false);
     }, [isSmallScreen]);
+
+    useEffect(() => {
+        const currentPath = pathname || '';
+        const activeItem = data.find(item => currentPath.startsWith(item.link));
+        if (activeItem) {
+            setActive(activeItem.label);
+        }
+    }, [pathname]);
 
     // Expanded navbar view
     const expandedView = (

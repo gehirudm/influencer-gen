@@ -49,7 +49,7 @@ async function createImageDocument(db: FirebaseFirestore.Firestore, imageId: str
 
 async function generateBlurHash(imageData: string): Promise<string> {
     const buffer = Buffer.from(imageData, 'base64');
-    const { base64 } =  await getPlaiceholder(buffer);
+    const { base64 } = await getPlaiceholder(buffer);
     return base64;
 }
 
@@ -59,7 +59,7 @@ async function processImages(storage: any, db: FirebaseFirestore.Firestore, user
         await saveImage(storage, userId, imageId, imageData);
         const blurHash = await generateBlurHash(imageData);
         await createImageDocument(db, imageId, userId, jobData, blurHash);
-        return imageId; 
+        return imageId;
     }));
 }
 
@@ -77,8 +77,7 @@ export async function POST(request: NextRequest) {
             delayTime,
             executionTime,
             workerId,
-            outputSummary: output ? `Images count: ${output.images.length}` : 'No output',
-            parameters: output.parameters ? output.parameters : {},
+            output
         });
 
         if (!id || !status) {
@@ -108,9 +107,13 @@ export async function POST(request: NextRequest) {
             [`statusTimestamps.${status}`]: new Date().toISOString(),
         };
 
-        if (status === 'COMPLETED' && output && output.images) {
-            const imageIds = await processImages(storage, db, userId, id, output, jobData); // Pass jobData here
-            updateData.imageIds = imageIds;
+        if (status === 'COMPLETED' && output && (output.images || output.image_ids)) {
+            if (output.images !== undefined) {
+                const imageIds = await processImages(storage, db, userId, id, output, jobData); // Pass jobData here
+                updateData.imageIds = imageIds;
+            } else {
+                updateData.imageIds = output.image_ids;
+            }
         }
 
         await db.collection('jobs').doc(id).update(updateData);

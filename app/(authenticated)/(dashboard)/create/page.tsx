@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react';
-import { Grid, TextInput, Button, Group, NumberInput, Slider, Select, Stack, Title, Paper, SegmentedControl, Tooltip, Text, ScrollArea } from '@mantine/core';
+import { Image as MantineImage, Grid, TextInput, Button, Group, NumberInput, Slider, Select, Stack, Title, Paper, SegmentedControl, Tooltip, Text, ScrollArea, Center, ActionIcon } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useForm } from '@mantine/form';
 import { useUserJobs } from '@/hooks/useUserJobs';
@@ -9,13 +9,25 @@ import { useUserProjects } from '@/hooks/useUserProjects';
 import { FileDropzonePreview } from '@/components/FileDropzonePreview';
 import EditImageModel from '@/components/Models/EditImageModel';
 import { GenJobCard } from '@/components/GenJobCard/GenJobCard';
+import { IconBrandInstagram, IconCropLandscape, IconCropPortrait, IconSquare, IconTrash } from '@tabler/icons-react';
+import ImageMaskEditor from '@/components/ImageMaskEditor';
+
+function AspectRatioLabel(props: { label: string, ratio: string, Icon: any }) {
+	return (
+		<Stack align='center' gap={0}>
+			<props.Icon size={25} stroke={1.5} />
+			<Text m={0} size='sm'>{props.label}</Text>
+			<Text m={0} c="dimmed" size='xs'>{props.ratio}</Text>
+		</Stack>
+	)
+}
 
 // Aspect ratio presets with their dimensions
 const aspectRatios = [
-	{ value: 'portrait', label: 'Portrait (2:3)', width: 800, height: 1200 },
-	{ value: 'instagram', label: 'Instagram (4:5)', width: 864, height: 1080 },
-	{ value: 'square', label: 'Square (1:1)', width: 1024, height: 1024 },
-	{ value: 'landscape', label: 'Landscape (3:2)', width: 1200, height: 800 },
+	{ value: 'portrait', label: (<AspectRatioLabel label='Portrait' Icon={IconCropPortrait} ratio='(2:3)' />), width: 800, height: 1200 },
+	{ value: 'instagram', label: (<AspectRatioLabel label='Instagram' Icon={IconBrandInstagram} ratio='(4:5)' />), width: 864, height: 1080 },
+	{ value: 'square', label: (<AspectRatioLabel label='Square' Icon={IconSquare} ratio='(1:1)' />), width: 1024, height: 1024 },
+	{ value: 'landscape', label: (<AspectRatioLabel label='Landscape' Icon={IconCropLandscape} ratio='(3:2)' />), width: 1200, height: 800 },
 ];
 
 export default function ImageGeneratorPage() {
@@ -45,11 +57,17 @@ export default function ImageGeneratorPage() {
 	const [editModalOpen, setEditModalOpen] = useState(false);
 	const [selectedJobImages, setSelectedJobImages] = useState<string[]>([]);
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
+	const [selectedImageDimentions, setSelectedImageDimensions] = useState<{ width: number, height: number } | null>(null);
 	const [maskImage, setMaskImage] = useState<string | null>(null);
 	const [imageLoading, setImageLoading] = useState(false);
+	const [maskEditorOpen, setMaskEditorOpen] = useState(false);
 
 	// Get dimensions based on selected aspect ratio
 	const getDimensions = () => {
+		if (selectedImageDimentions != null) {
+			return selectedImageDimentions;
+		}
+
 		const selected = aspectRatios.find(ratio => ratio.value === form.values.aspectRatio);
 		return selected ? { width: selected.width, height: selected.height } : { width: 800, height: 1200 };
 	};
@@ -286,6 +304,7 @@ export default function ImageGeneratorPage() {
 
 								<SegmentedControl
 									fullWidth
+									disabled={!!selectedImage}
 									data={aspectRatios.map(ratio => ({
 										value: ratio.value,
 										label: ratio.label
@@ -364,10 +383,55 @@ export default function ImageGeneratorPage() {
 									selectedImage={selectedImage}
 									setSelectedImage={setSelectedImage}
 									loading={imageLoading}
+									onImageLoad={(img) => setSelectedImageDimensions({ width: img.currentTarget.width, height: img.currentTarget.height })}
 									label="Upload base image for img2img generation"
 								/>
 
-								{/* TODO: Add mask image support if needed */}
+								{selectedImage && (
+									<>
+										<Group justify="space-between" align="center">
+											<Title order={4}>Mask Image</Title>
+											<Button
+												variant="light"
+												size="sm"
+												onClick={() => setMaskEditorOpen(true)}
+												disabled={!selectedImage}
+											>
+												Create Mask
+											</Button>
+										</Group>
+
+										{maskImage ? (
+											<Paper p="xs" withBorder shadow="sm" radius="md" style={{ position: 'relative' }}>
+												<Group justify="center">
+													<MantineImage
+														src={maskImage}
+														alt="Mask Preview"
+														fit="contain"
+														mah={200}
+													/>
+												</Group>
+												<ActionIcon
+													color="red"
+													variant="filled"
+													radius="xl"
+													size="md"
+													pos="absolute"
+													top={5}
+													right={5}
+													onClick={() => setMaskImage(null)}
+													aria-label="Clear mask"
+												>
+													<IconTrash size={16} />
+												</ActionIcon>
+											</Paper>
+										) : (
+											<Text c="dimmed" size="sm" ta="center" py="md">
+												No mask created yet. Click "Create Mask" to define areas to be modified.
+											</Text>
+										)}
+									</>
+								)}
 
 								<Button
 									type="submit"
@@ -420,6 +484,26 @@ export default function ImageGeneratorPage() {
 				setEditModalOpen={setEditModalOpen}
 				handleImageSelect={handleImageSelect}
 			/>
+
+			{selectedImage && (
+				<ImageMaskEditor
+					imageUrl={selectedImage}
+					width={getDimensions().width}
+					height={getDimensions().height}
+					opened={maskEditorOpen}
+					onClose={() => setMaskEditorOpen(false)}
+					onConfirm={(maskDataURL) => {
+						setMaskImage(maskDataURL);
+						setMaskEditorOpen(false);
+						notifications.show({
+							title: 'Mask Created',
+							message: 'Mask has been created successfully',
+							color: 'green'
+						});
+					}}
+					title="Create Image Mask"
+				/>
+			)}
 		</>
 	);
 }

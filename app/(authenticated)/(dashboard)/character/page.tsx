@@ -4,7 +4,9 @@ import { GenJobCard } from '@/components/GenJobCard/GenJobCard';
 import ImageMaskEditor from '@/components/ImageMaskEditor';
 import ImageRadioGroup from '@/components/ImageRadioGroup/ImageRadioGroup';
 import { ProjectCheckBox } from '@/components/ProjectCheckBox/ProjectCheckBox';
-import { SimpleGrid } from '@mantine/core';
+import { useImageToDataUrl } from '@/hooks/useImgToDataUrl';
+import { SimpleGrid, Image } from '@mantine/core';
+import { useState } from 'react';
 
 const icons = [
     'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=720&q=80',
@@ -27,7 +29,12 @@ function ImageCheckboxes() {
 }
 
 export default function ImageGeneratorPage() {
-    const imageUrl = 'https://firebasestorage.googleapis.com/v0/b/influncer-gen.firebasestorage.app/o/generated-images%2FuQCRZ39xGZQiaWPEW4JZF56EorE3%2F47aa67b4-9f4e-4e67-8c32-7359739fd28c-e1-image_0.png?alt=media&token=6982b9b2-e02d-4342-b039-c4abfaa1680b';
+    // const imageUrl = 'https://firebasestorage.googleapis.com/v0/b/influncer-gen.firebasestorage.app/o/generated-images%2FuQCRZ39xGZQiaWPEW4JZF56EorE3%2F47aa67b4-9f4e-4e67-8c32-7359739fd28c-e1-image_0.png?alt=media&token=6982b9b2-e02d-4342-b039-c4abfaa1680b';
+    const imageUrl = 'https://firebasestorage.googleapis.com/v0/b/influncer-gen.firebasestorage.app/o/generated-images%2FuQCRZ39xGZQiaWPEW4JZF56EorE3%2Fe4256731-0caf-4f87-9417-a81e86f9e7c7-e1-image_0.png?alt=media&token=701211ba-c27e-47e6-bedb-19ddefd32a24';
+
+    const [imageData, setImageData] = useState<string | null>(null);
+    const [imgModelOpened, setImgModelOpened] = useState(true);
+    const { dataUrl, loading, error } = useImageToDataUrl(imageUrl);
 
     const images = [
         { imgUrl: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=720&q=80', imageId: "1" },
@@ -37,19 +44,23 @@ export default function ImageGeneratorPage() {
     ];
 
     const handleConfirm = (maskDataURL: string) => {
-        console.log('Mask Data URL:', maskDataURL);
+        setImageData(maskDataURL);
+        setImgModelOpened(false);
         // You can handle the mask data URL here, e.g., send it to a server or display it
     };
 
     return (
         <div>
             <h1>Image Mask Editor</h1>
-            <ImageMaskEditor
-                imageUrl={imageUrl}
+            {dataUrl && (<ImageMaskEditor
+                imageUrl={dataUrl}
                 width={720}
-                height={1280}
+                height={405}
+                opened={imgModelOpened}
+                onClose={() => console.log('Mask editor closed')}
                 onConfirm={handleConfirm}
-            />
+            />)}
+            {imageData && (<Image src={imageData} alt='image'></Image>)}
             {/* <GenJobCard
                 prompt="Beach vacation with your mother"
                 status="Completed"

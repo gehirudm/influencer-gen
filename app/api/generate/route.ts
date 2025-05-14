@@ -115,7 +115,7 @@ async function uploadImageToStorage(storage: any, userId: string, jobId: string,
     return filePath;
 }
 
-async function generateImage(input: Partial<ImageGenerationRequestInput>) {
+async function generateImage(input: Partial<ImageGenerationRequestInput & { user_id: string }>) {
     const response = await fetch(MODEL_ENDPOINTS[input.model_name ? input.model_name : "lustify"], {
         method: "POST",
         headers: {
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json();
 
-        const cleanedBody: Partial<ImageGenerationRequestInput> = {};
+        const cleanedBody: Partial<ImageGenerationRequestInput> = { };
 
         for (const key of VALID_INPUT_KEYS) {
             if (body[key] !== undefined) {
@@ -211,7 +211,10 @@ export async function POST(request: NextRequest) {
             mask_img: cleanedBody.mask_img ? 'mask_img present' : null,
         });
 
-        const jobData = await generateImage(cleanedBody);
+        const jobData = await generateImage({
+            ...cleanedBody,
+            user_id: userId
+        });
         const jobId = jobData.id.toString();
 
         const imageFiles = await handleBaseAndMaskImages(storage, userId, jobId, cleanedBody);

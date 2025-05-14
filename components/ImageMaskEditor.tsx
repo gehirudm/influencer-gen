@@ -1,153 +1,222 @@
 import { useEffect, useRef, useState } from "react";
-import * as fabric from "fabric";
-import { Button, ColorInput, Group, Slider, Stack, Text } from "@mantine/core";
+import { ReactSketchCanvas, ReactSketchCanvasRef } from "react-sketch-canvas";
+import {
+    Button,
+    Group,
+    Modal,
+    Slider,
+    Stack,
+    Text,
+    ActionIcon,
+    Tooltip,
+    Divider,
+    Paper,
+    Alert
+} from "@mantine/core";
+import { IconBrush, IconEraser, IconTrash, IconArrowsExchange, IconCheck, IconInfoCircle } from '@tabler/icons-react';
 
-interface ImageMaskEditorProps {
+interface ImageMaskEditorModalProps {
     imageUrl: string;
-    width: number;
-    height: number;
+    width?: number;
+    height?: number;
+    opened: boolean;
+    onClose: () => void;
     onConfirm: (imageData: string) => void;
+    title?: string;
 }
 
-export default function ImageMaskEditor({ imageUrl, width = 512, height = 512, onConfirm }: ImageMaskEditorProps) {
-    const canvasRef = useRef(null);
-    const fabricCanvas = useRef<fabric.Canvas>(null);
-
-    const [brushColor, setBrushColor] = useState("#ffffff"); // white for mask
+export default function ImageMaskEditorModal({
+    imageUrl,
+    width = 512,
+    height = 512,
+    opened,
+    onClose,
+    onConfirm,
+    title = "Edit Image Mask"
+}: ImageMaskEditorModalProps) {
+    const canvasRef = useRef<ReactSketchCanvasRef>(null);
     const [brushSize, setBrushSize] = useState(20);
-
-    useEffect(() => {
-        const initializeCanvas = async () => {
-            if (!canvasRef.current) return;
-            if (fabricCanvas.current !== null)
-                await fabricCanvas.current.dispose();
-
-            fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
-                isDrawingMode: true,
-                width,
-                height
-            });
-
-            const img = await fabric.FabricImage.fromURL(imageUrl);
-            img.set({
-                selectable: false,
-                evented: false,
-                scaleX: width / img.width,
-                scaleY: height / img.height,
-            });
-
-            const brush = new fabric.PencilBrush(fabricCanvas.current);
-            brush.width = brushSize;
-            // brush.color = brushColor;
-            brush.color = "rgba(255, 255, 255, 0.5)";
-
-            fabricCanvas.current.set({
-                backgroundImage: img,
-                freeDrawingBrush: brush
-            });
-
-            fabricCanvas.current.renderAll();
-
-            // fabricCanvas.current.backgroundImage = img;
-            // fabricCanvas.current.freeDrawingBrush = new fabric.PencilBrush(fabricCanvas.current);
-
-            // Set default brush
-            // fabricCanvas.current.freeDrawingBrush.color = brushColor;
-            // fabricCanvas.current.freeDrawingBrush.width = brushSize;
-        }
-
-        initializeCanvas();
-
-        // Cleanup
-        return () => {
-            if (fabricCanvas.current)
-                fabricCanvas.current.dispose();
-        };
-    }, [imageUrl, width, height]);
-
-    // Update brush when props change
-    useEffect(() => {
-        if (fabricCanvas.current && fabricCanvas.current.freeDrawingBrush) {
-            fabricCanvas.current.freeDrawingBrush.color = brushColor;
-            fabricCanvas.current.freeDrawingBrush.width = brushSize;
-        }
-    }, [brushColor, brushSize]);
+    const [isEraser, setIsEraser] = useState(false);
+    const [backgroundImage, setBackgroundImage] = useState(imageUrl);
 
     const handleClear = () => {
-        if (!fabricCanvas.current) return;
-
-        fabricCanvas.current.getObjects().forEach((obj) => {
-            if (obj !== fabricCanvas.current?.backgroundImage) {
-                fabricCanvas.current?.remove(obj);
-            }
-        });
-        fabricCanvas.current.renderAll();
+        canvasRef.current?.clearCanvas();
     };
 
-    const handleInvertMask = () => {
-        if (!fabricCanvas.current) return;
+    const handleInvertMask = async () => {
+        if (!canvasRef.current) return;
 
-        const ctx = fabricCanvas.current.getContext();
-        const imageData = ctx.getImageData(0, 0, fabricCanvas.current.width, fabricCanvas.current.height);
-        const data = imageData.data;
+        const paths = await canvasRef.current.exportPaths();
+        const newPaths = paths.map((path) => ({
+            ...path,
+            strokeColor: path.strokeColor === "black" ? "white" : "black",
+        }));
+        canvasRef.current.loadPaths(newPaths);
+    };
 
-        for (let i = 0; i < data.length; i += 4) {
-            // Invert only the white areas
-            if (data[i] === 255 && data[i + 1] === 255 && data[i + 2] === 255) {
-                data[i] = 0;     // Red
-                data[i + 1] = 0; // Green
-                data[i + 2] = 0; // Blue
+    useEffect(() => {
+        if (backgroundImage !== "0") return;
+
+        const exportMask = async () => {
+            try {
+                if (!canvasRef.current) return;
+
+                // Get the PNG data from the canvas
+                const pngData = await canvasRef.current.exportImage("png");
+
+                // Create a new canvas to compose the final mask
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+
+                if (!ctx) {
+                    console.error("Could not get canvas context");
+                    return;
+                }
+
+                // Create a new image to load the PNG data
+                const img = new Image();
+                img.onload = () => {
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(0, 0, width, height);
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Get the final mask data URL
+                    const finalMaskDataURL = canvas.toDataURL('image/png');
+
+                    // Pass the final mask to the parent component
+                    onConfirm(finalMaskDataURL);
+                    onClose();
+                };
+
+                img.src = pngData;
+                canvasRef.current.clearCanvas();
+                setBackgroundImage(imageUrl)
+            } catch (error) {
+                console.error("Error creating mask:", error);
             }
         }
 
-        ctx.putImageData(imageData, 0, 0);
-        fabricCanvas.current.renderAll();
+        exportMask();
+    }, [backgroundImage])
+
+    const handleConfirm = async () => {
+        setBackgroundImage("0");
     };
 
-    const handleConfirm = () => {
-        if (!fabricCanvas.current) return;
-        // Temporarily remove background to extract mask only
-        const bg = fabricCanvas.current.backgroundImage;
-        fabricCanvas.current.backgroundImage = undefined;
-
-        const maskDataURL = fabricCanvas.current.toDataURL({
-            format: "png",
-            quality: 1.0,
-            multiplier: 1
-        });
-        // Restore background and notify parent
-        fabricCanvas.current.backgroundImage = bg;
-        onConfirm(maskDataURL);
+    const toggleBrushType = () => {
+        setIsEraser(!isEraser);
+        if (canvasRef.current) {
+            if (!isEraser) {
+                canvasRef.current.eraseMode(true);
+            } else {
+                canvasRef.current.eraseMode(false);
+            }
+        }
     };
 
     return (
-        <div>
-            <Stack>
-                {/* <ColorInput
-                    placeholder="Brush Color"
-                    label="Brush Color"
-                    disallowInput
-                    withPicker={false}
-                    value={brushColor}
-                    onChange={(e) => setBrushColor(e)}
-                    swatches={["#ffffff", "#000000"]}
-                /> */}
-                <Text>Brush Size</Text>
-                <Slider
-                    title="Brush Size"
-                    step={1}
-                    min={1}
-                    max={100}
-                    value={brushSize}
-                    onChange={(e) => setBrushSize(e)}
-                />
-                <Group gap={8}>
-                    <Button onClick={handleClear}>Clear</Button>
-                    <Button onClick={handleInvertMask}>Invert Mask</Button>
-                    <Button onClick={handleConfirm}>Confirm</Button>
+        <Modal
+            opened={opened}
+            onClose={onClose}
+            size="xl"
+            title={<Text fz={20} fw="bold">{title}</Text>}
+            centered
+        >
+            <Stack gap="md">
+                <Alert
+                    icon={<IconInfoCircle size={16} />}
+                    title="Mask Information"
+                    color="blue"
+                >
+                    Black areas will be preserved in the final image. White areas will be changed according to your prompt.
+                </Alert>
+
+                <Paper p="md" withBorder>
+                    <Group justify="space-between" mb="xs">
+                        <Text size="sm" fw={500}>Brush Settings</Text>
+                        <Tooltip label={isEraser ? "Switch to Brush" : "Switch to Eraser"}>
+                            <ActionIcon
+                                color={isEraser ? "red" : "blue"}
+                                variant="light"
+                                onClick={toggleBrushType}
+                            >
+                                {isEraser ? <IconEraser size={18} /> : <IconBrush size={18} />}
+                            </ActionIcon>
+                        </Tooltip>
+                    </Group>
+
+                    <Slider
+                        label={`Size: ${brushSize}px`}
+                        labelAlwaysOn
+                        step={1}
+                        min={1}
+                        max={100}
+                        value={brushSize}
+                        onChange={(value) => setBrushSize(value)}
+                        mb="md"
+                    />
+
+                    <Group grow>
+                        <Tooltip label="Clear Mask">
+                            <Button
+                                leftSection={<IconTrash size={16} />}
+                                color="red"
+                                variant="light"
+                                onClick={handleClear}
+                            >
+                                Clear
+                            </Button>
+                        </Tooltip>
+                        <Tooltip label="Invert Mask">
+                            <Button
+                                leftSection={<IconArrowsExchange size={16} />}
+                                color="orange"
+                                variant="light"
+                                onClick={handleInvertMask}
+                            >
+                                Invert
+                            </Button>
+                        </Tooltip>
+                    </Group>
+                </Paper>
+
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: height,
+                    width: "100%",
+                    overflow: 'auto',
+                    position: 'relative'
+                }}>
+                    <ReactSketchCanvas
+                        width={`${width}px`}
+                        height={`${height}px`}
+                        ref={canvasRef}
+                        strokeWidth={brushSize}
+                        eraserWidth={brushSize}
+                        strokeColor="white"
+                        canvasColor="black"
+                        backgroundImage={backgroundImage}
+                        exportWithBackgroundImage={false}
+                    />
+                </div>
+
+                <Divider my="sm" />
+
+                <Group align="right">
+                    <Button variant="default" onClick={onClose}>Cancel</Button>
+                    <Button
+                        leftSection={<IconCheck size={16} />}
+                        color="green"
+                        onClick={handleConfirm}
+                    >
+                        Apply Mask
+                    </Button>
                 </Group>
             </Stack>
-            <canvas ref={canvasRef} width={width} height={height} style={{ border: "1px solid #ccc" }} />
-        </div>
+        </Modal>
     );
 }

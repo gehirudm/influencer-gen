@@ -1,18 +1,20 @@
 import { Group, Text, Image, Box, ActionIcon, Stack, Paper } from '@mantine/core';
 import { IconUpload, IconPhoto, IconX, IconTrash } from '@tabler/icons-react';
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
-import { useState } from 'react';
+import { ReactEventHandler, useState } from 'react';
 
 interface FileDropzonePreviewProps extends Partial<DropzoneProps> {
     selectedImage: string | null;
     setSelectedImage: (image: string | null) => void;
     label?: string;
+    onImageLoad?: ReactEventHandler<HTMLImageElement>;
 }
 
 export function FileDropzonePreview({ 
     selectedImage, 
     setSelectedImage, 
     label = "Upload Image",
+    onImageLoad,
     ...props 
 }: FileDropzonePreviewProps) {
     const [loading, setLoading] = useState(false);
@@ -24,6 +26,7 @@ export function FileDropzonePreview({
 
         reader.onloadend = () => {
             const base64String = reader.result as string;
+            console.log(base64String);
             setSelectedImage(base64String);
             setLoading(false);
         };
@@ -80,6 +83,7 @@ export function FileDropzonePreview({
                                 h={300}
                                 radius="sm"
                                 style={{ maxWidth: '100%' }}
+                                onLoad={onImageLoad}
                             />
                         </Paper>
                     )}
