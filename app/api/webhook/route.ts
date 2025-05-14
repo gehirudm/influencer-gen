@@ -39,10 +39,15 @@ async function saveImage(storage: Storage, userId: string, imageId: string, imag
     const file = storage.bucket("influncer-gen.firebasestorage.app").file(filePath);
 
     await file.save(buffer, {
-        metadata: { contentType: 'image/png' },
+        metadata: { contentType: 'image/png', },
     });
 
-    return getImageUrls(filePath, userId);
+    const fileUrl = await file.getSignedUrl({
+        action: 'read',
+        expires: "2100-01-01"
+    });
+
+    return { publicUrl: fileUrl[0], privateUrl: fileUrl[0] };
 }
 
 async function createImageDocument(db: FirebaseFirestore.Firestore, imageId: string, userId: string, jobData: any, blurHash: string, imageURLs: { publicUrl: string, privateUrl: string }) {
