@@ -16,11 +16,16 @@ async function getJobData(db: FirebaseFirestore.Firestore, jobId: string) {
     return jobDoc.data();
 }
 
-function getImageUrls(filePath: string, userId: string) {
-    return {
-        privateUrl: `https://firebasestorage.googleapis.com/v0/b/influncer-gen.firebasestorage.app/o/${encodeURIComponent(filePath)}?alt=media&token=${userId}`,
-        publicUrl: `https://firebasestorage.googleapis.com/v0/b/influncer-gen.firebasestorage.app/o/${encodeURIComponent(filePath)}?alt=media&token=${randomUUID()}`,
-    };
+async function getImageUrls(storage: Storage, imageId: string, userId: string) {
+    const filePath = `generated-images/${userId}/${imageId}.png`;
+    const file = storage.bucket("influncer-gen.firebasestorage.app").file(filePath);
+
+    const fileUrl = await file.getSignedUrl({
+        action: 'read',
+        expires: "2100-01-01"
+    });
+
+    return { publicUrl: fileUrl[0], privateUrl: fileUrl[0] };
 }
 
 async function saveImage(storage: Storage, userId: string, imageId: string, imageData: string) {
@@ -130,7 +135,7 @@ export async function POST(request: NextRequest) {
                 updateData.imageUrls = imageData.map((imageData) => imageData.imageURLs);
             } else {
                 updateData.imageIds = output.image_ids;
-                updateData.imageUrls = output.image_ids.map((imageId: string) => getImageUrls(imageId, userId));
+                updateData.imageUrls = await Promise.all(output.image_ids.map((imageId: string) => getImageUrls(storage, imageId, userId)));
             }
         }
 

@@ -84,6 +84,7 @@ export default function ImageGeneratorPage() {
 
 	const handleGenerate = async () => {
 		const { width, height } = getDimensions();
+		console.log(width, height);
 		setLoading(true);
 
 		try {
@@ -108,7 +109,7 @@ export default function ImageGeneratorPage() {
 			}
 
 			// Add mask image if selected
-			if (maskImage) {
+			if (maskImage && selectedImage) {
 				payload.mask_img = maskImage;
 			}
 
@@ -395,7 +396,12 @@ export default function ImageGeneratorPage() {
 									selectedImage={selectedImage}
 									setSelectedImage={setSelectedImage}
 									loading={imageLoading}
-									onImageLoad={(img) => setSelectedImageDimensions({ width: img.currentTarget.width, height: img.currentTarget.height })}
+									onImageLoad={(e) => {
+										console.log(e.currentTarget.clientWidth, e.currentTarget.clientHeight);
+										console.log(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight);
+
+										setSelectedImageDimensions({ width: e.currentTarget.naturalWidth, height: e.currentTarget.naturalHeight })
+									}}
 									label="Upload base image for img2img generation"
 								/>
 
