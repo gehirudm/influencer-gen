@@ -61,11 +61,6 @@ export function GenJobCard({
             const timer = setInterval(() => {
                 setElapsedTime((prev) => prev + 0.1);
             }, 100);
-    useEffect(() => {
-        if (!imageUrls || imageUrls.length === 0) {
-            const timer = setInterval(() => {
-                setElapsedTime((prev) => prev + 0.1);
-            }, 100);
 
             return () => clearInterval(timer);
         }
@@ -76,56 +71,13 @@ export function GenJobCard({
         
         setIsCheckingStatus(true);
         try {
-            // Get the session cookie from localStorage or wherever it's stored in your app
-            const sessionCookie = localStorage.getItem('sessionCookie');
-            
             const response = await fetch('/api/jobs/status', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    jobId,
-                    sessionCookie
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok && data.success) {
-                // Call the parent component's callback with the new status
-                if (onRecheckStatus) {
-                    onRecheckStatus(jobId, data.status);
-                }
-            } else {
-                console.error('Failed to check job status:', data.error);
-            }
-        } catch (error) {
-            console.error('Error checking job status:', error);
-        } finally {
-            setIsCheckingStatus(false);
-        }
-    };
-            return () => clearInterval(timer);
-        }
-    }, [imageUrls]);
-
-    const handleRecheckStatus = async () => {
-        if (!jobId) return;
-        
-        setIsCheckingStatus(true);
-        try {
-            // Get the session cookie from localStorage or wherever it's stored in your app
-            const sessionCookie = localStorage.getItem('sessionCookie');
-            
-            const response = await fetch('/api/jobs/status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    jobId,
-                    sessionCookie
+                    jobId
                 })
             });
             
