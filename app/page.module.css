@@ -1,0 +1,13 @@
+.title {
+  color: var(--mantine-color-black);
+  font-weight: 800;
+  line-height: 1.05;
+  max-width: 500px;
+  font-size: 48px;
+
+  @media (max-width: $mantine-breakpoint-md) {
+    max-width: 100%;
+    font-size: 34px;
+    line-height: 1.15;
+  }
+}

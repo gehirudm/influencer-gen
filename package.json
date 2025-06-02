@@ -24,6 +24,7 @@
     "plaiceholder": "^3.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-image-crop": "^11.0.10",
     "react-sketch-canvas": "^6.2.0",
     "react-timeago": "^8.2.0",
     "sharp": "^0.34.1"

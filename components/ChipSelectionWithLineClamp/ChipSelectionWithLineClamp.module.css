@@ -1,0 +1,30 @@
+.clampContainer {
+  max-height: 72px; /* Approximately 2 lines of standard chips */
+  overflow: hidden;
+  position: relative;
+}
+
+.clampContainerWithImages {
+  max-height: 170px; /* Approximately 2 lines of image chips */
+  overflow: hidden;
+  position: relative;
+}
+
+.imageChipRoot {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.imageChipLabel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 8px;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent 70%);
+}

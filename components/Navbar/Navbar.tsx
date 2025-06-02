@@ -19,9 +19,9 @@ import { useMediaQuery } from '@mantine/hooks';
 const data = [
     { link: '/discover', label: 'Discover', icon: IconCompass },
     { link: '/create', label: 'Create', icon: IconPlus },
-    { link: '/video', label: 'Video', icon: IconVideo },
+    // { link: '/video', label: 'Video', icon: IconVideo },
     { link: '/character', label: 'Character', icon: IconUser },
-    { link: '/projects', label: 'Projects', icon: IconFileText },
+    // { link: '/projects', label: 'Projects', icon: IconFileText },
     { link: '/pricing', label: 'Pricing', icon: IconCurrencyDollar },
 ];
 
