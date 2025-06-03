@@ -366,7 +366,7 @@ export function ImageGenerationForm({
                     onClick={handleSubmit}
                     mt="md"
                 >
-                    GENERATE
+                    Generate | 5 tokens
                 </Button>
             </Stack>
         );
@@ -396,7 +396,7 @@ export function ImageGenerationForm({
                     mt="md"
                     color="indigo"
                 >
-                    Generate | 2 tokens
+                    Generate | 10 tokens
                 </Button>
             </Stack>
         );
@@ -593,7 +593,6 @@ export function ImageGenerationForm({
                     </Tabs.Tab>
                     <Tabs.Tab value="nudify" leftSection={<IconPhoto size={16} />}>
                         Nudify
-                        <Badge ml={5} size="xs" variant="filled" color="red">18+</Badge>
                     </Tabs.Tab>
                 </Tabs.List>
 

@@ -11,3 +11,12 @@
     line-height: 1.15;
   }
 }
+
+.titleContainer {
+  max-width: var(--mantine-width-md);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,245,0.9) 100%);
+    padding: 15px;
+  }
+}

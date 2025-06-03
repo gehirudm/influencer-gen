@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Text, Title } from '@mantine/core';
+import { Box, Text, Title } from '@mantine/core';
 import classes from './page.module.css';
 
 export default function Home() {
@@ -43,8 +43,8 @@ export default function Home() {
       {/* Main content container */}
       <div className="flex flex-col md:flex-row min-h-screen pt-16">
         {/* Fixed left column - Text content */}
-        <div className="md:w-1/2 fixed left-0 top-16 bottom-0 px-8 py-12 flex flex-col justify-center">
-          <div className="max-w-md">
+        <div className="md:w-1/2 fixed left-0 top-16 bottom-0 px-8 py-12 flex flex-col justify-center z-10">
+          <div className={classes.titleContainer}>
             <Title className={classes.title} mb={10}>
               Turn your Ideas into{' '}
               <Text
@@ -76,7 +76,7 @@ export default function Home() {
 
         {/* Scrollable right column - Image grid */}
         <div className="md:w-1/2 md:ml-[50%] mt-8 md:mt-0 relative min-h-screen overflow-y-auto px-8 py-5">
-          
+
           <div className="grid grid-cols-2 gap-4">
             {/* Left column - staggered down */}
             <div className="space-y-4 mt-12">

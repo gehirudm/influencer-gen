@@ -1,17 +1,16 @@
 "use client"
 
 import { useState } from 'react';
-import { Grid, Group } from '@mantine/core';
+import { Grid } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useForm } from '@mantine/form';
 import { useUserJobs } from '@/hooks/useUserJobs';
 import { useUserProjects } from '@/hooks/useUserProjects';
 import EditImageModel from '@/components/Models/EditImageModel';
-import { GenJobCard } from '@/components/GenJobCard/GenJobCard';
 import ImageMaskEditor from '@/components/ImageMaskEditor';
 import { useRouter } from 'next/navigation';
 import { ImageGenerationForm, aspectRatios } from '@/components/ImageGenerationForm/ImageGenerationForm';
-import { IconBrandInstagram, IconCropLandscape, IconCropPortrait, IconSquare } from '@tabler/icons-react';
+import { UserJobsExplorer } from '@/components/UserJobsExplorer/UserJobsExplorer';
 
 export default function ImageGeneratorPage() {
     const form = useForm({
@@ -34,7 +33,7 @@ export default function ImageGeneratorPage() {
         }
     });
 
-    const { jobs: userJobs, deleteJob } = useUserJobs();
+    const { jobs: userJobs } = useUserJobs();
     const { projects: userProjects } = useUserProjects();
     const [loading, setLoading] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
@@ -54,13 +53,6 @@ export default function ImageGeneratorPage() {
 
         const selected = aspectRatios.find(ratio => ratio.value === form.values.aspectRatio);
         return selected ? { width: selected.width, height: selected.height } : { width: 800, height: 1200 };
-    };
-
-    // Get aspect ratio string from dimensions
-    const getAspectRatioString = (width: number, height: number) => {
-        const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b);
-        const divisor = gcd(width, height);
-        return `${width / divisor}:${height / divisor}`;
     };
 
     const handleGenerate = async () => {
@@ -264,7 +256,7 @@ export default function ImageGeneratorPage() {
     return (
         <>
             <Grid>
-                <Grid.Col span={5}>
+                <Grid.Col span={{ base: 12, md: 5 }}>
                     <ImageGenerationForm
                         form={form}
                         loading={loading}
@@ -279,36 +271,15 @@ export default function ImageGeneratorPage() {
                     />
                 </Grid.Col>
 
-                <Grid.Col span={7}>
-                    <Group>
-                        {userJobs.map((job) => {
-                            // Calculate aspect ratio string
-                            const width = job.metadata?.width || 512;
-                            const height = job.metadata?.height || 512;
-                            const aspectRatio = getAspectRatioString(width, height);
-
-                            return (
-                                <GenJobCard
-                                    key={job.id}
-									jobId={job.id}
-                                    prompt={job.metadata?.prompt || ""}
-                                    status={job.status}
-                                    imageUrls={job.imageUrls?.map(url => url.privateUrl) || []}
-                                    generationTime={job.executionTime ? job.executionTime / 1000 : undefined}
-                                    dimensions={{ width, height }}
-                                    aspectRatio={aspectRatio}
-                                    batchSize={job.metadata?.batch_size || 1}
-                                    userProjects={userProjects}
-                                    onEdit={() => handleEdit(job.id)}
-                                    onRecreate={() => handleRecreate(job)}
-                                    onInpaint={() => handleInpaint(job)}
-                                    onAddToProject={() => handleAddToProject(job)}
-                                    onRecheckStatus={() => handleRecheckStatus(job.id)}
-                                    onDelete={() => deleteJob(job.id)}
-                                />
-                            );
-                        })}
-                    </Group>
+                <Grid.Col span={{ base: 12, md: 7 }}>
+                    <UserJobsExplorer
+                        userProjects={userProjects}
+                        onEdit={handleEdit}
+                        onRecreate={handleRecreate}
+                        onInpaint={handleInpaint}
+                        onAddToProject={handleAddToProject}
+                        onRecheckStatus={handleRecheckStatus}
+                    />
                 </Grid.Col>
             </Grid>
 

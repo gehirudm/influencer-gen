@@ -28,7 +28,7 @@ async function verifySessionCookie(sessionCookie: string) {
 }
 
 async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firestore) {
-    const userRef = db.collection('users').doc(userId).collection('private').doc('data');
+    const userRef = db.collection('users').doc(userId).collection('private').doc('system');
     const userDoc = await userRef.get();
 
     if (!userDoc.exists) {

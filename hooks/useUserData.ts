@@ -15,10 +15,17 @@ interface UserPrivateData {
   tokens: number;
 }
 
+interface UserSystemData {
+  tokens: number;
+  subscription_tier?: "free" | "Basic Plan" | "Premium Plan";
+  isAdmin?: boolean;
+}
+
 interface UserDataHookResult {
   user: User | null;
   userData: UserData | null;
   privateData: UserPrivateData | null;
+  systemData: UserSystemData | null;
   loading: boolean;
   error: string | null;
 }
@@ -27,6 +34,7 @@ export function useUserData(): UserDataHookResult {
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [privateData, setPrivateData] = useState<UserPrivateData | null>(null);
+  const [systemData, setSystemData] = useState<UserSystemData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,6 +66,7 @@ export function useUserData(): UserDataHookResult {
     const db = getFirestore(app);
     let unsubscribeUserData: (() => void) | undefined;
     let unsubscribePrivateData: (() => void) | undefined;
+    let unsubscribeSystemData: (() => void) | undefined;
 
     try {
       // Subscribe to user document
@@ -94,6 +103,24 @@ export function useUserData(): UserDataHookResult {
           setLoading(false);
         }
       );
+
+      // Subscribe to system user data
+      unsubscribeSystemData = onSnapshot(
+        doc(db, 'users', user.uid, 'private', 'system'),
+        (docSnapshot) => {
+          if (docSnapshot.exists()) {
+            setSystemData(docSnapshot.data() as UserPrivateData);
+          } else {
+            setSystemData({ tokens: 0 });
+          }
+          setLoading(false);
+        },
+        (err) => {
+          console.error('Error fetching private user data:', err);
+          setError(`Error fetching private user data: ${err.message}`);
+          setLoading(false);
+        }
+      );
     } catch (err: any) {
       console.error('Error setting up listeners:', err);
       setError(`Error setting up listeners: ${err.message}`);
@@ -103,8 +130,9 @@ export function useUserData(): UserDataHookResult {
     return () => {
       if (unsubscribeUserData) unsubscribeUserData();
       if (unsubscribePrivateData) unsubscribePrivateData();
+      if (unsubscribeSystemData) unsubscribeSystemData();
     };
   }, [user]);
 
-  return { user, userData, privateData, loading, error };
+  return { user, userData, privateData, systemData, loading, error };
 }

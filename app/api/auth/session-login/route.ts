@@ -82,7 +82,7 @@ async function ensureUserDocumentExists(decoded: DecodedIdToken): Promise<string
 
         await userRef.set(userData);
 
-        await userRef.collection('private').doc('data').set({
+        await userRef.collection('private').doc('system').set({
             tokens: 100,
         });
 

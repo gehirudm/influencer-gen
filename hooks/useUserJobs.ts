@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { useState, useEffect, useCallback } from 'react';
+import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, getDoc, deleteDoc, limit, startAfter, getDocs, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
 import { getStorage, ref, getDownloadURL, deleteObject } from 'firebase/storage';
 import app from '@/lib/firebase';
 import { getAuth } from 'firebase/auth';
@@ -20,15 +20,22 @@ interface JobData {
 
 interface ImageURLS { publicUrl: string, privateUrl: string };
 
-export function useUserJobs() {
+type SortOrder = 'newest' | 'oldest';
+
+export function useUserJobs(initialPageSize: number = 10, initialSortOrder: SortOrder = 'newest') {
     const auth = getAuth(app);
     const user = auth.currentUser;
 
     const [jobs, setJobs] = useState<JobData[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [hasMore, setHasMore] = useState(true);
+    const [sortOrder, setSortOrder] = useState<SortOrder>(initialSortOrder);
+    const [lastVisible, setLastVisible] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
     const imageUrlsCache = new Map<string, ImageURLS[]>();
 
+    // Function to delete a job
     const deleteJob = async (jobId: string, onComplete?: () => void, onError?: (error: Error) => void) => {
         if (!user?.uid) {
             const error = new Error('User not authenticated');
@@ -51,7 +58,6 @@ export function useUserJobs() {
 
         try {
             const db = getFirestore(app);
-            const storage = getStorage(app);
 
             // Get the job document
             const jobRef = doc(db, 'jobs', jobId);
@@ -68,47 +74,11 @@ export function useUserJobs() {
                 throw new Error('You do not have permission to delete this job');
             }
 
-            // Delete generated images if they exist
-            if (jobData.imageIds && Array.isArray(jobData.imageIds)) {
-                const deleteImagePromises = jobData.imageIds.map(async (imageId: string) => {
-                    const imagePath = `generated-images/${user.uid}/${imageId}.png`;
-                    try {
-                        const imageRef = ref(storage, imagePath);
-                        await deleteObject(imageRef);
-                        console.log(`Deleted generated image: ${imagePath}`);
-                    } catch (error) {
-                        console.error(`Error deleting generated image ${imagePath}:`, error);
-                        // Continue with deletion even if some images fail to delete
-                    }
-                });
-
-                await Promise.all(deleteImagePromises);
-            }
-
-            // Delete base image if it exists
-            if (jobData.baseImagePath) {
-                try {
-                    const baseImageRef = ref(storage, jobData.baseImagePath);
-                    await deleteObject(baseImageRef);
-                    console.log(`Deleted base image: ${jobData.baseImagePath}`);
-                } catch (error) {
-                    console.error(`Error deleting base image ${jobData.baseImagePath}:`, error);
-                }
-            }
-
-            // Delete mask image if it exists
-            if (jobData.maskImagePath) {
-                try {
-                    const maskImageRef = ref(storage, jobData.maskImagePath);
-                    await deleteObject(maskImageRef);
-                    console.log(`Deleted mask image: ${jobData.maskImagePath}`);
-                } catch (error) {
-                    console.error(`Error deleting mask image ${jobData.maskImagePath}:`, error);
-                }
-            }
-
             // Delete the job document
             await deleteDoc(jobRef);
+
+            // Update local state
+            setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
 
             notifications.update({
                 id: notificationId,
@@ -138,45 +108,160 @@ export function useUserJobs() {
         }
     };
 
+    // Function to change sort order
+    const changeSortOrder = (newSortOrder: SortOrder) => {
+        if (newSortOrder !== sortOrder) {
+            setSortOrder(newSortOrder);
+            setJobs([]);
+            setLastVisible(null);
+            setHasMore(true);
+            setLoading(true);
+        }
+    };
+
+    // Function to load more jobs
+    const loadMoreJobs = useCallback(async () => {
+        if (!user?.uid || !hasMore || loadingMore) return;
+
+        setLoadingMore(true);
+        try {
+            const db = getFirestore(app);
+            const jobsRef = collection(db, 'jobs');
+            
+            let q = query(
+                jobsRef,
+                where('userId', '==', user.uid),
+                orderBy('createdAt', sortOrder === 'newest' ? 'desc' : 'asc'),
+                limit(initialPageSize)
+            );
+
+            if (lastVisible) {
+                q = query(
+                    jobsRef,
+                    where('userId', '==', user.uid),
+                    orderBy('createdAt', sortOrder === 'newest' ? 'desc' : 'asc'),
+                    startAfter(lastVisible),
+                    limit(initialPageSize)
+                );
+            }
+
+            const querySnapshot = await getDocs(q);
+            
+            if (querySnapshot.empty) {
+                setHasMore(false);
+                setLoadingMore(false);
+                return;
+            }
+
+            const newJobsData: JobData[] = [];
+            
+            querySnapshot.forEach((doc) => {
+                const jobData = doc.data() as JobData;
+                jobData.id = doc.id;
+                
+                // Skip jobs with COMPLETED status but no imageUrls (backward compatibility)
+                if (jobData.status === 'COMPLETED' && !jobData.imageUrls) {
+                    return;
+                }
+                
+                newJobsData.push(jobData);
+            });
+
+            // Update last visible document for pagination
+            const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+            setLastVisible(lastDoc);
+            
+            // Append new jobs to existing jobs
+            setJobs(prevJobs => [...prevJobs, ...newJobsData]);
+            
+            // Check if there might be more jobs to load
+            setHasMore(querySnapshot.size === initialPageSize);
+        } catch (err) {
+            console.error('Error loading more jobs:', err);
+            setError('Failed to load more jobs');
+        } finally {
+            setLoadingMore(false);
+        }
+    }, [user, hasMore, loadingMore, lastVisible, sortOrder, initialPageSize]);
+
+    // Function to get and update a specific job
+    const refreshJob = useCallback(async (jobId: string) => {
+        if (!user?.uid) return null;
+
+        try {
+            const db = getFirestore(app);
+            const jobRef = doc(db, 'jobs', jobId);
+            const jobDoc = await getDoc(jobRef);
+
+            if (!jobDoc.exists()) {
+                console.error(`Job with ID ${jobId} not found`);
+                return null;
+            }
+
+            const jobData = jobDoc.data() as JobData;
+            jobData.id = jobDoc.id;
+
+            // Update the job in the jobs array if it exists
+            setJobs(prevJobs => {
+                const jobIndex = prevJobs.findIndex(job => job.id === jobId);
+                if (jobIndex !== -1) {
+                    const updatedJobs = [...prevJobs];
+                    updatedJobs[jobIndex] = jobData;
+                    return updatedJobs;
+                }
+                return prevJobs;
+            });
+
+            return jobData;
+        } catch (err) {
+            console.error(`Error refreshing job ${jobId}:`, err);
+            return null;
+        }
+    }, [user]);
+
+    // Initial load and real-time updates for the first page
     useEffect(() => {
         if (!user?.uid) return;
 
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-        const jobsRef = collection(db, 'jobs');
-        const q = query(jobsRef, where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
+        setLoading(true);
+        setJobs([]);
+        setLastVisible(null);
+        setHasMore(true);
 
+        const db = getFirestore(app);
+        const jobsRef = collection(db, 'jobs');
+        const q = query(
+            jobsRef,
+            where('userId', '==', user.uid),
+            orderBy('createdAt', sortOrder === 'newest' ? 'desc' : 'asc'),
+            limit(initialPageSize)
+        );
+
+        // Set up real-time listener for the first page only
         const unsubscribe = onSnapshot(q, async (querySnapshot) => {
             const jobsData: JobData[] = [];
+
+            // Update last visible document for pagination
+            if (!querySnapshot.empty) {
+                const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+                setLastVisible(lastDoc);
+            }
 
             for (const doc of querySnapshot.docs) {
                 const jobData = doc.data() as JobData;
                 jobData.id = doc.id;
 
-                // if (jobData.status === 'COMPLETED' && jobData.imageIds && jobData.imageUrls != undefined) {
-                //     if (imageUrlsCache.has(jobData.id)) {
-                //         jobData.imageUrls = imageUrlsCache.get(jobData.id);
-                //     } else {
-                //         const imageUrls = (await Promise.all(
-                //             jobData.imageIds.map(async (imageId: string) => {
-                //                 const imageRef = ref(storage, `generated-images/${user.uid}/${imageId}.png`);
-                //                 return getDownloadURL(imageRef);
-                //             })
-                //         )).map(imageUrl => ({ publicUrl: imageUrl, privateUrl: imageUrl}));
-
-                //         jobData.imageUrls = imageUrls;
-                //         imageUrlsCache.set(jobData.id, imageUrls);
-                //     }
-                // }
-
-                if (jobData.status === 'COMPLETED' && !jobData.imageUrls)
+                // Skip jobs with COMPLETED status but no imageUrls (backward compatibility)
+                if (jobData.status === 'COMPLETED' && !jobData.imageUrls) {
                     continue;
+                }
 
                 jobsData.push(jobData);
             }
 
             setJobs(jobsData);
             setLoading(false);
+            setHasMore(querySnapshot.size === initialPageSize);
         }, (err) => {
             console.error('Error fetching user jobs:', err);
             setError('Failed to load jobs');
@@ -184,7 +269,18 @@ export function useUserJobs() {
         });
 
         return () => unsubscribe();
-    }, [user]);
+    }, [user, sortOrder, initialPageSize]);
 
-    return { jobs, loading, error, deleteJob };
+    return { 
+        jobs, 
+        loading, 
+        loadingMore, 
+        error, 
+        hasMore, 
+        sortOrder,
+        deleteJob, 
+        loadMoreJobs, 
+        changeSortOrder,
+        refreshJob
+    };
 }

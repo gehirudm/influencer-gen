@@ -1,19 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { 
-  Container, 
-  Grid, 
-  Card, 
-  Text, 
-  Group, 
-  Badge, 
-  Stack, 
-  Title, 
-  Divider, 
-  Skeleton, 
-  Paper, 
+import { useParams, useSearchParams } from 'next/navigation';
+import {
+  Container,
+  Grid,
+  Card,
+  Text,
+  Group,
+  Badge,
+  Stack,
+  Title,
+  Divider,
+  Skeleton,
+  Paper,
   Button,
   ActionIcon,
   CopyButton,
@@ -21,16 +21,16 @@ import {
   Box
 } from '@mantine/core';
 import { Carousel } from '@mantine/carousel';
-import { 
-  IconCheck, 
-  IconCopy, 
-  IconDownload, 
-  IconShare, 
-  IconClock, 
-  IconAspectRatio, 
-  IconStack2, 
-  IconWand, 
-  IconPhoto, 
+import {
+  IconCheck,
+  IconCopy,
+  IconDownload,
+  IconShare,
+  IconClock,
+  IconAspectRatio,
+  IconStack2,
+  IconWand,
+  IconPhoto,
   IconArrowBack,
   IconEditCircle
 } from '@tabler/icons-react';
@@ -42,7 +42,8 @@ import Link from 'next/link';
 import classes from './ViewJob.module.css';
 
 export default function ViewGeneratedImagePage() {
-  const { jobId } = useParams();
+  const searchParams = useSearchParams();
+  const jobId = searchParams.get('jobId');
   const [job, setJob] = useState<ImageGenerationJob & { id: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -50,13 +51,14 @@ export default function ViewGeneratedImagePage() {
 
   useEffect(() => {
     const fetchJobData = async () => {
+      console.log(jobId)
       if (!jobId) return;
-      
+
       try {
         const db = getFirestore(app);
         const jobRef = doc(db, 'jobs', jobId as string);
         const jobDoc = await getDoc(jobRef);
-        
+
         if (!jobDoc.exists()) {
           notifications.show({
             title: 'Error',
@@ -66,10 +68,12 @@ export default function ViewGeneratedImagePage() {
           setLoading(false);
           return;
         }
-        
+
+        console.log(jobDoc.data())
+
         const jobData = { ...jobDoc.data(), id: jobDoc.id } as unknown as ImageGenerationJob & { id: string };
         setJob(jobData);
-        
+
         // Fetch download URLs for the images
         if (jobData.imageIds && jobData.imageIds.length > 0) {
           const storage = getStorage(app);
@@ -92,7 +96,7 @@ export default function ViewGeneratedImagePage() {
         setLoading(false);
       }
     };
-    
+
     fetchJobData();
   }, [jobId]);
 
@@ -133,19 +137,19 @@ export default function ViewGeneratedImagePage() {
   return (
     <Container size="xl" py="xl">
       <Group mb="md">
-        <Button 
-          component={Link} 
-          href="/create" 
-          variant="subtle" 
+        <Button
+          component={Link}
+          href="/create"
+          variant="subtle"
           leftSection={<IconArrowBack size={16} />}
         >
           Back to Generator
         </Button>
       </Group>
 
-      <Grid gutter="xl">
+      <Grid gutter="xl" h="full">
         {/* Left side - Image Carousel */}
-        <Grid.Col span={{ base: 12, md: 7 }}>
+        <Grid.Col span={{ base: 12, md: 7 }} h="full">
           <Card radius="lg" withBorder shadow="md" padding="lg" className={classes.carouselCard}>
             {loading ? (
               <Skeleton height={500} radius="md" />
@@ -165,18 +169,18 @@ export default function ViewGeneratedImagePage() {
                   {downloadUrls.map((url, index) => (
                     <Carousel.Slide key={index}>
                       <div className={classes.imageContainer}>
-                        <img 
-                          src={url} 
-                          alt={`Generated image ${index + 1}`} 
+                        <img
+                          src={url}
+                          alt={`Generated image ${index + 1}`}
                           className={classes.carouselImage}
                         />
                         <div className={classes.imageOverlay}>
                           <Group>
                             <Tooltip label="Download">
-                              <ActionIcon 
-                                variant="filled" 
-                                color="dark" 
-                                size="lg" 
+                              <ActionIcon
+                                variant="filled"
+                                color="dark"
+                                size="lg"
                                 radius="xl"
                                 onClick={() => handleDownload(url, index)}
                               >
@@ -184,10 +188,10 @@ export default function ViewGeneratedImagePage() {
                               </ActionIcon>
                             </Tooltip>
                             <Tooltip label="Share">
-                              <ActionIcon 
-                                variant="filled" 
-                                color="dark" 
-                                size="lg" 
+                              <ActionIcon
+                                variant="filled"
+                                color="dark"
+                                size="lg"
                                 radius="xl"
                               >
                                 <IconShare size={20} />
@@ -199,7 +203,7 @@ export default function ViewGeneratedImagePage() {
                     </Carousel.Slide>
                   ))}
                 </Carousel>
-                
+
                 <Group mt="md" justify="center">
                   {downloadUrls.map((_, index) => (
                     <Paper
@@ -210,9 +214,9 @@ export default function ViewGeneratedImagePage() {
                       }}
                       onClick={() => setActiveImageIndex(index)}
                     >
-                      <img 
-                        src={downloadUrls[index]} 
-                        alt={`Thumbnail ${index + 1}`} 
+                      <img
+                        src={downloadUrls[index]}
+                        alt={`Thumbnail ${index + 1}`}
                         className={classes.thumbnail}
                       />
                     </Paper>
@@ -226,8 +230,8 @@ export default function ViewGeneratedImagePage() {
         </Grid.Col>
 
         {/* Right side - Job Details */}
-        <Grid.Col span={{ base: 12, md: 5 }}>
-          <Card radius="lg" withBorder shadow="md" padding="lg">
+        <Grid.Col span={{ base: 12, md: 5 }} h="100%">
+          <Card radius="lg" withBorder shadow="md" padding="lg" h="100%">
             <Stack>
               <Group justify="space-between">
                 <Title order={3}>Image Generation Details</Title>
@@ -354,16 +358,16 @@ export default function ViewGeneratedImagePage() {
               <Divider />
 
               <Group justify="center" mt="md">
-                <Button 
-                  variant="light" 
+                <Button
+                  variant="light"
                   leftSection={<IconWand size={16} />}
                   component={Link}
                   href={`/create?recreate=${job?.id}`}
                 >
                   Recreate with these settings
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   leftSection={<IconEditCircle size={16} />}
                   component={Link}
                   href={`/create?inpaint=${job?.id}`}

@@ -68,7 +68,7 @@ export function GenJobCard({
 
     const handleRecheckStatus = async () => {
         if (!jobId) return;
-        
+
         setIsCheckingStatus(true);
         try {
             const response = await fetch('/api/jobs/status', {
@@ -80,9 +80,9 @@ export function GenJobCard({
                     jobId
                 })
             });
-            
+
             const data = await response.json();
-            
+
             if (response.ok && data.success) {
                 // Call the parent component's callback with the new status
                 if (onRecheckStatus) {
@@ -99,46 +99,32 @@ export function GenJobCard({
     };
 
     const slides = (imageUrls && imageUrls.length > 0 ? imageUrls : Array(5).fill(null)).map((image, index) => (
-        <Carousel.Slide key={index}>
+        <Carousel.Slide key={index} style={{ cursor: "pointer" }} onClick={() => router.push(`create/view?jobId=${jobId}`)}>
             {image ? <Image src={image} width={300} className={classes.image} /> : <Skeleton width={300} height={200} />}
         </Carousel.Slide>
     ));
 
     return (
-        <Card radius="md" withBorder padding="lg" className={classes.card} onClick={() => router.push("/create/view?jobId=" + jobId)}>
+        <Card radius="md" withBorder padding="lg" className={classes.card}>
             <Card.Section mb={10}>
-                <Anchor href="#">
-                    <Carousel
-                        withIndicators
-                        loop={true}
-                        classNames={{
-                            root: classes.carousel,
-                            controls: classes.carouselControls,
-                            indicator: classes.carouselIndicator,
-                        }}
-                    >
-                        {slides}
-                    </Carousel>
-                </Anchor>
+                <Carousel
+                    withIndicators
+                    loop={true}
+                    classNames={{
+                        root: classes.carousel,
+                        controls: classes.carouselControls,
+                        indicator: classes.carouselIndicator,
+                    }}
+                >
+                    {slides}
+                </Carousel>
             </Card.Section>
 
             <Badge autoContrast size="md" color="lime.4">{status}</Badge>
             <Text className={classes.title} lineClamp={4}>
                 {prompt}
             </Text>
-            <Badge autoContrast size="md" color="lime.4">{status}</Badge>
-            <Text className={classes.title} lineClamp={4}>
-                {prompt}
-            </Text>
 
-            {character && (
-                <Group mt="lg">
-                    <Avatar src={character?.image} radius="sm" />
-                    <div>
-                        <Text fw={500}>{character?.name}</Text>
-                    </div>
-                </Group>
-            )}
             {character && (
                 <Group mt="lg">
                     <Avatar src={character?.image} radius="sm" />
@@ -198,25 +184,17 @@ export function GenJobCard({
                                     <Menu.Item leftSection={<IconPlus size={14} />} onClick={onAddToProject}>
                                         Add to Project
                                     </Menu.Item>
-                                    
+
                                     <Menu.Divider />
 
-                                    <Menu.Item 
-                                        leftSection={isCheckingStatus ? <Loader size={14} /> : <IconRefreshAlert size={14} />} 
-                                        onClick={handleRecheckStatus}
-                                        disabled={isCheckingStatus}
-                                    >
-                                        {isCheckingStatus ? 'Checking...' : 'Recheck Status'}
-                                    </Menu.Item>
-                                    <Menu.Item 
-                                        leftSection={isCheckingStatus ? <Loader size={14} /> : <IconRefreshAlert size={14} />} 
+                                    <Menu.Item
+                                        leftSection={isCheckingStatus ? <Loader size={14} /> : <IconRefreshAlert size={14} />}
                                         onClick={handleRecheckStatus}
                                         disabled={isCheckingStatus}
                                     >
                                         {isCheckingStatus ? 'Checking...' : 'Recheck Status'}
                                     </Menu.Item>
 
-                                    <Menu.Divider />
                                     <Menu.Divider />
 
                                     <Menu.Item color="red" leftSection={<IconTrash size={14} />} onClick={onDelete}>

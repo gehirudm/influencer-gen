@@ -8,7 +8,7 @@ interface UserButtonProps {
 }
 
 export function UserButton({ onClick }: UserButtonProps) {
-  const { userData, privateData, loading, error } = useUserData();
+  const { userData, systemData, loading, error } = useUserData();
 
   // Show loading state
   if (loading || error || !userData) {
@@ -46,7 +46,7 @@ export function UserButton({ onClick }: UserButtonProps) {
           <Group gap={2}>
             <IconCoin size={16} color="var(--mantine-color-yellow-3)" stroke={2}/>
             <Text ml={2} size="xs">
-              {privateData?.tokens || 0} Tokens
+              {systemData?.tokens || 0} Tokens
             </Text>
           </Group>
         </div>

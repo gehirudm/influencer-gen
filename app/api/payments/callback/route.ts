@@ -79,39 +79,24 @@ export async function POST(request: NextRequest) {
     const subscriptionDetails = SUBSCRIPTION_CREDITS[tier as keyof typeof SUBSCRIPTION_CREDITS];
     
     // Update user's subscription tier in system document
-    const userSystemRef = db.collection('users').doc(userId).collection('system').doc('settings');
+    const userSystemRef = db.collection('users').doc(userId).collection('private').doc('system');
     const userSystemDoc = await userSystemRef.get();
     
     if (!userSystemDoc.exists) {
       // Create the system document if it doesn't exist
       await userSystemRef.set({
+        tokens: subscriptionDetails.tokens,
         subscription_tier: tier,
         updatedAt: new Date().toISOString()
       });
     } else {
       // Update the existing system document
-      await userSystemRef.update({
-        subscription_tier: tier,
-        updatedAt: new Date().toISOString()
-      });
-    }
-    
-    // Update user's tokens in private document
-    const userPrivateRef = db.collection('users').doc(userId).collection('private').doc('data');
-    const userPrivateDoc = await userPrivateRef.get();
-    
-    if (!userPrivateDoc.exists) {
-      // Create the private document if it doesn't exist
-      await userPrivateRef.set({
-        tokens: subscriptionDetails.tokens,
-        updatedAt: new Date().toISOString()
-      });
-    } else {
-      // Update the existing tokens, adding the new tokens to any existing balance
-      const userData = userPrivateDoc.data();
+      const userData = userSystemDoc.data();
       const currentTokens = userData?.tokens || 0;
-      await userPrivateRef.update({
+
+      await userSystemRef.update({
         tokens: currentTokens + subscriptionDetails.tokens,
+        subscription_tier: tier,
         updatedAt: new Date().toISOString()
       });
     }
