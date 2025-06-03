@@ -17,7 +17,7 @@ interface UserPrivateData {
 
 interface UserSystemData {
   tokens: number;
-  subscription_tier?: "free" | "Basic Plan" | "Premium Plan";
+  subscription_tier?: "promo" | "Basic Plan" | "Premium Plan";
   isAdmin?: boolean;
 }
 

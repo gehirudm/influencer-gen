@@ -66,6 +66,7 @@ export async function POST(request: NextRequest) {
       if (!userSystemDoc.exists) {
         // Create system document if it doesn't exist
         transaction.set(userSystemRef, {
+          subscription_tier: "promo",
           tokens: promoData?.tokenAmount,
           lastUpdated: new Date().toISOString()
         });
@@ -89,6 +90,7 @@ export async function POST(request: NextRequest) {
       const userData = userSystemDoc.data();
       const currentTokens = userData?.tokens || 0;
       const tokenAmount = promoData?.tokenAmount;
+      const subscription_tier = userData?.subscription_tier && userData?.subscription_tier !== "promo"  ? userData?.subscription_tier : "promo";
       
       // Mark promo code as used
       transaction.update(promoRef, {
@@ -99,6 +101,7 @@ export async function POST(request: NextRequest) {
       
       // Add tokens to user's account
       transaction.update(userSystemRef, {
+        subscription_tier,
         tokens: currentTokens + tokenAmount,
         lastUpdated: new Date().toISOString()
       });

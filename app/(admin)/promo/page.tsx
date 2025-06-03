@@ -23,7 +23,7 @@ import { IconTrash, IconCopy, IconCheck, IconAlertCircle } from '@tabler/icons-r
 import { useState, useEffect } from 'react';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { usePromoCodeManagement } from '@/hooks/usePromoAdmin';
+import { usePromoCodeManagement } from '@/hooks/admin/usePromo';
 
 interface PromoFormValues {
     tokenAmount: number;
