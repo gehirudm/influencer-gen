@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/dropzone/styles.css';
 import '@mantine/carousel/styles.css';
+import "./globals.css";
+import "@/theme/styles.css"
 
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
+import { shadcnTheme } from "@/theme/theme";
+import { shadcnCssVariableResolver } from "@/theme/cssVariableResolver";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,13 +32,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        // className={`antialiased`}
       >
-        <MantineProvider defaultColorScheme="dark">
+        <MantineProvider defaultColorScheme="dark" theme={shadcnTheme} cssVariablesResolver={shadcnCssVariableResolver}>
           <Notifications />
           {children}
         </MantineProvider>

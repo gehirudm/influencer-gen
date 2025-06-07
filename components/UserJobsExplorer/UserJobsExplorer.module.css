@@ -17,6 +17,58 @@
   flex-direction: column;
 }
 
+.segmentedControl {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.segmentedIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 30px;
+  background-color: var(--mantine-color-blue-5);
+}
+
+.segmentedRoot {
+  display: flex;
+  gap: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: transparent;
+  align-items: center;
+}
+
+.segmentedControl {
+  --separator-color: transparent;
+}
+
+.segmentedLabel {
+  padding: 10px 20px;
+}
+
+.controlsContainer {
+  background-color: var(--mantine-color-dark-6);
+}
+
+.paginationControl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--mantine-color-dark-7);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.paginationNumber {
+  font-weight: 600;
+  min-width: 24px;
+  text-align: center;
+}
+
+.paginationArrow {
+  cursor: pointer;
+}
+
 .footer {
   margin-top: auto;
 }
