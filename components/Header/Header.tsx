@@ -1,3 +1,5 @@
+"use client"
+
 import {
     IconCompass,
     IconCurrencyDollar,
@@ -20,10 +22,12 @@ import {
     useMantineTheme,
     Avatar,
     ActionIcon,
+    Anchor,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
 import Link from 'next/link';
+import { useUserData } from '@/hooks/useUserData';
 
 const data = [
     { link: '/discover', title: 'Discover', icon: IconCompass },
@@ -37,7 +41,7 @@ const data = [
 
 export function Header({ children }: { children?: React.ReactNode }) {
     const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
-    const theme = useMantineTheme();
+    const { userData, systemData, loading, error } = useUserData();
 
     return (
         <Box h="full" w="full">
@@ -81,9 +85,14 @@ export function Header({ children }: { children?: React.ReactNode }) {
 
                         {/* User Section */}
                         <Group visibleFrom="md">
-                            {/* <Avatar color="initials" radius="xl" size="md">JK</Avatar> */}
-                            <IconUserCircle color='var(--mantine-color-indigo-filled)' size={40}></IconUserCircle>
-                            <Text fw={500} fz={20} c='var(--mantine-color-indigo-filled)'>550</Text>
+                            {loading && <Anchor href='/auth'><Button size='md' radius="xl">Login</Button></Anchor>}
+                            {(!loading) && <>
+                                {userData?.displayName ?
+                                    <Avatar color="initials" radius="xl" size="md">{userData.displayName.split(" ").map(word => word[0].toUpperCase()).join("")}</Avatar> :
+                                    <IconUserCircle color='var(--mantine-color-indigo-filled)' size={40}></IconUserCircle>
+                                }
+                                <Text fw={500} fz={20} c='var(--mantine-color-indigo-filled)'>{systemData?.tokens}</Text>
+                            </>}
                         </Group>
                     </Group>
 

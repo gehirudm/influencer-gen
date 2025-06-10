@@ -1,8 +1,7 @@
 'use client'
 
 import { useRouter } from "next/navigation";
-import { Text, Title, Button, Container } from '@mantine/core';
-import classes from './page.module.css';
+import { Text } from '@mantine/core';
 import Link from "next/link";
 import { IconArrowNarrowRight, IconBrandTelegram, IconClick, IconStar, IconTarget } from "@tabler/icons-react";
 import { Header } from "@/components/Header/Header";
@@ -94,7 +93,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="relative min-h-screen">
         {/* Navigation */}
-        <div className="absolute inset-0 z-10">
+        <div className="absolute inset-0 z-12">
           <Header></Header>
         </div>
         {/* Background Image */}
@@ -104,7 +103,7 @@ export default function Home() {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 flex flex-col md:flex-row h-screen">
+        <div className="relative z-10 flex flex-row h-screen">
           {/* Left Column - Text */}
           <div className="md:w-5xl flex flex-col justify-center px-8 md:pl-16 pt-24 md:pt-0">
             <h1 className="text-5xl md:text-8xl font-bold mb-6">
