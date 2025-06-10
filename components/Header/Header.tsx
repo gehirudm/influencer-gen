@@ -84,14 +84,17 @@ export function Header({ children }: { children?: React.ReactNode }) {
                         </Group>
 
                         {/* User Section */}
+
                         <Group visibleFrom="md">
                             {loading && <Anchor href='/auth'><Button size='md' radius="xl">Login</Button></Anchor>}
                             {(!loading) && <>
-                                {userData?.displayName ?
-                                    <Avatar color="initials" radius="xl" size="md">{userData.displayName.split(" ").map(word => word[0].toUpperCase()).join("")}</Avatar> :
-                                    <IconUserCircle color='var(--mantine-color-indigo-filled)' size={40}></IconUserCircle>
-                                }
-                                <Text fw={500} fz={20} c='var(--mantine-color-indigo-filled)'>{systemData?.tokens}</Text>
+                                <Anchor href='/account' underline='never'>
+                                    {userData?.displayName ?
+                                        <Avatar color="initials" radius="xl" size="md">{userData.displayName.split(" ").map(word => word[0].toUpperCase()).join("")}</Avatar> :
+                                        <IconUserCircle color='var(--mantine-color-indigo-filled)' size={40}></IconUserCircle>
+                                    }
+                                    <Text fw={500} fz={20} c='var(--mantine-color-indigo-filled)'>{systemData?.tokens}</Text>
+                                </Anchor>
                             </>}
                         </Group>
                     </Group>
