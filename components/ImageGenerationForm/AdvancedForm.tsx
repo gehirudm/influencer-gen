@@ -85,7 +85,7 @@ export function AdvancedForm({
     };
 
     return (
-        <form onSubmit={form.onSubmit(onSubmit)}>
+        <form onSubmit={onSubmit}>
             <Stack gap="md">
                 <Title order={3}>Image Generation</Title>
 

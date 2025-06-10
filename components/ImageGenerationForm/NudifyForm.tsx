@@ -66,6 +66,7 @@ export function NudifyForm({
             // Set the base image for nudify processing
             form.setFieldValue('base_img', dataUrl.split(',')[1]); // Remove the data:image/... prefix
             form.setFieldValue('model_name', 'nudify'); // Force nudify model
+            form.setFieldValue('nudify', true);
             onSubmit();
         }
     };

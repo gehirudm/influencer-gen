@@ -1,13 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Button, TextInput, PasswordInput, Container, Paper, Title, Text, Divider, Anchor, Group, Transition, Checkbox, Center, Loader } from "@mantine/core";
+import { Button, TextInput, PasswordInput, Container, Paper, Title, Text, Divider, Anchor, Group, Transition, Checkbox, Center, Loader, Box } from "@mantine/core";
 import { hasLength, isEmail, useForm } from "@mantine/form";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendSignInLinkToEmail, signInWithPopup, GoogleAuthProvider, ActionCodeSettings, isSignInWithEmailLink, signInWithEmailLink, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import app from "@/lib/firebase";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from 'next/navigation'
 import { useCsrfToken } from "@/hooks/useCsrfToken";
+import { IconBrandGoogle, IconBrandGoogleFilled } from "@tabler/icons-react";
+import { Header } from "@/components/Header/Header";
+import Footer from "@/components/Footer/Footer";
 
 
 const auth = getAuth(app);
@@ -186,66 +189,72 @@ export default function AuthPage() {
 	}
 
 	return (
-		<Container size={420} my={40}>
-			<Title fw={900}>
-				Welcome to InfluncerGen
-			</Title>
+		<>
+			<Header></Header>
+			<Group w="full" my={40} align="center" justify="center" gap={30}>
+				<Box p={30} mt={30} w={380}>
+					<Title order={2} mt="md">
+						{mode === "signup" ? "Sign Up" : "Sign In"}
+					</Title>
+					<Text c="dimmed" size="sm" mt={5} mb={20}>
+						{mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
+						<Anchor size="sm" component="button" onClick={() => setMode(mode === "signup" ? "signin" : "signup")}>
+							{mode === "signup" ? "Sign in" : "Sign up"}
+						</Anchor>
+					</Text>
+					<form onSubmit={form.onSubmit(handleSubmit)}>
+						<TextInput
+							withAsterisk
+							label="Email"
+							placeholder="you@example.com"
+							required
+							{...form.getInputProps('email')}
+						/>
+						<Transition
+							mounted={form.isValid('email')}
+							transition="fade"
+							duration={400}
+							timingFunction="ease"
+						>
+							{(styles) => <div style={styles}>
+								<Button fullWidth mt="md" onClick={() => handleMagicLink(form.values.email)} loading={isSendingMagicLink}>
+									Send Magic Link
+								</Button>
+							</div>}
+						</Transition>
+						<PasswordInput
+							label="Password"
+							placeholder="Your password"
+							required
+							mt="md"
+							{...form.getInputProps('password')}
+						/>
+						<Checkbox
+							label="Remember Me"
+							mt="md"
+							{...form.getInputProps('rememberMe', { type: 'checkbox' })}
+						/>
+						<Button fullWidth mt="xl" type="submit" loading={isAuthenticating}>
+							{mode === "signup" ? "Sign Up" : mode === "signin" ? "Sign In" : "Send Sign-In Link"}
+						</Button>
+					</form>
 
-			<Paper withBorder shadow="md" p={30} mt={30} radius="md">
-				<Title order={2} mt="md">
-					{mode === "signup" ? "Sign Up" : "Sign In"}
-				</Title>
-				<Text c="dimmed" size="sm" mt={5} mb={20}>
-					{mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
-					<Anchor size="sm" component="button" onClick={() => setMode(mode === "signup" ? "signin" : "signup")}>
-						{mode === "signup" ? "Sign in" : "Sign up"}
-					</Anchor>
-				</Text>
-				<form onSubmit={form.onSubmit(handleSubmit)}>
-					<TextInput
-						withAsterisk
-						label="Email"
-						placeholder="you@example.com"
-						required
-						{...form.getInputProps('email')}
-					/>
-					<Transition
-						mounted={form.isValid('email')}
-						transition="fade"
-						duration={400}
-						timingFunction="ease"
-					>
-						{(styles) => <div style={styles}>
-							<Button fullWidth mt="md" onClick={() => handleMagicLink(form.values.email)} loading={isSendingMagicLink}>
-								Send Magic Link
-							</Button>
-						</div>}
-					</Transition>
-					<PasswordInput
-						label="Password"
-						placeholder="Your password"
-						required
-						mt="md"
-						{...form.getInputProps('password')}
-					/>
-					<Checkbox
-						label="Remember Me"
-						mt="md"
-						{...form.getInputProps('rememberMe', { type: 'checkbox' })}
-					/>
-					<Button fullWidth mt="xl" type="submit" loading={isAuthenticating}>
-						{mode === "signup" ? "Sign Up" : mode === "signin" ? "Sign In" : "Send Sign-In Link"}
-					</Button>
-				</form>
+					<Divider label="Or continue with" labelPosition="center" my="lg" />
 
-				<Divider label="Or continue with" labelPosition="center" my="lg" />
-
-				<Group grow mb="md" mt="md">
-					<Button variant="outline" onClick={handleGoogleSignIn}>
-						Google
-					</Button>
-				</Group>
-			</Paper>
-		</Container>
+					<Group grow mb="md" mt="md">
+						<Button variant="outline" onClick={handleGoogleSignIn} leftSection={<IconBrandGoogleFilled></IconBrandGoogleFilled>}>
+							Google
+						</Button>
+					</Group>
+				</Box>
+				<div className="relative text-center lg:text-left lg:w-1/2 max-w-lg mantine-visible-from-md">
+					<img src="/landing/signin.png" alt="signup_model" className="rounded-3xl hidden lg:block brightness-90" />
+					<div className="absolute inset-0 flex-col items-center justify-center w-full h-full text-center text-white text-6xl font-bold font-['Outfit'] hidden lg:flex">
+						<span>Very good things</span><span>are waiting for</span><span>you!!!</span>
+					</div>
+				</div>
+			</Group>
+			<Footer></Footer>
+		</>
 	);
 }

@@ -1,22 +1,54 @@
-.title {
-  color: var(--mantine-color-black);
-  font-weight: 800;
-  line-height: 1.05;
-  max-width: 500px;
-  font-size: 48px;
-
-  @media (max-width: $mantine-breakpoint-md) {
-    max-width: 100%;
-    font-size: 34px;
-    line-height: 1.15;
-  }
+.heroBackground {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
 }
 
-.titleContainer {
-  max-width: var(--mantine-width-md);
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.3) 100%);
+  z-index: 1;
+}
 
-  @media (max-width: $mantine-breakpoint-sm) {
-    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,245,0.9) 100%);
-    padding: 15px;
+.navLink {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.navLink:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.heroTitle {
+  font-size: 5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+}
+
+.featureCard {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.featureIcon {
+  color: #6366f1;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 3.5rem;
   }
 }

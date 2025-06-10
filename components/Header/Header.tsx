@@ -53,7 +53,15 @@ export function Header({ children }: { children?: React.ReactNode }) {
                             fw="bolder"
                             fz={26}
                         >
-                            InfluencerGEN
+                            Fantazy
+                        </Text>
+                        <Text
+                            component="span"
+                            inherit
+                            fw="bolder"
+                            fz={26}
+                        >
+                            .Pro
                         </Text>
                     </Link>
 
@@ -83,7 +91,7 @@ export function Header({ children }: { children?: React.ReactNode }) {
                 </Group>
             </header>
 
-            <Box p={10}>
+            <Box py={15} px={30}>
                 {children}
             </Box>
 

@@ -25,6 +25,7 @@ export default function ImageGeneratorPage() {
             solver_order: 2 as 2 | 3,
             strength: 0.75,
             model_name: 'realism' as 'lustify' | 'realism',
+            nudify: false
         },
         validate: {
             prompt: (value) => value.trim().length === 0 ? 'Prompt is required' : null,

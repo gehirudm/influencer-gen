@@ -37,6 +37,7 @@ interface ImageGenerationFormProps {
         solver_order: 2 | 3;
         strength: number;
         model_name: 'lustify' | 'realism';
+        nudify: boolean;
     }>;
     loading: boolean;
     selectedImage: string | null;

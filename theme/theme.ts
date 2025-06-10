@@ -31,7 +31,7 @@ import {
   Timeline,
   Tooltip
 } from "@mantine/core";
-import { Outfit, Questrial } from "next/font/google";
+import { Outfit } from "next/font/google";
 
 const CONTAINER_SIZES: Record<string, string> = {
   xxs: rem("200px"),
