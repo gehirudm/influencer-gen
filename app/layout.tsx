@@ -7,7 +7,7 @@ import '@mantine/carousel/styles.css';
 import "./globals.css";
 import "@/theme/styles.css"
 
-import { MantineProvider } from "@mantine/core";
+import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { shadcnTheme } from "@/theme/theme";
 import { shadcnCssVariableResolver } from "@/theme/cssVariableResolver";
@@ -38,7 +38,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         // className={`antialiased`}
       >
-        <MantineProvider defaultColorScheme="dark" theme={shadcnTheme} cssVariablesResolver={shadcnCssVariableResolver}>
+        <ColorSchemeScript forceColorScheme="dark"/>
+        <MantineProvider forceColorScheme="dark" theme={shadcnTheme} cssVariablesResolver={shadcnCssVariableResolver}>
           <Notifications />
           {children}
         </MantineProvider>

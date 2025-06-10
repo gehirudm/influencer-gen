@@ -63,14 +63,20 @@ export function UserJobsExplorer({
 
   // Generate skeleton placeholders while loading
   const renderSkeletons = () => {
-    return Array(6).fill(0).map((_, index) => (
+    return Array(8).fill(0).map((_, index) => (
       <Card key={`skeleton-${index}`} radius="md" withBorder padding="lg" className={classes.card}>
         <Card.Section mb={10}>
           <Skeleton height={200} width="100%" />
         </Card.Section>
-        <Skeleton height={20} width="30%" mb={10} />
-        <Skeleton height={60} width="100%" mb={10} />
-        <Skeleton height={30} width="60%" mb={10} />
+        <Card.Section>
+          <Group px={10} py={5} align='center' justify='space-between'>
+            <Group>
+              <Skeleton height={30} width={30} mb={10} />
+              <Skeleton height={30} width={30} mb={10} />
+            </Group>
+            <Skeleton height={30} width={30} mb={10} />
+          </Group>
+        </Card.Section>
       </Card>
     ));
   };
@@ -112,7 +118,7 @@ export function UserJobsExplorer({
                 <IconChevronDown size={18} className={classes.paginationArrow} style={{ transform: 'rotate(180deg)' }} />
               </Box>
             </Group>
-            
+
             <Group gap="xs">
               <Text size="sm">Show</Text>
               <Select
@@ -174,6 +180,8 @@ export function UserJobsExplorer({
             // Add ref to last element for infinite scrolling
             const isLastElement = index === userJobs.length - 1;
 
+            console.log(job.imageUrls)
+
             return (
               <div
                 key={job.id}
@@ -200,7 +208,7 @@ export function UserJobsExplorer({
                   // jobId={job.id}
                   // prompt={job.metadata?.prompt || ""}
                   // status={job.status}
-                  imageUrls={[]}
+                  imageUrls={job.imageUrls ? job.imageUrls.map(url => url.publicUrl) : []}
                   // generationTime={job.executionTime ? job.executionTime / 1000 : undefined}
                   // dimensions={{ width, height }}
                   // aspectRatio={aspectRatio}

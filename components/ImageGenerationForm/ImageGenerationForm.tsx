@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { Stack, Paper, Text, Tabs } from '@mantine/core';
+import { Stack, Paper, Text, Tabs, FloatingIndicator } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { IconBrandInstagram, IconCropLandscape, IconCropPortrait, IconSquare, IconSettings, IconWand, IconPhoto } from '@tabler/icons-react';
 import { SimpleForm } from './SimpleForm';
 import { AdvancedForm } from './AdvancedForm';
 import { NudifyForm } from './NudifyForm';
+
+import classes from './ImageGenerationForm.module.css';
+import { FeatureLock } from '../FeatureLockContainer/FeatureLockContainer';
+import { FeatureId } from '@/lib/subscriptions';
 
 // Aspect ratio component
 function AspectRatioLabel(props: { label: string, ratio: string, Icon: any }) {
@@ -15,6 +19,38 @@ function AspectRatioLabel(props: { label: string, ratio: string, Icon: any }) {
             <Text m={0} c="dimmed" size='xs'>{props.ratio}</Text>
         </Stack>
     )
+}
+
+function FloatingIndicatorTabs({ tabs }: { tabs: { name: string, panel: React.ReactNode }[] }) {
+    const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null);
+    const [value, setValue] = useState<string | null>('0');
+    const [controlsRefs, setControlsRefs] = useState<Record<string, HTMLButtonElement | null>>({});
+    const setControlRef = (val: string) => (node: HTMLButtonElement) => {
+        controlsRefs[val] = node;
+        setControlsRefs(controlsRefs);
+    };
+
+    return (
+        <Tabs variant="none" value={value} onChange={setValue}>
+            <Tabs.List ref={setRootRef} className={classes.list}>
+                {tabs.map(({ name }, index) => (
+                    <Tabs.Tab key={`${index}`} value={`${index}`} ref={setControlRef(`${index}`)} className={classes.tab}>
+                        {name}
+                    </Tabs.Tab>
+                ))}
+
+                <FloatingIndicator
+                    target={value ? controlsRefs[value] : null}
+                    parent={rootRef}
+                    className={classes.indicator}
+                />
+            </Tabs.List>
+
+            {tabs.map(({ panel }, index) => (
+                <Tabs.Panel key={`${index}`} value={`${index}`}>{panel}</Tabs.Panel>
+            ))}
+        </Tabs>
+    );
 }
 
 // Aspect ratio presets with their dimensions
@@ -65,43 +101,37 @@ export function ImageGenerationForm({
     const [mode, setMode] = useState<'simple' | 'advanced' | 'nudify'>('simple');
 
     return (
-        <Paper withBorder p="md" radius="md">
-            <Tabs value={mode} onChange={(value) => setMode(value as 'simple' | 'advanced' | 'nudify')}>
-                <Tabs.List grow mb="md">
-                    <Tabs.Tab value="simple" leftSection={<IconWand size={16} />}>
-                        Simple
-                    </Tabs.Tab>
-                    <Tabs.Tab value="advanced" leftSection={<IconSettings size={16} />}>
-                        Advanced
-                    </Tabs.Tab>
-                    <Tabs.Tab value="nudify" leftSection={<IconPhoto size={16} />}>
-                        Nudify
-                    </Tabs.Tab>
-                </Tabs.List>
+        <Paper p="md" radius="md">
+            <FloatingIndicatorTabs tabs={[
+                {
+                    name: 'Simple',
+                    panel: <SimpleForm
+                        form={form}
+                        loading={loading}
+                        onSubmit={onSubmit}
+                    />
 
-                <Tabs.Panel value="simple">
-                    <SimpleForm
-                        form={form}
-                        loading={loading}
-                        onSubmit={onSubmit}
-                    />
-                </Tabs.Panel>
-                <Tabs.Panel value="advanced">
-                    <AdvancedForm
-                        form={form}
-                        loading={loading}
-                        selectedImage={selectedImage}
-                        setSelectedImage={setSelectedImage}
-                        selectedImageDimensions={selectedImageDimensions}
-                        setSelectedImageDimensions={setSelectedImageDimensions}
-                        maskImage={maskImage}
-                        setMaskImage={setMaskImage}
-                        setMaskEditorOpen={setMaskEditorOpen}
-                        onSubmit={onSubmit}
-                    />
-                </Tabs.Panel>
-                <Tabs.Panel value="nudify">
-                    <NudifyForm
+                },
+                {
+                    name: 'Advanced',
+                    panel: <FeatureLock featureId={FeatureId.IMAGE_GENERATION_ADVANCED}>
+                        <AdvancedForm
+                            form={form}
+                            loading={loading}
+                            selectedImage={selectedImage}
+                            setSelectedImage={setSelectedImage}
+                            selectedImageDimensions={selectedImageDimensions}
+                            setSelectedImageDimensions={setSelectedImageDimensions}
+                            maskImage={maskImage}
+                            setMaskImage={setMaskImage}
+                            setMaskEditorOpen={setMaskEditorOpen}
+                            onSubmit={onSubmit}
+                        />
+                    </FeatureLock>
+                },
+                {
+                    name: 'Nudify',
+                    panel: <NudifyForm
                         form={form}
                         loading={loading}
                         selectedImage={selectedImage}
@@ -110,8 +140,8 @@ export function ImageGenerationForm({
                         // setSelectedImageDimensions={setSelectedImageDimensions}
                         onSubmit={onSubmit}
                     />
-                </Tabs.Panel>
-            </Tabs>
+                },
+            ]} />
         </Paper>
     );
 }                                 

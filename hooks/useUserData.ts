@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { getFirestore, doc, onSnapshot } from 'firebase/firestore';
 import app from '@/lib/firebase';
+import { SUBSCRIPTION_TIERS_TYPE } from '@/lib/subscriptions';
 
 interface UserData {
   displayName: string | null;
@@ -17,7 +18,7 @@ interface UserPrivateData {
 
 interface UserSystemData {
   tokens: number;
-  subscription_tier?: "promo" | "Basic Plan" | "Premium Plan";
+  subscription_tier?: SUBSCRIPTION_TIERS_TYPE;
   isAdmin?: boolean;
 }
 

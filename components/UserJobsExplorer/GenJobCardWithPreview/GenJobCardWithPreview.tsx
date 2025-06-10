@@ -135,6 +135,7 @@ export function GenJobCardWithPreview({
                     body: classes.modalBody,
                     inner: classes.modalInner
                 }}
+                centered
             >
                 <div className={classes.previewContainer}>
                     <div className={classes.imagePreview}>

@@ -20,6 +20,7 @@ import { UseFormReturnType } from '@mantine/form';
 import { IconRefresh, IconEraser, IconChevronUp } from '@tabler/icons-react';
 import { FileDropzonePreview } from '@/components/FileDropzonePreview';
 import { aspectRatios } from './ImageGenerationForm';
+import { COST_MAP } from '@/lib/cost';
 
 interface AdvancedFormProps {
     form: UseFormReturnType<any>;
@@ -216,7 +217,7 @@ export function AdvancedForm({
                     mt="md"
                     color="indigo"
                 >
-                    Generate | 10 tokens
+                    Generate | {COST_MAP.image_generation_advanced} tokens
                 </Button>
             </Stack>
         </form>

@@ -15,12 +15,18 @@ import {
 import { UseFormReturnType } from '@mantine/form';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { aspectRatios } from './ImageGenerationForm';
+import { COST_MAP } from '@/lib/cost';
 
 // Sample model images for the simple mode
 const modelImages = [
-    { id: 1, title: 'Fashion Model', src: 'https://firebasestorage.googleapis.com/v0/b/influncer-gen.firebasestorage.app/o/generated-images%2FuQCRZ39xGZQiaWPEW4JZF56EorE3%2Fe4256731-0caf-4f87-9417-a81e86f9e7c7-e1-image_0.png?alt=media&token=701211ba-c27e-47e6-bedb-19ddefd32a24',  },
-    { id: 2, title: 'Casual Style', src: 'https://firebasestorage.googleapis.com/v0/b/influncer-gen.firebasestorage.app/o/generated-images%2FRN3etXjphXOf4qhazofuJjPHOSl2%2F6c8969cb-ebde-487a-b83c-278c0d255e3d-u2-image_0.png?alt=media&token=fd55bf25-6a3d-468c-8ae8-bc42397728ca',  },
-    { id: 3, title: 'Business Look', src: 'https://firebasestorage.googleapis.com/v0/b/influncer-gen.firebasestorage.app/o/generated-images%2FuQCRZ39xGZQiaWPEW4JZF56EorE3%2Fe4256731-0caf-4f87-9417-a81e86f9e7c7-e1-image_0.png?alt=media&token=701211ba-c27e-47e6-bedb-19ddefd32a24',  },
+    { id: 1, title: 'Fashion Model', src: '/character/fashion_model.png' },
+    { id: 2, title: 'Wellness Coach', src: '/character/wellness_coach.png' },
+    { id: 3, title: 'NSFW Model', src: '/character/NSFW_model.png' },
+    { id: 4, title: 'Travel Blogger', src: '/character/travel_blogger.png' },
+    { id: 5, title: 'Tech Reviewer', src: '/character/tech_reviewer.png' },
+    { id: 6, title: 'Fitness Model', src: '/character/fitness_model.png' },
+    { id: 7, title: 'Chef', src: '/character/chef.png' },
+    { id: 8, title: 'Musician/DJ', src: '/character/dj.png' },
 ];
 
 // Simple mode options
@@ -159,19 +165,18 @@ export function SimpleForm({ form, loading, onSubmit }: SimpleFormProps) {
                             ))}
                         </Group>
                     ) : (
-                        <SimpleGrid cols={2} spacing="xs">
+                        <Group>
                             {options.map((option) => (
                                 <Button
                                     key={option}
                                     variant={value === option ? "filled" : "outline"}
                                     onClick={() => onChange(option)}
-                                    size="sm"
-                                    mb="xs"
+                                    radius="xl"
                                 >
                                     {option}
                                 </Button>
                             ))}
-                        </SimpleGrid>
+                        </Group>
                     )}
                 </Collapse>
             </Paper>
@@ -227,7 +232,7 @@ export function SimpleForm({ form, loading, onSubmit }: SimpleFormProps) {
                 mt="md"
                 color="indigo"
             >
-                Generate | 10 tokens
+                Generate | {COST_MAP.image_generation_simple} tokens
             </Button>
         </Stack>
     );
