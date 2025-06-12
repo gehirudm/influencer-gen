@@ -50,7 +50,7 @@ export function FileDropzonePreview({
                 loading={loading || props.loading}
                 {...props}
             >
-                <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: 'none' }}>
+                <Group justify="center" gap="md" mih={220} style={{ pointerEvents: 'none' }}>
                     {!selectedImage && (
                         <>
                             <Dropzone.Accept>
@@ -63,7 +63,7 @@ export function FileDropzonePreview({
                                 <IconPhoto size={52} color="var(--mantine-color-dimmed)" stroke={1.5} />
                             </Dropzone.Idle>
                             <Stack align="center" gap="xs">
-                                <Text size="xl" inline>
+                                <Text fz={{base: 15, md: 20}} inline ta="center">
                                     {label}
                                 </Text>
                                 <Text size="sm" c="dimmed" ta="center">

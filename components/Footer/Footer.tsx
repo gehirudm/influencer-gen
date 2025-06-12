@@ -5,10 +5,10 @@ const Footer = () => {
         {/* Logo and Email */}
         <div className="mb-8 md:mb-0">
           <h1 className="text-2xl font-bold mb-2">
-            <span className="mr-2">✦</span>Genfluence<sup>®</sup>
+            <span className="mr-2">✦</span>Fantazy.Pro<sup>®</sup>
           </h1>
           <a href="mailto:hello@genfluence.ai" className="text-blue-400 hover:underline">
-            hello@genfluence.ai
+            hello@fantazy.pro
           </a>
         </div>
 

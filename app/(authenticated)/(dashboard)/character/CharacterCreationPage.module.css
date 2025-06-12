@@ -1,0 +1,15 @@
+.characterImage {
+    transition: transform 0.3s ease-in-out;
+}
+
+.characterCard {
+    transition: transform 0.2s ease;
+}
+
+.characterCard:hover .characterImage {
+    transform: scale(1.01) rotate(1deg);
+}
+
+.characterCard:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}

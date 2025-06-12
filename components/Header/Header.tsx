@@ -36,7 +36,7 @@ const data = [
     { link: '/character', title: 'Character', icon: IconUser },
     { link: '/pricing', title: 'Pricing', icon: IconCurrencyDollar },
     { link: '/news', title: 'News', icon: IconNews },
-    { link: '/learn', title: 'Learn', icon: IconBook },
+    { link: '/', title: 'Learn', icon: IconBook },
 ];
 
 export function Header({ children }: { children?: React.ReactNode }) {
@@ -85,21 +85,23 @@ export function Header({ children }: { children?: React.ReactNode }) {
 
                         {/* User Section */}
 
-                        <Group visibleFrom="md">
+                        <Group>
                             {loading && <Anchor href='/auth'><Button size='md' radius="xl">Login</Button></Anchor>}
                             {(!loading) && <>
-                                <Anchor href='/account' underline='never'>
+                                <Link href="/account">
                                     {userData?.displayName ?
                                         <Avatar color="initials" radius="xl" size="md">{userData.displayName.split(" ").map(word => word[0].toUpperCase()).join("")}</Avatar> :
                                         <IconUserCircle color='var(--mantine-color-indigo-filled)' size={40}></IconUserCircle>
                                     }
+                                </Link>
+                                <Link href="/pricing">
                                     <Text fw={500} fz={20} c='var(--mantine-color-indigo-filled)'>{systemData?.tokens}</Text>
-                                </Anchor>
+                                </Link>
                             </>}
+                            <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="md" />
                         </Group>
                     </Group>
 
-                    <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="md" />
                 </Group>
             </header>
 
@@ -121,7 +123,7 @@ export function Header({ children }: { children?: React.ReactNode }) {
                         fw="bolder"
                         fz={26}
                     >
-                        InfluencerGEN
+                        Fantazy<Text component="span" inherit fw="bolder" fz={26}>.Pro</Text>
                     </Text>
                 }
                 hiddenFrom="md"
@@ -145,13 +147,28 @@ export function Header({ children }: { children?: React.ReactNode }) {
                     <Divider my="sm" />
 
                     <Group justify="center" p="md">
-                        <Avatar
-                            color="indigo"
-                            radius="xl"
-                            size="lg"
-                        >
-                            <Text fw={500}>550</Text>
-                        </Avatar>
+                        {loading &&
+                            <Anchor href='/auth' onClick={closeDrawer}>
+                                <Button size='md' radius="xl">Login</Button>
+                            </Anchor>
+                        }
+                        {(!loading) &&
+                            <Group>
+                                <Link href="/account" onClick={closeDrawer}>
+                                    {userData?.displayName ?
+                                        <Avatar color="initials" radius="xl" size="md">
+                                            {userData.displayName.split(" ").map(word => word[0].toUpperCase()).join("")}
+                                        </Avatar> :
+                                        <IconUserCircle color='var(--mantine-color-indigo-filled)' size={40} />
+                                    }
+                                </Link>
+                                <Link href="/pricing" onClick={closeDrawer}>
+                                    <Text fw={500} fz={20} c='var(--mantine-color-indigo-filled)'>
+                                        {systemData?.tokens || 0}
+                                    </Text>
+                                </Link>
+                            </Group>
+                        }
                     </Group>
                 </ScrollArea>
             </Drawer>

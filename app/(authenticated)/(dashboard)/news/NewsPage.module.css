@@ -1,0 +1,70 @@
+.container {
+  max-width: 900px;
+  padding: 3rem 1rem;
+}
+
+.mainTitle {
+  font-size: 4rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 4rem;
+  letter-spacing: -0.02em;
+  color: white;
+}
+
+.content {
+  width: 100%;
+}
+
+.monthTitle {
+  font-size: 2.5rem;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 2rem 0;
+}
+
+.newsItem {
+  margin-bottom: 3rem;
+}
+
+.newsTitle {
+  font-size: 2rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.paragraphStack {
+  margin-top: 1rem;
+}
+
+.paragraph {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 300;
+}
+
+@media (max-width: 768px) {
+  .mainTitle {
+    font-size: 3rem;
+    margin-bottom: 3rem;
+  }
+  
+  .monthTitle {
+    font-size: 2rem;
+  }
+  
+  .newsTitle {
+    font-size: 1.75rem;
+  }
+  
+  .paragraph {
+    font-size: 1rem;
+  }
+}
