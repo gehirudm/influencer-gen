@@ -1,0 +1,28 @@
+.segmentedControl {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.segmentedIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 30px;
+  background-color: var(--mantine-color-blue-5);
+}
+
+.segmentedRoot {
+  display: flex;
+  gap: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: transparent;
+  align-items: center;
+}
+
+.segmentedControl {
+  --separator-color: transparent;
+}
+
+.segmentedLabel {
+  padding: 10px 20px;
+}

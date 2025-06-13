@@ -28,11 +28,12 @@ import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
 import Link from 'next/link';
 import { useUserData } from '@/hooks/useUserData';
+import { useMemo } from 'react';
 
 const data = [
     { link: '/discover', title: 'Discover', icon: IconCompass },
     { link: '/create', title: 'Create', icon: IconPlus },
-    { link: '/video', title: 'Video', icon: IconVideo },
+    // { link: '/video', title: 'Video', icon: IconVideo },
     { link: '/character', title: 'Character', icon: IconUser },
     { link: '/pricing', title: 'Pricing', icon: IconCurrencyDollar },
     { link: '/news', title: 'News', icon: IconNews },
@@ -42,6 +43,8 @@ const data = [
 export function Header({ children }: { children?: React.ReactNode }) {
     const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
     const { userData, systemData, loading, error } = useUserData();
+
+    const userLoggedIn = useMemo(() => !loading && userData != null, [loading, userData]);
 
     return (
         <Box h="full" w="full">
@@ -86,8 +89,8 @@ export function Header({ children }: { children?: React.ReactNode }) {
                         {/* User Section */}
 
                         <Group>
-                            {loading && <Anchor href='/auth'><Button size='md' radius="xl">Login</Button></Anchor>}
-                            {(!loading) && <>
+                            {!userLoggedIn && <Anchor href='/auth'><Button size='md' radius="xl">Login</Button></Anchor>}
+                            {userLoggedIn && <>
                                 <Link href="/account">
                                     {userData?.displayName ?
                                         <Avatar color="initials" radius="xl" size="md">{userData.displayName.split(" ").map(word => word[0].toUpperCase()).join("")}</Avatar> :
@@ -147,12 +150,12 @@ export function Header({ children }: { children?: React.ReactNode }) {
                     <Divider my="sm" />
 
                     <Group justify="center" p="md">
-                        {loading &&
+                        {!userLoggedIn &&
                             <Anchor href='/auth' onClick={closeDrawer}>
                                 <Button size='md' radius="xl">Login</Button>
                             </Anchor>
                         }
-                        {(!loading) &&
+                        {userLoggedIn &&
                             <Group>
                                 <Link href="/account" onClick={closeDrawer}>
                                     {userData?.displayName ?

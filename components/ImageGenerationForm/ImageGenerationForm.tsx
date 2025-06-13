@@ -9,6 +9,7 @@ import { NudifyForm } from './NudifyForm';
 import classes from './ImageGenerationForm.module.css';
 import { FeatureLock } from '../FeatureLockContainer/FeatureLockContainer';
 import { FeatureId } from '@/lib/subscriptions';
+import RoundTabs from '../RoundTabs/RoundTabs';
 
 // Aspect ratio component
 function AspectRatioLabel(props: { label: string, ratio: string, Icon: any }) {
@@ -19,38 +20,6 @@ function AspectRatioLabel(props: { label: string, ratio: string, Icon: any }) {
             <Text m={0} c="dimmed" size='xs'>{props.ratio}</Text>
         </Stack>
     )
-}
-
-function FloatingIndicatorTabs({ tabs }: { tabs: { name: string, panel: React.ReactNode }[] }) {
-    const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null);
-    const [value, setValue] = useState<string | null>('0');
-    const [controlsRefs, setControlsRefs] = useState<Record<string, HTMLButtonElement | null>>({});
-    const setControlRef = (val: string) => (node: HTMLButtonElement) => {
-        controlsRefs[val] = node;
-        setControlsRefs(controlsRefs);
-    };
-
-    return (
-        <Tabs variant="none" value={value} onChange={setValue}>
-            <Tabs.List ref={setRootRef} className={classes.list}>
-                {tabs.map(({ name }, index) => (
-                    <Tabs.Tab key={`${index}`} value={`${index}`} ref={setControlRef(`${index}`)} className={classes.tab}>
-                        {name}
-                    </Tabs.Tab>
-                ))}
-
-                <FloatingIndicator
-                    target={value ? controlsRefs[value] : null}
-                    parent={rootRef}
-                    className={classes.indicator}
-                />
-            </Tabs.List>
-
-            {tabs.map(({ panel }, index) => (
-                <Tabs.Panel key={`${index}`} value={`${index}`}>{panel}</Tabs.Panel>
-            ))}
-        </Tabs>
-    );
 }
 
 // Aspect ratio presets with their dimensions
@@ -102,7 +71,7 @@ export function ImageGenerationForm({
 
     return (
         <Paper p="md" radius="md">
-            <FloatingIndicatorTabs tabs={[
+            <RoundTabs tabs={[
                 {
                     name: 'Simple',
                     panel: <SimpleForm

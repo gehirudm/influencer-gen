@@ -87,7 +87,7 @@ async function ensureUserDocumentExists(decoded: DecodedIdToken): Promise<string
         });
 
         console.log(`User document created for user ID: ${userId}`);
-        return "/landing";
+        return "auth/landing";
     }
 
     return "/discover";

@@ -213,7 +213,7 @@ export default function Home() {
           </p>
 
           <div className="flex justify-center mb-16">
-            <Link href="/gallery" className="flex items-center text-lg text-indigo-400 hover:text-indigo-300 transition">
+            <Link href="/discover" className="flex items-center text-lg text-indigo-400 hover:text-indigo-300 transition">
               View all
               <IconArrowNarrowRight size={20} className="ml-1" />
             </Link>
@@ -230,7 +230,7 @@ export default function Home() {
 
           <div className="flex justify-center">
             <a
-              href="https://t.me/influencergen"
+              href="https://t.me/FantazyPro"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full font-medium transition"
