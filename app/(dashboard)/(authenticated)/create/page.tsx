@@ -74,6 +74,7 @@ export default function ImageGeneratorPage() {
                 batch_size: form.values.batch_size,
                 solver_order: form.values.solver_order,
                 model_name: form.values.model_name,
+                auto_mask_clothes: form.values.nudify
             };
 
             // Add base image if selected

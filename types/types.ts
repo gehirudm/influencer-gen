@@ -175,6 +175,11 @@ interface StableDiffusionRequestInput {
      * @max 1
      */
     strength?: number;
+
+    /**
+     * Will trigger the auto cloth masking and image inpainting for the base image
+     */
+    auto_mask_clothes?: boolean;
 }
 
 type ImageGenerationRequestInput =
