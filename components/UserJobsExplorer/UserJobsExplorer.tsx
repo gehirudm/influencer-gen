@@ -208,6 +208,8 @@ export function UserJobsExplorer({
                   // jobId={job.id}
                   // prompt={job.metadata?.prompt || ""}
                   // status={job.status}
+                  // isGenerating={job.status != 'COMPLETED'}
+                  isGenerating={true}
                   imageUrls={job.imageUrls ? job.imageUrls.map(url => url.publicUrl) : []}
                   // generationTime={job.executionTime ? job.executionTime / 1000 : undefined}
                   // dimensions={{ width, height }}

@@ -84,6 +84,8 @@ async function ensureUserDocumentExists(decoded: DecodedIdToken): Promise<string
 
         await userRef.collection('private').doc('system').set({
             tokens: 100,
+            subscription_tier: "free",
+            isAdmin: false
         });
 
         console.log(`User document created for user ID: ${userId}`);

@@ -1,27 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server';
+'use server';
+
 import { cookies } from 'next/headers';
 import { getAuth } from 'firebase-admin/auth';
 import adminApp from '@/lib/firebaseAdmin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
+import { revalidatePath } from 'next/cache';
 
 // Define the cost of generating an image
 const IMAGE_GENERATION_COST = 1; // Cost in tokens
 const RUNPOD_API_KEY = process.env.RUNPOD_API_KEY;
 const WEBHOOK_URL = "https://influencer-gen.vercel.app/api/webhook";
-// const WEBHOOK_URL = "https://cd7a-2402-d000-8128-246d-bcaf-852a-7387-dae2.ngrok-free.app/api/webhook";
 
 // Valid keys for request body validation
 const VALID_INPUT_KEYS = [
     'prompt', 'negative_prompt', 'width', 'height', 'steps', 'cfg_scale',
     'seed', 'batch_size', 'solver_order', 'base_img', 'strength', 'mask_img', 'model_name',
-    'auto_mask_clothes'
+    'auto_mask_clothes', 'generation_type'
 ] as const;
 
 const MODEL_ENDPOINTS = {
     "realism": "https://api.runpod.ai/v2/9c6y8ue4f8ie0e/run",
     "lustify": "https://api.runpod.ai/v2/k7649vd0rf6sof/run",
-}
+};
 
 async function verifySessionCookie(sessionCookie: string) {
     const decodedClaims = await getAuth(adminApp).verifySessionCookie(sessionCookie, true);
@@ -164,16 +165,44 @@ async function createJobDocument(
     });
 }
 
-export async function POST(request: NextRequest) {
+// Define the type for the input
+type GenerateImageInput = {
+    prompt: string;
+    negative_prompt?: string;
+    width?: number;
+    height?: number;
+    steps?: number;
+    cfg_scale?: number;
+    seed?: number;
+    batch_size?: number;
+    solver_order?: number;
+    base_img?: string;
+    strength?: number;
+    mask_img?: string;
+    model_name?: string;
+    auto_mask_clothes?: boolean;
+    generation_type: 'simple' | 'advanced' | 'nudify';
+};
+
+// Define the type for the response
+type GenerateImageResponse = {
+    success: boolean;
+    jobId?: string;
+    tokensRemaining?: number;
+    error?: string;
+};
+
+// The main server action function
+export async function generateImageAction(input: GenerateImageInput): Promise<GenerateImageResponse> {
     try {
         const cookieStore = await cookies();
         const sessionCookie = cookieStore.get('session')?.value;
 
         if (!sessionCookie) {
-            return NextResponse.json(
-                { error: 'Unauthorized: No session found' },
-                { status: 401 }
-            );
+            return {
+                success: false,
+                error: 'Unauthorized: No session found'
+            };
         }
 
         let userId: string;
@@ -181,19 +210,18 @@ export async function POST(request: NextRequest) {
         try {
             userId = await verifySessionCookie(sessionCookie);
         } catch (error) {
-            return NextResponse.json(
-                { error: 'Unauthorized: Unable to verify session' },
-                { status: 401 }
-            );
+            return {
+                success: false,
+                error: 'Unauthorized: Unable to verify session'
+            };
         }
 
-        const body = await request.json();
-
+        // Clean and validate the input
         const cleanedBody: Partial<ImageGenerationRequestInput> = {};
 
         for (const key of VALID_INPUT_KEYS) {
-            if (body[key] !== undefined) {
-                cleanedBody[key] = body[key];
+            if (input[key as keyof GenerateImageInput] !== undefined) {
+                cleanedBody[key] = input[key] as any;
             }
         }
 
@@ -201,27 +229,27 @@ export async function POST(request: NextRequest) {
 
         // Validate prompt
         if (!prompt) {
-            return NextResponse.json(
-                { error: 'Prompt is required' },
-                { status: 400 }
-            );
+            return {
+                success: false,
+                error: 'Prompt is required'
+            };
         }
 
         // Validate generation_type
         if (!generation_type) {
-            return NextResponse.json(
-                { error: 'generation_type is required' },
-                { status: 400 }
-            );
+            return {
+                success: false,
+                error: 'generation_type is required'
+            };
         }
 
         // Validate generation_type values
         const validGenerationTypes = ['simple', 'advanced', 'nudify'];
         if (!validGenerationTypes.includes(generation_type)) {
-            return NextResponse.json(
-                { error: 'Invalid generation_type. Must be one of: simple, advanced, nudify' },
-                { status: 400 }
-            );
+            return {
+                success: false,
+                error: 'Invalid generation_type. Must be one of: simple, advanced, nudify'
+            };
         }
 
         const db = getFirestore(adminApp);
@@ -245,19 +273,20 @@ export async function POST(request: NextRequest) {
         // Create a job document in Firestore
         await createJobDocument(db, userId, jobData, cleanedBody, imageFiles);
 
-        const response = {
+        // Revalidate the path to update the UI
+        revalidatePath('/authenticated/dashboard/generate');
+
+        return {
             success: true,
             jobId: jobData.id,
             tokensRemaining
         };
 
-        return NextResponse.json(response);
-
     } catch (error: any) {
-        console.error('Error in image generation endpoint:', error);
-        return NextResponse.json(
-            { error: error.message || 'Failed to process image generation request' },
-            { status: 500 }
-        );
+        console.error('Error in image generation server action:', error);
+        return {
+            success: false,
+            error: error.message || 'Failed to process image generation request'
+        };
     }
 }

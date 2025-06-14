@@ -38,7 +38,7 @@ const Footer = () => {
 
       {/* Bottom Line */}
       <div className="text-center text-sm text-gray-400 mt-10">
-        Copyright © Genfluence AI 2024 | All rights reserved
+        Copyright © FantazyPro AI 2025 | All rights reserved
       </div>
     </footer>
   );

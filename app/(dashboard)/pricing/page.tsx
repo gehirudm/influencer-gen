@@ -1,10 +1,24 @@
 "use client"
 
-import { Group, Stack } from '@mantine/core';
-import { IconCheck, IconX } from '@tabler/icons-react';
+import { Group, HoverCard, Stack, Text } from '@mantine/core';
+import { IconCheck, IconInfoCircle, IconX } from '@tabler/icons-react';
 import React, { useState } from 'react';
 
-const pricingPlans = [
+const pricingPlans: {
+    name: string;
+    price: string;
+    tagline: string;
+    tokens: string;
+    images: string;
+    features: ({
+        name: string;
+        explanation?: string;
+        available: boolean;
+    }[]);
+    button: string;
+    highlight: boolean;
+    popular?: boolean;
+}[] = [
   {
     name: 'Free',
     price: '$0',
@@ -12,14 +26,15 @@ const pricingPlans = [
     tokens: '50 tokens',
     images: 'create up to 25 images',
     features: [
-      { name: 'AI Image generator', available: true },
-      { name: 'Character creation', available: true },
-      { name: 'Img2Img generation', available: true },
-      { name: '2 hyper realistic models', available: true },
-      { name: 'No watermark on images', available: false },
-      { name: 'Nudify', available: false },
-      { name: 'Character training with Character Engine', available: false },
-      { name: 'Image Generation with Character Engine', available: false },
+      { name: 'Simple image generation', explanation: "Generate realistic images easily without the need of complex prompts with a pre-defined set of features handcrafted for optimal image generation.", available: true },
+      { name: 'Advanced image generation', explanation: "Full control over image generation parameters including negative prompts, dimensions, and other advanced settings.", available: true },
+      { name: 'Character creation', explanation: "Create and customize your own characters with detailed appearance settings.", available: true },
+      { name: 'Img2Img generation', explanation: "Transform existing images using AI by providing a base image and modifying it with prompts.", available: true },
+      { name: '2 hyper realistic models', explanation: "Access to two high-quality AI models optimized for photorealistic image generation.", available: true },
+      { name: 'No watermark on images', explanation: "Download and use images without any watermarks or branding.", available: false },
+      { name: 'Nudify', explanation: "Generate tasteful artistic nude content with our specialized model.", available: false },
+      { name: 'Character training with Character Engine', explanation: "Train AI to mimic your character's personality and speech patterns for interactive conversations.", available: false },
+      { name: 'Image Generation with Character Engine', explanation: "Generate images that match your character's specific appearance and style consistently.", available: false },
     ],
     button: 'Current plan',
     highlight: false,
@@ -31,14 +46,14 @@ const pricingPlans = [
     tokens: '1000 tokens',
     images: 'Create up to 750 images',
     features: [
-      { name: 'AI Image generator', available: true },
-      { name: 'Character creation', available: true },
-      { name: 'Img2Img generation', available: true },
-      { name: '2 hyper realistic models', available: true },
-      { name: 'No watermark on images', available: true },
-      { name: 'Nudify', available: true },
-      { name: 'Character training with Character Engine', available: true },
-      { name: 'Image Generation with Character Engine', available: true },
+      { name: 'All image generation features', explanation: "Full access all image generation features available.", available: true },
+      { name: 'Character creation', explanation: "Create and customize your own characters with detailed appearance settings and save them for future use.", available: true },
+      { name: 'Img2Img generation', explanation: "Transform existing images using AI by providing a base image and modifying it with prompts for precise results.", available: true },
+      { name: '2 hyper realistic models', explanation: "Access to two premium AI models specifically tuned for photorealistic image generation with exceptional quality.", available: true },
+      { name: 'No watermark on images', explanation: "All generated images are delivered without watermarks for professional use and sharing.", available: true },
+      { name: 'Nudify', explanation: "Upload an image and generate a nude version of that image. You can tweak the characteristics to your choice", available: true },
+      { name: 'Character training with Character Engine', explanation: "Train AI to learn your character, resulting in much higher quality similarity in ", available: true },
+      { name: 'Image Generation with Character Engine', explanation: "Generate consistent images of your trained characters with perfect appearance matching across multiple generations.", available: true },
     ],
     button: 'Purchase',
     highlight: false,
@@ -50,14 +65,14 @@ const pricingPlans = [
     tokens: '10000 tokens',
     images: 'Create up to 3000 images',
     features: [
-      { name: 'AI Image generator', available: true },
-      { name: 'Character creation', available: true },
-      { name: 'Img2Img generation', available: true },
-      { name: '2 hyper realistic models', available: true },
-      { name: 'No watermark on images', available: true },
-      { name: 'Nudify', available: true },
-      { name: 'Character training with Character Engine', available: true },
-      { name: 'Image Generation with Character Engine', available: true },
+      { name: 'All image generation features', explanation: "Full access all image generation features available.", available: true },
+      { name: 'Character creation', explanation: "Create unlimited characters with our most detailed customization options and advanced appearance settings.", available: true },
+      { name: 'Img2Img generation', explanation: "Transform existing images with our most powerful AI models, offering precise control over the transformation process.", available: true },
+      { name: '2 hyper realistic models', explanation: "Access to our highest quality AI models with enhanced photorealism and superior detail rendering.", available: true },
+      { name: 'No watermark on images', explanation: "All generated images are delivered without watermarks and at maximum available resolution.", available: true },
+      { name: 'Nudify', explanation: "Upload an image and generate a nude version of that image. You can tweak the characteristics to your choice", available: true },
+      { name: 'Character training with Character Engine', explanation: "Train multiple AI characters with our most sophisticated learning algorithms for incredibly realistic conversations.", available: true },
+      { name: 'Image Generation with Character Engine', explanation: "Generate the highest quality consistent images of your trained characters with perfect appearance matching and enhanced details.", available: true },
     ],
     button: 'Purchase',
     highlight: true,
@@ -164,6 +179,19 @@ const PricingPage = () => {
                       )}
                       <span className={feature.available ? 'text-gray-200' : 'text-gray-500'}>
                         {feature.name}
+                        {" "}
+                        {feature.explanation && feature.available && (
+                          <HoverCard width={280} shadow="md">
+                            <HoverCard.Target>
+                              <IconInfoCircle size={16} className="inline" />
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown>
+                              <Text size="sm">
+                                {feature.explanation}
+                              </Text>
+                            </HoverCard.Dropdown>
+                          </HoverCard>
+                        )}
                       </span>
                     </li>
                   ))}

@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Card, Image, Group, ActionIcon, Modal, Stack, Switch, Button, Skeleton } from '@mantine/core';
 import { IconPlus, IconDownload, IconTrash, IconChevronLeft, IconChevronRight, IconX, IconFolderPlus } from '@tabler/icons-react';
 import classes from './GenJobCardWithPreview.module.css';
+import ShinyText from '@/components/blocks/TextAnimations/ShinyText/ShinyText';
 
 interface GenJobCardWithPreviewProps {
+    isGenerating: boolean;
     imageUrls?: string[];
     thumbnailIndex?: number;
     onDownload?: (imageUrl: string) => void;
@@ -16,6 +18,7 @@ interface GenJobCardWithPreviewProps {
 }
 
 export function GenJobCardWithPreview({
+    isGenerating,
     imageUrls,
     thumbnailIndex = 0,
     onDownload,
@@ -32,17 +35,17 @@ export function GenJobCardWithPreview({
 
     // Check if we're in loading state
     const isLoading = !imageUrls || imageUrls.length == 0;
-    
+
     // Use empty array for loading state or empty imageUrls
     const images = imageUrls || [];
-    
+
     // Get the current image URL if available
     const currentImageUrl = images.length > 0 ? images[currentImageIndex] : '';
 
     // Handle navigation between images
     const goToNextImage = () => {
         if (isLoading || images.length <= 1) return;
-        
+
         setCurrentImageIndex((prevIndex) =>
             prevIndex === images.length - 1 ? 0 : prevIndex + 1
         );
@@ -50,7 +53,7 @@ export function GenJobCardWithPreview({
 
     const goToPreviousImage = () => {
         if (isLoading || images.length <= 1) return;
-        
+
         setCurrentImageIndex((prevIndex) =>
             prevIndex === 0 ? images.length - 1 : prevIndex - 1
         );
@@ -59,7 +62,7 @@ export function GenJobCardWithPreview({
     // Reset to thumbnail index when opening preview
     const handleOpenPreview = () => {
         if (isLoading) return;
-        
+
         setCurrentImageIndex(thumbnailIndex);
         setPreviewOpen(true);
     };
@@ -67,13 +70,14 @@ export function GenJobCardWithPreview({
     return (
         <>
             <Card radius="md" p={0} className={classes.card}>
-                <Card.Section 
-                    className={classes.imageSection} 
+                <Card.Section
+                    className={classes.imageSection}
                     onClick={isLoading ? undefined : handleOpenPreview}
                     style={{ cursor: isLoading ? 'default' : 'pointer' }}
-                >
-                    {isLoading ? (
+                > 
+                    {isLoading ? (<>
                         <Skeleton height="250" width="200" animate={true} />
+                    </>
                     ) : (
                         <Image
                             src={images[thumbnailIndex] || 'https://placehold.co/600x400?text=No+Image+Available'}
@@ -91,7 +95,7 @@ export function GenJobCardWithPreview({
                             size="lg"
                             radius="md"
                             onClick={isLoading ? undefined : onAddToProject}
-                            disabled={isLoading}
+                            disabled={isLoading || isGenerating}
                             style={{ opacity: isLoading ? 0.5 : 1 }}
                         >
                             <IconFolderPlus size={20} />
@@ -103,13 +107,13 @@ export function GenJobCardWithPreview({
                             size="lg"
                             radius="md"
                             onClick={isLoading ? undefined : () => onDownload?.(images[thumbnailIndex])}
-                            disabled={isLoading}
+                            disabled={isLoading || isGenerating}
                             style={{ opacity: isLoading ? 0.5 : 1 }}
                         >
                             <IconDownload size={20} />
                         </ActionIcon>
                     </Group>
-                    
+
                     <ActionIcon
                         variant="subtle"
                         color="gray"

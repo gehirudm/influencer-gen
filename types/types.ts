@@ -185,5 +185,6 @@ interface StableDiffusionRequestInput {
 type ImageGenerationRequestInput =
     StableDiffusionRequestInput &
     {
-        model_name: "lustify" | "realism"
+        model_name: "lustify" | "realism",
+        generation_type: "simple" | "advanced" | "nudify"
     };
