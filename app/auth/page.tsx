@@ -26,6 +26,86 @@ export default function AuthPage() {
 
 	const csrfToken = useCsrfToken();
 
+	useEffect(() => {
+		// Skip if CSRF token is not available yet
+		if (!csrfToken) return;
+
+		// Check if the current URL contains a sign-in link
+		if (isSignInWithEmailLink(auth, window.location.href)) {
+			// Set loading state
+			setIsEmailLinkAuthenticating(true);
+
+			// Get the email from localStorage (saved when the link was sent)
+			let email = window.localStorage.getItem('emailForSignIn');
+
+			// If email is not found in localStorage, prompt the user
+			if (!email) {
+				email = window.prompt('Please provide your email for confirmation');
+			}
+
+			if (email) {
+				// Complete the sign-in process with the email link
+				signInWithEmailLink(auth, email, window.location.href)
+					.then(async (userCredential) => {
+						// Clear the email from localStorage
+						window.localStorage.removeItem('emailForSignIn');
+
+						// Get the ID token
+						const idToken = await userCredential.user.getIdToken();
+
+						// Create a session on the server
+						const res = await fetch("/api/auth/session-login", {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+								"X-CSRF-TOKEN": csrfToken as string,
+							},
+							body: JSON.stringify({
+								idToken,
+								remember: true // Usually magic links imply "remember me"
+							}),
+						});
+
+						const { next } = await res.json();
+
+						// Show success notification
+						notifications.show({
+							position: "top-center",
+							color: "green",
+							title: "Success",
+							message: "Signed in successfully with magic link!",
+						});
+
+						// Redirect to the appropriate page
+						router.replace(next);
+					})
+					.catch((error) => {
+						// Handle errors
+						notifications.show({
+							position: "top-center",
+							color: "red",
+							title: "Error",
+							message: error.message || "Failed to sign in with magic link. Please try again."
+						});
+
+						// Reset loading state
+						setIsEmailLinkAuthenticating(false);
+					});
+			} else {
+				// If no email was provided
+				notifications.show({
+					position: "top-center",
+					color: "red",
+					title: "Error",
+					message: "Email is required to complete sign in with magic link."
+				});
+
+				// Reset loading state
+				setIsEmailLinkAuthenticating(false);
+			}
+		}
+	}, [auth, router, csrfToken]);
+
 	const form = useForm({
 		initialValues: {
 			email: "",
@@ -94,6 +174,35 @@ export default function AuthPage() {
 		}
 	}, [auth, router, csrfToken]);
 
+	const handleMagicLink = useCallback(async (email: string) => {
+		const actionCodeSettings: ActionCodeSettings = {
+			url: window.location.href,
+			handleCodeInApp: true,
+		};
+
+		setIsSendingMagicLink(true);
+
+		try {
+			await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+			window.localStorage.setItem("emailForSignIn", email);
+			notifications.show({
+				position: "top-center",
+				color: "green",
+				title: "Magic Link Sent",
+				message: "Magic Sign In link has been sent to your Inbox!"
+			});
+		} catch (error: any) {
+			notifications.show({
+				position: "top-center",
+				color: "red",
+				title: "Error",
+				message: error.message || "Failed to send magic link. Please try again."
+			});
+		} finally {
+			setIsSendingMagicLink(false);
+		}
+	}, []);
+
 	const handleSubmit = async (values: typeof form.values) => {
 		setIsAuthenticating(true); // Set loading state
 		try {
@@ -137,46 +246,46 @@ export default function AuthPage() {
 		}
 	};
 
-	const handleMagicLink = useCallback(async (email: string) => {
-		const actionCodeSettings: ActionCodeSettings = {
-			url: window.location.href,
-			handleCodeInApp: true,
-		};
-
-		setIsSendingMagicLink(true);
-
+	const handleGoogleSignIn = async () => {
+		setIsAuthenticating(true); // Set loading state
 		try {
-			await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-			window.localStorage.setItem("emailForSignIn", email);
+			const userCredential = await signInWithPopup(auth, provider);
+
+			// Get the ID token
+			const idToken = await userCredential.user.getIdToken();
+
+			// Send the token to the backend to create a session
+			const res = await fetch("/api/auth/session-login", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRF-TOKEN": csrfToken as string,
+				},
+				body: JSON.stringify({
+					idToken,
+					remember: form.values.rememberMe // Use the remember me value from the form
+				}),
+			});
+
+			const { next } = await res.json();
+
 			notifications.show({
 				position: "top-center",
 				color: "green",
-				title: "Magic Link Sent",
-				message: "Magic Sign In link has been sent to your Inbox!"
+				title: "Success",
+				message: "Signed in successfully with Google!",
 			});
+
+			router.replace(next);
 		} catch (error: any) {
 			notifications.show({
 				position: "top-center",
 				color: "red",
 				title: "Error",
-				message: error.message || "Failed to send magic link. Please try again."
+				message: error.message || "Failed to authenticate with Google. Please try again.",
 			});
 		} finally {
-			setIsSendingMagicLink(false);
-		}
-	}, []);
-
-	const handleGoogleSignIn = async () => {
-		try {
-			await signInWithPopup(auth, provider);
-			notifications.show({
-				position: "top-center",
-				color: "green",
-				title: "Success",
-				message: "Signed in successfully!",
-			});
-		} catch (error: any) {
-			alert(error.message);
+			setIsAuthenticating(false); // Reset loading state
 		}
 	};
 

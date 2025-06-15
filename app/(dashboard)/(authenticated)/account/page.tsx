@@ -87,6 +87,7 @@ export default function ProfilePage() {
           loading: false,
           autoClose: 3000
         });
+        router.replace("/auth")
       } else
         notifications.update({
           id: signOutNotification,
