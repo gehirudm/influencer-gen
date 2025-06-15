@@ -5,20 +5,21 @@ import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from "next/cache";
 
 // Define subscription tiers and their prices
-const SUBSCRIPTION_TIERS = {
-    basic: {
+const SUBSCRIPTION_TIERS = [
+    {
         name: "Basic Plan",
         price: 39.99,
         tokens: 1000
     },
-    premium: {
+    {
         name: "Premium Plan",
         price: 64.99,
         tokens: 10000
     }
-};
+];
 
 // NOW Payments API key
 const NOW_PAYMENTS_API_KEY = process.env.NOWPAYMENTS_API_KEY;
@@ -53,8 +54,10 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
             };
         }
 
+        const requestedTier = SUBSCRIPTION_TIERS.find((tierItem) => tierItem.name === tier);
+
         // Validate tier
-        if (!SUBSCRIPTION_TIERS[tier as keyof typeof SUBSCRIPTION_TIERS]) {
+        if (!requestedTier) {
             return {
                 success: false,
                 error: "Invalid subscription tier"
@@ -73,9 +76,6 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
             };
         }
 
-        // Get subscription details
-        const subscriptionTier = SUBSCRIPTION_TIERS[tier as keyof typeof SUBSCRIPTION_TIERS];
-
         // Generate a unique order ID
         const orderRef = db.collection('orders').doc();
         const orderId = orderRef.id;
@@ -84,8 +84,8 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
         const orderData = {
             userId,
             tier,
-            amount: subscriptionTier.price,
-            tokens: subscriptionTier.tokens,
+            amount: requestedTier.price,
+            tokens: requestedTier.tokens,
             status: 'pending',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -104,6 +104,16 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
             };
         }
 
+        console.log({
+            price_amount: requestedTier.price,
+            price_currency: "USD",
+            order_id: orderId,
+            order_description: `Subscription to ${requestedTier.name}`,
+            ipn_callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/callback`,
+            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success?orderId=${orderId}`,
+            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/cancel?orderId=${orderId}`,
+        })
+
         const invoiceResponse = await fetch(NOW_PAYMENTS_API_URL, {
             method: "POST",
             headers: {
@@ -111,13 +121,13 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
                 "x-api-key": NOW_PAYMENTS_API_KEY
             },
             body: JSON.stringify({
-                price_amount: subscriptionTier.price,
+                price_amount: requestedTier.price,
                 price_currency: "USD",
                 order_id: orderId,
-                order_description: `Subscription to ${subscriptionTier.name}`,
+                order_description: `Subscription to ${requestedTier.name}`,
                 ipn_callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/callback`,
-                success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success?orderId=${orderId}`,
-                cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/cancel?orderId=${orderId}`,
+                success_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing/?status=success?orderId=${orderId}`,
+                cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing/?status=cancel?orderId=${orderId}`,
             })
         });
 
@@ -140,12 +150,14 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
 
         const invoiceData = await invoiceResponse.json();
 
+        console.log(invoiceData);
+
         // Update order with invoice details
         await orderRef.set({
             ...orderData,
             invoiceId: invoiceData.id,
             invoiceUrl: invoiceData.invoice_url,
-            paymentStatus: invoiceData.payment_status,
+            paymentStatus: "invoice created",
         });
 
         return {
@@ -168,11 +180,11 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
 // Helper action to redirect to payment page after invoice creation
 export async function createInvoiceAndRedirect(formData: FormData) {
     const result = await createInvoice(formData);
-    
+
     if (result.success && result.invoiceUrl) {
         redirect(result.invoiceUrl);
     } else {
         // Redirect to error page with the error message
-        redirect(`/payment/error?message=${encodeURIComponent(result.error || 'Unknown error')}`);
+        redirect(`/pricing?error=${encodeURIComponent(result.error || 'Unknown error')}`);
     }
 }
