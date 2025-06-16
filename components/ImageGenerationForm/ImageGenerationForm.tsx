@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { Stack, Paper, Text, Tabs, FloatingIndicator } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { IconBrandInstagram, IconCropLandscape, IconCropPortrait, IconSquare, IconSettings, IconWand, IconPhoto } from '@tabler/icons-react';
@@ -71,46 +71,48 @@ export function ImageGenerationForm({
 
     return (
         <Paper p="md" radius="md">
-            <RoundTabs tabs={[
-                {
-                    name: 'Simple',
-                    panel: <SimpleForm
-                        form={form}
-                        loading={loading}
-                        onSubmit={onSubmit}
-                    />
+            <Suspense>
+                <RoundTabs tabs={[
+                    {
+                        name: 'Simple',
+                        panel: <SimpleForm
+                            form={form}
+                            loading={loading}
+                            onSubmit={onSubmit}
+                        />
 
-                },
-                {
-                    name: 'Advanced',
-                    panel: <FeatureLock featureId={FeatureId.IMAGE_GENERATION_ADVANCED}>
-                        <AdvancedForm
+                    },
+                    {
+                        name: 'Advanced',
+                        panel: <FeatureLock featureId={FeatureId.IMAGE_GENERATION_ADVANCED}>
+                            <AdvancedForm
+                                form={form}
+                                loading={loading}
+                                selectedImage={selectedImage}
+                                setSelectedImage={setSelectedImage}
+                                selectedImageDimensions={selectedImageDimensions}
+                                setSelectedImageDimensions={setSelectedImageDimensions}
+                                maskImage={maskImage}
+                                setMaskImage={setMaskImage}
+                                setMaskEditorOpen={setMaskEditorOpen}
+                                onSubmit={onSubmit}
+                            />
+                        </FeatureLock>
+                    },
+                    {
+                        name: 'Exposify',
+                        panel: <NudifyForm
                             form={form}
                             loading={loading}
                             selectedImage={selectedImage}
                             setSelectedImage={setSelectedImage}
-                            selectedImageDimensions={selectedImageDimensions}
-                            setSelectedImageDimensions={setSelectedImageDimensions}
-                            maskImage={maskImage}
-                            setMaskImage={setMaskImage}
-                            setMaskEditorOpen={setMaskEditorOpen}
+                            // selectedImageDimensions={selectedImageDimensions}
+                            // setSelectedImageDimensions={setSelectedImageDimensions}
                             onSubmit={onSubmit}
                         />
-                    </FeatureLock>
-                },
-                {
-                    name: 'Nudify',
-                    panel: <NudifyForm
-                        form={form}
-                        loading={loading}
-                        selectedImage={selectedImage}
-                        setSelectedImage={setSelectedImage}
-                        // selectedImageDimensions={selectedImageDimensions}
-                        // setSelectedImageDimensions={setSelectedImageDimensions}
-                        onSubmit={onSubmit}
-                    />
-                },
-            ]} />
+                    },
+                ]} />
+            </Suspense>
         </Paper>
     );
 }                                 

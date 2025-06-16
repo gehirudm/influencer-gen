@@ -57,7 +57,7 @@ function BackgroundImageCarousel() {
 }
 
 interface CharacterCardData {
-  id?: string;
+  cid?: string;
   name: string;
   image: string;
 }
@@ -72,9 +72,12 @@ function CharacterCard(character: CharacterCardData) {
           className="w-full h-full object-cover"
         />
       </div>
-      <button className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-3xl transition w-full">
+      <Link 
+        href={`/create?cid=${character.cid || ''}`}
+        className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-3xl transition w-full flex justify-center items-center"
+      >
         <span className="text-lg font-bold">{character.name}</span>
-      </button>
+      </Link>
     </div>
   )
 }
@@ -179,15 +182,15 @@ export default function Home() {
 
           {/* Character Selection Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <CharacterCard name="Fashion Model" image="/character/fashion_model.png"></CharacterCard>
-            <CharacterCard name="Wellness Coach" image="/character/wellness_coach.png"></CharacterCard>
-            <CharacterCard name="NSFW Model" image="/character/NSFW_model.png"></CharacterCard>
-            <CharacterCard name="Travel Blogger" image="/character/travel_blogger.png"></CharacterCard>
+            <CharacterCard cid="fashion_model" name="Fashion Model" image="/character/fashion_model.png"></CharacterCard>
+            <CharacterCard cid="wellness_coach" name="Wellness Coach" image="/character/wellness_coach.png"></CharacterCard>
+            <CharacterCard cid="nsfw_model" name="NSFW Model" image="/character/NSFW_model.png"></CharacterCard>
+            <CharacterCard cid="travel_blogger" name="Travel Blogger" image="/character/travel_blogger.png"></CharacterCard>
 
-            <CharacterCard name="Tech Reviewer" image="/character/tech_reviewer.png"></CharacterCard>
-            <CharacterCard name="Fitness Model" image="/character/fitness_model.png"></CharacterCard>
-            <CharacterCard name="Chef" image="/character/chef.png"></CharacterCard>
-            <CharacterCard name="Musician/DJ" image="/character/dj.png"></CharacterCard>
+            <CharacterCard cid="tech_reviewer" name="Tech Reviewer" image="/character/tech_reviewer.png"></CharacterCard>
+            <CharacterCard cid="fitness_model" name="Fitness Model" image="/character/fitness_model.png"></CharacterCard>
+            <CharacterCard cid="chef" name="Chef" image="/character/chef.png"></CharacterCard>
+            <CharacterCard cid="dj" name="Musician/DJ" image="/character/dj.png"></CharacterCard>
           </div>
         </div>
       </div>

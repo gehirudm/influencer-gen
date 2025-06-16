@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Image as MantineImage,
     Button,
@@ -16,17 +16,18 @@ import { UseFormReturnType } from '@mantine/form';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { aspectRatios } from './ImageGenerationForm';
 import { COST_MAP } from '@/lib/cost';
+import { useSearchParams } from 'next/navigation';
 
 // Sample model images for the simple mode
 const modelImages = [
-    { id: 1, title: 'Fashion Model', src: '/character/fashion_model.png' },
-    { id: 2, title: 'Wellness Coach', src: '/character/wellness_coach.png' },
-    { id: 3, title: 'NSFW Model', src: '/character/NSFW_model.png' },
-    { id: 4, title: 'Travel Blogger', src: '/character/travel_blogger.png' },
-    { id: 5, title: 'Tech Reviewer', src: '/character/tech_reviewer.png' },
-    { id: 6, title: 'Fitness Model', src: '/character/fitness_model.png' },
-    { id: 7, title: 'Chef', src: '/character/chef.png' },
-    { id: 8, title: 'Musician/DJ', src: '/character/dj.png' },
+    { id: 1, title: 'Fashion Model', src: '/character/fashion_model.png', cid: 'fashion_model' },
+    { id: 2, title: 'Wellness Coach', src: '/character/wellness_coach.png', cid: 'wellness_coach' },
+    { id: 3, title: 'NSFW Model', src: '/character/NSFW_model.png', cid: 'nsfw_model' },
+    { id: 4, title: 'Travel Blogger', src: '/character/travel_blogger.png', cid: 'travel_blogger' },
+    { id: 5, title: 'Tech Reviewer', src: '/character/tech_reviewer.png', cid: 'tech_reviewer' },
+    { id: 6, title: 'Fitness Model', src: '/character/fitness_model.png', cid: 'fitness_model' },
+    { id: 7, title: 'Chef', src: '/character/chef.png', cid: 'chef' },
+    { id: 8, title: 'Musician/DJ', src: '/character/dj.png', cid: 'dj' },
 ];
 
 // Simple mode options
@@ -54,6 +55,19 @@ export function SimpleForm({ form, loading, onSubmit }: SimpleFormProps) {
     const [outfit, setOutfit] = useState<string | null>(null);
     const [pose, setPose] = useState<string | null>(null);
     const [background, setBackground] = useState<string | null>(null);
+
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const cidParam = searchParams.get('cid');
+        if (cidParam) {
+            const matchedModel = modelImages.find(model => model.cid === cidParam);
+            if (matchedModel) {
+                setSelectedModelId(matchedModel.id);
+            }
+        }
+    }, [searchParams]);
+
 
     // Toggle section expansion for simple mode
     const toggleSection = (section: string) => {

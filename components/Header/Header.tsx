@@ -51,25 +51,15 @@ export function Header({ children }: { children?: React.ReactNode }) {
             <header className={classes.header}>
                 <Group justify="space-between" h="100%" w="100%" px="md">
                     {/* Logo */}
-                    <Link href="/" style={{ textDecoration: 'none' }}>
-                        <Text
-                            component="span"
-                            inherit
-                            variant="gradient"
-                            gradient={{ from: 'blue', to: 'cyan' }}
-                            fw="bolder"
-                            fz={26}
-                        >
-                            Fantazy
-                        </Text>
-                        <Text
-                            component="span"
-                            inherit
-                            fw="bolder"
-                            fz={26}
-                        >
-                            .Pro
-                        </Text>
+                    <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+                        <img
+                            src="/fantazy_text.png"
+                            alt="Fantazy.Pro Logo"
+                            style={{
+                                height: '42px',
+                                width: 'auto'
+                            }}
+                        />
                     </Link>
 
                     <Group>

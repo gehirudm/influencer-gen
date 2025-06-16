@@ -104,16 +104,6 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
             };
         }
 
-        console.log({
-            price_amount: requestedTier.price,
-            price_currency: "USD",
-            order_id: orderId,
-            order_description: `Subscription to ${requestedTier.name}`,
-            ipn_callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/callback`,
-            success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success?orderId=${orderId}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/cancel?orderId=${orderId}`,
-        })
-
         const invoiceResponse = await fetch(NOW_PAYMENTS_API_URL, {
             method: "POST",
             headers: {
