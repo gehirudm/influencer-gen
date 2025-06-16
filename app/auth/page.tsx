@@ -211,8 +211,6 @@ export default function AuthPage() {
 					signInWithEmailAndPassword(auth, values.email, values.password) :
 					createUserWithEmailAndPassword(auth, values.email, values.password));
 
-			console.log(userCredential);
-
 			const idToken = await userCredential.user.getIdToken();
 
 			const res = await fetch("/api/auth/session-login", {
@@ -235,7 +233,16 @@ export default function AuthPage() {
 
 			router.replace(next);
 		} catch (error: any) {
-			notifications.show({
+			console.log(error);
+			
+			if (error.message.includes('INVALID_LOGIN_CREDENTIALS')) {
+				notifications.show({
+					position: "top-center",
+					color: "red",
+					title: "Login failed",
+					message: "Invalid username or password.",
+				});
+			} else notifications.show({
 				position: "top-center",
 				color: "red",
 				title: "Error",

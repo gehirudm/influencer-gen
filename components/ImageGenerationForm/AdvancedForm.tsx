@@ -33,6 +33,7 @@ interface AdvancedFormProps {
     setMaskImage: (mask: string | null) => void;
     setMaskEditorOpen: (open: boolean) => void;
     onSubmit: () => void;
+    setFormValue: (name: string, value: any) => void;
 }
 
 export function AdvancedForm({
@@ -45,7 +46,8 @@ export function AdvancedForm({
     maskImage,
     setMaskImage,
     setMaskEditorOpen,
-    onSubmit
+    onSubmit,
+    setFormValue
 }: AdvancedFormProps) {
     // Generate a random seed
     const generateRandomSeed = () => {

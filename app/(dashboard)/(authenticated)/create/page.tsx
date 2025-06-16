@@ -34,6 +34,11 @@ export default function ImageGeneratorPage() {
         }
     });
 
+    const setFormValue = (field: string, value: any) => {
+        console.log({field, value });
+        form.setFieldValue(field, value, { forceUpdate: true });
+    };
+
     const { jobs: userJobs } = useUserJobs();
     const { projects: userProjects } = useUserProjects();
     const [loading, setLoading] = useState(false);
@@ -42,6 +47,7 @@ export default function ImageGeneratorPage() {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [selectedImageDimentions, setSelectedImageDimensions] = useState<{ width: number, height: number } | null>(null);
     const [maskImage, setMaskImage] = useState<string | null>(null);
+    const [generationMode, setGenerationMode] = useState<"simple" | "advanced" | "nudify">("simple");
     const [maskEditorOpen, setMaskEditorOpen] = useState(false);
 
     const router = useRouter();
@@ -74,7 +80,8 @@ export default function ImageGeneratorPage() {
                 batch_size: form.values.batch_size,
                 solver_order: form.values.solver_order,
                 model_name: form.values.model_name,
-                auto_mask_clothes: form.values.nudify
+                auto_mask_clothes: form.values.nudify,
+                generation_type: generationMode,
             };
 
             // Add base image if selected
@@ -270,6 +277,9 @@ export default function ImageGeneratorPage() {
                         setMaskImage={setMaskImage}
                         setMaskEditorOpen={setMaskEditorOpen}
                         onSubmit={handleGenerate}
+                        generationMode={generationMode}
+                        setGenerationMode={setGenerationMode}
+                        setFormValue={setFormValue}
                     />
                 </Grid.Col>
 

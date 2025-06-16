@@ -3,11 +3,10 @@ import { Tabs, FloatingIndicator } from '@mantine/core';
 
 import classes from './RoundTabs.module.css';
 
-export default function RoundTabs({ tabs }: { tabs: { name: string, panel: React.ReactNode, value?: string }[] }) {
+export default function RoundTabs({ tabs, onChange, value }: { tabs: { name: string, panel: React.ReactNode, value: string }[], value: string, onChange: (value: string | null) => void }) {
     if (tabs.length == 0) return;
 
     const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null);
-    const [value, setValue] = useState<string | null>(tabs[0].value || '0');
     const [controlsRefs, setControlsRefs] = useState<Record<string, HTMLButtonElement | null>>({});
     const setControlRef = (val: string) => (node: HTMLButtonElement) => {
         controlsRefs[val] = node;
@@ -15,10 +14,10 @@ export default function RoundTabs({ tabs }: { tabs: { name: string, panel: React
     };
 
     return (
-        <Tabs variant="none" value={value} onChange={setValue}>
+        <Tabs variant="none" value={value} onChange={v => onChange(v)}>
             <Tabs.List ref={setRootRef} className={classes.list}>
                 {tabs.map(({ name, value }, index) => (
-                    <Tabs.Tab key={`${index}`} value={value || `${index}`} ref={setControlRef(`${index}`)} className={classes.tab}>
+                    <Tabs.Tab key={`${index}`} value={value} ref={setControlRef(value)} className={classes.tab}>
                         {name}
                     </Tabs.Tab>
                 ))}
@@ -30,8 +29,8 @@ export default function RoundTabs({ tabs }: { tabs: { name: string, panel: React
                 />
             </Tabs.List>
 
-            {tabs.map(({ panel }, index) => (
-                <Tabs.Panel key={`${index}`} value={`${index}`}>{panel}</Tabs.Panel>
+            {tabs.map(({ panel, value }, index) => (
+                <Tabs.Panel key={`${index}`} value={value}>{panel}</Tabs.Panel>
             ))}
         </Tabs>
     );

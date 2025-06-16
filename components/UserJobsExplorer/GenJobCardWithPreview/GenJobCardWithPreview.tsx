@@ -72,12 +72,21 @@ export function GenJobCardWithPreview({
             <Card radius="md" p={0} className={classes.card}>
                 <Card.Section
                     className={classes.imageSection}
-                    onClick={isLoading ? undefined : handleOpenPreview}
+                    onClick={(isLoading || isGenerating) ? undefined : handleOpenPreview}
                     style={{ cursor: isLoading ? 'default' : 'pointer' }}
                 > 
-                    {isLoading ? (<>
+                    {isGenerating ? (
+                        <div className={classes.generatingContainer}>
+                            <div className={classes.generatingOverlay}>
+                                <ShinyText 
+                                    text="Generating..." 
+                                    speed={3} 
+                                    className={classes.generatingText}
+                                />
+                            </div>
+                        </div>
+                    ) : isLoading ? (
                         <Skeleton height="250" width="200" animate={true} />
-                    </>
                     ) : (
                         <Image
                             src={images[thumbnailIndex] || 'https://placehold.co/600x400?text=No+Image+Available'}
@@ -120,7 +129,7 @@ export function GenJobCardWithPreview({
                         size="lg"
                         radius="md"
                         onClick={isLoading ? undefined : onDelete}
-                        disabled={isLoading}
+                        disabled={isLoading || isGenerating}
                         style={{ opacity: isLoading ? 0.5 : 1 }}
                     >
                         <IconTrash size={20} />

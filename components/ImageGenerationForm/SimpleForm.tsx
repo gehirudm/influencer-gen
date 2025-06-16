@@ -16,7 +16,8 @@ import { UseFormReturnType } from '@mantine/form';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { aspectRatios } from './ImageGenerationForm';
 import { COST_MAP } from '@/lib/cost';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { notifications } from '@mantine/notifications';
 
 // Sample model images for the simple mode
 const modelImages = [
@@ -43,9 +44,10 @@ interface SimpleFormProps {
     form: UseFormReturnType<any>;
     loading: boolean;
     onSubmit: () => void;
+    setFormValue: (name: string, value: any) => void;
 }
 
-export function SimpleForm({ form, loading, onSubmit }: SimpleFormProps) {
+export function SimpleForm({ form, onSubmit, setFormValue }: SimpleFormProps) {
     const [expandedSection, setExpandedSection] = useState<string | null>('1. Model');
     const [selectedModelId, setSelectedModelId] = useState<number | null>(1);
     const [selectedGender, setSelectedGender] = useState<string>('Female');
@@ -56,7 +58,10 @@ export function SimpleForm({ form, loading, onSubmit }: SimpleFormProps) {
     const [pose, setPose] = useState<string | null>(null);
     const [background, setBackground] = useState<string | null>(null);
 
+    const [loading, setLoading] = useState(false);
+
     const searchParams = useSearchParams();
+    const router = useRouter();
 
     useEffect(() => {
         const cidParam = searchParams.get('cid');
@@ -96,9 +101,66 @@ export function SimpleForm({ form, loading, onSubmit }: SimpleFormProps) {
     };
 
     // Handle form submission
-    const handleSubmit = () => {
-        form.setFieldValue('prompt', buildSimplePrompt());
-        onSubmit();
+    const handleSubmit = async () => {
+        const prompt = buildSimplePrompt();
+        
+        // Get dimensions based on selected aspect ratio
+        const selectedRatio = aspectRatios.find(ratio => ratio.value === form.values.aspectRatio);
+        const dimensions = selectedRatio ? { width: selectedRatio.width, height: selectedRatio.height } : { width: 800, height: 1200 };
+    
+        setLoading(true);
+
+        try {
+            // Prepare request payload
+            const payload = {
+                prompt: prompt,
+                negative_prompt: "",
+                width: dimensions.width,
+                height: dimensions.height,
+                model_name: "realism",
+                generation_type: 'simple',
+            };
+
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.status === 401) {
+                notifications.show({
+                    title: 'Session Expired',
+                    message: 'Please log in again to continue generating images.',
+                    color: 'blue'
+                });
+                
+                router.push('/auth');
+                setLoading(false);
+                return;
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate image');
+            }
+
+            notifications.show({
+                title: 'Success',
+                message: 'Image generation started successfully!',
+                color: 'green'
+            });
+        } catch (error: any) {
+            console.error('Error generating image:', error);
+            notifications.show({
+                title: 'Error',
+                message: error.message || 'Failed to generate image',
+                color: 'red'
+            });
+        } finally {
+            setLoading(false);
+        }
     };
 
     // Render accordion section for simple mode

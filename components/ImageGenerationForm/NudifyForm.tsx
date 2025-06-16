@@ -26,6 +26,7 @@ interface NudifyFormProps {
     selectedImage: string | null;
     setSelectedImage: (image: string | null) => void;
     onSubmit: () => void;
+    setFormValue: (name: string, value: any) => void;
 }
 
 const nudifyOptions: Record<string, { label: string, values: string[] }> = {
@@ -97,7 +98,8 @@ export function NudifyForm({
     loading,
     selectedImage,
     setSelectedImage,
-    onSubmit
+    onSubmit,
+    setFormValue
 }: NudifyFormProps) {
     const { dataUrl, loading: dataUrlLoading } = useImageToDataUrl(selectedImage);
     const [expandedSection, setExpandedSection] = useState<string | null>(null);
@@ -245,7 +247,7 @@ export function NudifyForm({
                 color="indigo"
                 disabled={!selectedImage}
             >
-                Nudify | {COST_MAP.nudify} tokens
+                Undress AI | {COST_MAP.nudify} tokens
             </Button>
         </Stack>
     );

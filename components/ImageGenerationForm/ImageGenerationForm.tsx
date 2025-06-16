@@ -53,6 +53,9 @@ interface ImageGenerationFormProps {
     setMaskImage: (mask: string | null) => void;
     setMaskEditorOpen: (open: boolean) => void;
     onSubmit: () => void;
+    generationMode: "simple" | "advanced" | "nudify";
+    setGenerationMode: (mode: "simple" | "advanced" | "nudify") => void;
+    setFormValue: (name: string, value: any) => void;
 }
 
 export function ImageGenerationForm({
@@ -65,22 +68,24 @@ export function ImageGenerationForm({
     maskImage,
     setMaskImage,
     setMaskEditorOpen,
-    onSubmit
+    onSubmit,
+    generationMode,
+    setGenerationMode,
+    setFormValue,
 }: ImageGenerationFormProps) {
-    const [mode, setMode] = useState<'simple' | 'advanced' | 'nudify'>('simple');
-
     return (
         <Paper p="md" radius="md">
             <Suspense>
-                <RoundTabs tabs={[
+                <RoundTabs value={generationMode} onChange={v => setGenerationMode(v as "simple" | "advanced" | "nudify")} tabs={[
                     {
                         name: 'Simple',
                         panel: <SimpleForm
                             form={form}
                             loading={loading}
                             onSubmit={onSubmit}
-                        />
-
+                            setFormValue={setFormValue}
+                        />,
+                        value: 'simple'
                     },
                     {
                         name: 'Advanced',
@@ -96,11 +101,13 @@ export function ImageGenerationForm({
                                 setMaskImage={setMaskImage}
                                 setMaskEditorOpen={setMaskEditorOpen}
                                 onSubmit={onSubmit}
+                                setFormValue={setFormValue}
                             />
-                        </FeatureLock>
+                        </FeatureLock>,
+                        value: "advanced"
                     },
                     {
-                        name: 'Exposify',
+                        name: 'Undress AI',
                         panel: <NudifyForm
                             form={form}
                             loading={loading}
@@ -109,7 +116,9 @@ export function ImageGenerationForm({
                             // selectedImageDimensions={selectedImageDimensions}
                             // setSelectedImageDimensions={setSelectedImageDimensions}
                             onSubmit={onSubmit}
-                        />
+                            setFormValue={setFormValue}
+                        />,
+                        value: "nudify"
                     },
                 ]} />
             </Suspense>
