@@ -12,6 +12,7 @@ import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { shadcnTheme } from "@/theme/theme";
 import { shadcnCssVariableResolver } from "@/theme/cssVariableResolver";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,12 +38,16 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        // className={`antialiased`}
+      // className={`antialiased`}
       >
-        <ColorSchemeScript forceColorScheme="dark"/>
+        <ColorSchemeScript forceColorScheme="dark" />
         <MantineProvider forceColorScheme="dark" theme={shadcnTheme} cssVariablesResolver={shadcnCssVariableResolver}>
           <Notifications />
-          <NuqsAdapter>{children}</NuqsAdapter>
+          <NuqsAdapter>
+            <Suspense>
+              {children}
+            </Suspense>
+          </NuqsAdapter>
         </MantineProvider>
       </body>
     </html>
