@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/dropzone/styles.css';
@@ -41,7 +42,7 @@ export default function RootLayout({
         <ColorSchemeScript forceColorScheme="dark"/>
         <MantineProvider forceColorScheme="dark" theme={shadcnTheme} cssVariablesResolver={shadcnCssVariableResolver}>
           <Notifications />
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
         </MantineProvider>
       </body>
     </html>

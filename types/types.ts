@@ -1,3 +1,5 @@
+type WithId<T> = T & { id: string };
+
 interface ImageGenerationMetadata {
     height: number;
     width: number;
@@ -43,6 +45,7 @@ interface UserCharacter {
     userId: string;
     name: string;
     imageIds: string[];
+    imageUrls: string[];
     createdAt: string;
     description: string;
     characteristics: CharacterAttribute[];

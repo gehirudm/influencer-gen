@@ -206,7 +206,7 @@ export function NudifyForm({
     return (
         <Stack gap="md">
             <Title order={3}>Upload Image</Title>
-            <Text size="sm" c="dimmed">Upload an image to transform. For best results, use a clear image with good lighting.</Text>
+            <Text size="sm" c="dimmed">Upload an image of anyone fully clothed and we can remove them. Customize them to look however you want!</Text>
 
             <FileDropzonePreview
                 selectedImage={selectedImage}

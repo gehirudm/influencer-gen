@@ -6,6 +6,7 @@ import { ReactEventHandler, useState } from 'react';
 interface FileDropzonePreviewProps extends Partial<DropzoneProps> {
     selectedImage: string | null;
     setSelectedImage: (image: string | null) => void;
+    setSelectedImageFile?: (file: File | null) => void;
     label?: string;
     onImageLoad?: ReactEventHandler<HTMLImageElement>;
 }
@@ -13,6 +14,7 @@ interface FileDropzonePreviewProps extends Partial<DropzoneProps> {
 export function FileDropzonePreview({ 
     selectedImage, 
     setSelectedImage, 
+    setSelectedImageFile,
     label = "Upload Image",
     onImageLoad,
     ...props 
@@ -28,6 +30,7 @@ export function FileDropzonePreview({
             const base64String = reader.result as string;
             console.log(base64String);
             setSelectedImage(base64String);
+            setSelectedImageFile?.(file);
             setLoading(false);
         };
 

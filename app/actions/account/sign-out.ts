@@ -1,7 +1,6 @@
 "use server"
 
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 
 /**
  * Server action to log out a user by deleting their session cookie

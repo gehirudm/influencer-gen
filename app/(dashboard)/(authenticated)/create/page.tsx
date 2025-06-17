@@ -8,9 +8,10 @@ import { useUserJobs } from '@/hooks/useUserJobs';
 import { useUserProjects } from '@/hooks/useUserProjects';
 import EditImageModel from '@/components/Models/EditImageModel';
 import ImageMaskEditor from '@/components/ImageMaskEditor';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ImageGenerationForm, aspectRatios } from '@/components/ImageGenerationForm/ImageGenerationForm';
 import { UserJobsExplorer } from '@/components/UserJobsExplorer/UserJobsExplorer';
+import { parseAsStringLiteral, useQueryState } from 'nuqs'
 
 export default function ImageGeneratorPage() {
     const form = useForm({
@@ -35,7 +36,7 @@ export default function ImageGeneratorPage() {
     });
 
     const setFormValue = (field: string, value: any) => {
-        console.log({field, value });
+        console.log({ field, value });
         form.setFieldValue(field, value, { forceUpdate: true });
     };
 
@@ -47,7 +48,7 @@ export default function ImageGeneratorPage() {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [selectedImageDimentions, setSelectedImageDimensions] = useState<{ width: number, height: number } | null>(null);
     const [maskImage, setMaskImage] = useState<string | null>(null);
-    const [generationMode, setGenerationMode] = useState<"simple" | "advanced" | "nudify">("simple");
+    const [generationMode, setGenerationMode] = useQueryState('gen_type', parseAsStringLiteral(["simple", "advanced", "nudify"] as const).withDefault("simple"))
     const [maskEditorOpen, setMaskEditorOpen] = useState(false);
 
     const router = useRouter();

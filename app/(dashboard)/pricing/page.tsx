@@ -227,7 +227,7 @@ const PricingPage = () => {
       <div className="text-center mb-12">
         <h1 className="text-5xl font-bold mb-6">Pricing</h1>
         <p className="text-xl max-w-3xl mx-auto">
-          Unlimited creativity at amazing prices. Try Genfluence for free or purchase a pack for more tokens and features.
+          Unlimited creativity at amazing prices. Try FantazyPro for free or purchase a pack for more tokens and features.
         </p>
       </div>
 
