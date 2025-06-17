@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Influencer Gen",
+  title: "FantazyPro",
   description: "Create Virtual Influences quick and easily!",
 };
 

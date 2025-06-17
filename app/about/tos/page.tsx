@@ -15,13 +15,13 @@ export default function TermsOfServicePage() {
                         our websites, mobile apps, products, or services (our “Services”). These
                         Terms apply to anyone who accesses our Services, whether as registered
                         users or guests (each a “Member” or “you”), and is an agreement between
-                        you and Open Insights Inc. (“Genfluence”).
+                        you and Open Insights Inc. (“FantazyPro”).
                     </p>
                     <p>
                         We’ve removed as much legal language as possible from these Terms to
                         make it easier for you to understand your rights and obligations
                         regarding our Services. Since these Terms do form a binding legal
-                        agreement between you and Genfluence, however, we have to include some
+                        agreement between you and FantazyPro, however, we have to include some
                         legal language in certain provisions. Please read these Terms carefully.
                     </p>
                     <p>By using our Services, you agree:</p>
@@ -33,7 +33,7 @@ export default function TermsOfServicePage() {
                     </ul>
                     <p>
                         Arbitration Notice: These Terms describe how claims between you and
-                        Genfluence will be resolved. With limited exceptions, disputes must be
+                        FantazyPro will be resolved. With limited exceptions, disputes must be
                         submitted to binding and final arbitration. You may pursue claims and
                         seek relief against us only on an individual basis, and not as a
                         plaintiff or class member in any class action. You also waive your right
@@ -43,9 +43,9 @@ export default function TermsOfServicePage() {
                     <h2>1. USE OF OUR SERVICES</h2>
                     <p>
                         There are some ground rules you must follow that are intended to protect
-                        the Genfluence community. If you do not agree to these Terms, then you
+                        the FantazyPro community. If you do not agree to these Terms, then you
                         can choose to not use our Services. Service Rules. Be reasonable and
-                        responsible. Don’t do anything that could harm our Members, Genfluence,
+                        responsible. Don’t do anything that could harm our Members, FantazyPro,
                         or our Services. When using our Services, you are responsible for your
                         interactions with others. For example, don’t do any of the following
                         while using our Services:
@@ -61,7 +61,7 @@ export default function TermsOfServicePage() {
                             any commercial or competitive purpose (including “scraping” to gather
                             information or content; decompiling or reverse engineering our
                             Services; or framing or using similar techniques to include any
-                            Genfluence Marks or our Services);
+                            FantazyPro Marks or our Services);
                         </li>
                         <li>
                             Attempt any technological attack (including accessing information
@@ -79,15 +79,15 @@ export default function TermsOfServicePage() {
                     </ul>
                     <p>
                         Eligibility. You must be at least 13 years old to use our Services and
-                        legally agree to and comply with these Terms. If your Genfluence account
+                        legally agree to and comply with these Terms. If your FantazyPro account
                         or access to our Services is discontinued by us due to your violation of
                         these Terms, you may not access or use our Services. This includes
                         re-registering with us or accessing our Services through use of a
                         different account name or otherwise.
                     </p>
                     <p>
-                        Genfluence Account. To access our Services, you’ll need to create your
-                        own Genfluence account (“Account”). You can control your Member profile
+                        FantazyPro Account. To access our Services, you’ll need to create your
+                        own FantazyPro account (“Account”). You can control your Member profile
                         and your interactions with our Services on your “Account Settings” page.
                         When creating your Account, you must:
                     </p>
@@ -104,7 +104,7 @@ export default function TermsOfServicePage() {
                     </ul>
                     <p>
                         Aside from the rights you have in your content as described below, your
-                        Account is owned by Genfluence, which means you have no ownership or
+                        Account is owned by FantazyPro, which means you have no ownership or
                         other rights in or to your Account.
                     </p>
                     <p>
@@ -136,8 +136,8 @@ export default function TermsOfServicePage() {
                         content you and others create. These Terms provide us certain license
                         rights to the content you create, post, or distribute on our Services so
                         we can provide and promote our Services and business (for example,
-                        feature your content on our website, our Genfluence Collection or in
-                        Genfluence Challenges or share on our social channels) to you and
+                        feature your content on our website, our FantazyPro Collection or in
+                        FantazyPro Challenges or share on our social channels) to you and
                         others. You are responsible for your content and actions on our
                         Services. Be respectful and responsible.
                     </p>
@@ -164,7 +164,7 @@ export default function TermsOfServicePage() {
                         media or technology, whether now known or developed in the future, in
                         connection with our Services and our business. By submitting your Member
                         Content to any forums, comments, or any other area on our Services, you
-                        consent to us identifying you by your Genfluence username (which may be
+                        consent to us identifying you by your FantazyPro username (which may be
                         a pseudonym) in connection with your Member Content. You waive any moral
                         or other author’s rights you may have in connection with any of these
                         uses of your Member Content.
@@ -218,7 +218,7 @@ export default function TermsOfServicePage() {
                         to time, we may also give you access to Beta Services (defined below).
                     </p>
                     <p>
-                        Genfluence Services. Subject to these Terms, we grant you a
+                        FantazyPro Services. Subject to these Terms, we grant you a
                         non-exclusive, limited, non-transferable, freely revocable license to
                         use our Services on your devices for your personal and internal use only
                         as intended and as allowed by our Services. To use our websites or
@@ -244,26 +244,26 @@ export default function TermsOfServicePage() {
                         by us, and (c) to promptly delete and destroy all such information, upon
                         our request or upon expiration of any Beta Period.
                     </p>
-                    <h2>4. Genfluence’S PROPRIETARY RIGHTS</h2>
+                    <h2>4. FantazyPro’S PROPRIETARY RIGHTS</h2>
                     <p>
-                        We own rights in and to all of our Genfluence Property and Genfluence
+                        We own rights in and to all of our FantazyPro Property and FantazyPro
                         Marks. Do not use these without our permission. Also, if you give us
                         ideas related to our Services or business, you grant us the right to use
                         them, including incorporating them into our Services and business.
                     </p>
                     <p>
-                        Genfluence Property. Except for Member Content, our Services and all
+                        FantazyPro Property. Except for Member Content, our Services and all
                         associated materials and intellectual property rights, including
-                        software, images, text, photos, audio, videos, music and Genfluence
-                        Marks (“Genfluence Property”) are our or our licensors’ exclusive
+                        software, images, text, photos, audio, videos, music and FantazyPro
+                        Marks (“FantazyPro Property”) are our or our licensors’ exclusive
                         property. To be clear, other Members own their own Member Content, and
                         you own your Member Content. Except for the specific licenses we grant
                         you under these Terms, we are not providing or granting you licenses to
-                        any intellectual property rights. Use of Genfluence Property for any
+                        any intellectual property rights. Use of FantazyPro Property for any
                         purpose not specifically allowed by these Terms is strictly prohibited.
-                        Open Insights Inc, Genfluence, and all related graphics, logos, service
+                        Open Insights Inc, FantazyPro, and all related graphics, logos, service
                         marks and trade names used on or in connection with the Services
-                        (“Genfluence Marks”) are our trademarks.
+                        (“FantazyPro Marks”) are our trademarks.
                     </p>
                     <p>
                         Feedback. You may choose to or we may invite you to submit feedback,
@@ -273,7 +273,7 @@ export default function TermsOfServicePage() {
                         to participate or otherwise provide Feedback, you grant us a
                         royalty-free, sublicensable, non-exclusive, worldwide license to use and
                         otherwise exploit any Feedback as we see fit without restriction. You
-                        agree to keep all information about Genfluence (such as our future
+                        agree to keep all information about FantazyPro (such as our future
                         product plans) that you may receive in connection with any research
                         discussion strictly confidential and, if asked, to return or delete all
                         such confidential information. We may record you during the research
@@ -281,7 +281,7 @@ export default function TermsOfServicePage() {
                         us consent to record your image, voice, likeness and activities during
                         your participation in the research discussion through photographs,
                         videos, audio recordings, written notes, and/or any other method. You
-                        agree that Genfluence exclusively owns such recordings and is free to
+                        agree that FantazyPro exclusively owns such recordings and is free to
                         use them for research, development, or other similar purposes without
                         restriction. If we wish to use your name or likeness for any external
                         marketing purposes, we will ask for your consent at that time.
@@ -333,7 +333,7 @@ export default function TermsOfServicePage() {
                     </p>
                     <p>
                         Without limiting the foregoing, we (including our subsidiaries and
-                        licensors) do not warrant that any Genfluence Property, our Services, or
+                        licensors) do not warrant that any FantazyPro Property, our Services, or
                         Member Content is accurate, reliable, or correct; that our Services will
                         meet your requirements or will be available at any particular time or
                         location, uninterrupted or secure; that any defects or errors will be
@@ -365,7 +365,7 @@ export default function TermsOfServicePage() {
                     <p>
                         Basis of the Bargain. The limitations of damages set forth above are
                         fundamental elements of the basis of the bargain between you and
-                        Genfluence. This limitation of liability section applies whether the
+                        FantazyPro. This limitation of liability section applies whether the
                         alleged liability is based on contract, tort, negligence, strict
                         liability, or any other basis, even if we have been advised of the
                         possibility of such damage. The foregoing limitation of liability will
@@ -383,7 +383,7 @@ export default function TermsOfServicePage() {
                         will continue to apply until terminated.
                     </p>
                     <p>
-                        Termination of Services by Genfluence. We may terminate this Agreement
+                        Termination of Services by FantazyPro. We may terminate this Agreement
                         or your ability to access or use any or all of our Services at any time
                         for any reason, including if payment cannot be charged to your Payment
                         Information for any reason, if you have violated these Terms, or if we
@@ -394,7 +394,7 @@ export default function TermsOfServicePage() {
                         so by taking the following steps:
                     </p>
                     <ul>
-                        <li>notifying us at any time to hello@Genfluence.com</li>
+                        <li>notifying us at any time to hello@FantazyPro.com</li>
                         <li>terminating your Account for all our Services that you use.</li>
                     </ul>
                     <p>
@@ -407,7 +407,7 @@ export default function TermsOfServicePage() {
                     <p>
                         Please read the following arbitration agreement (“Arbitration
                         Agreement”) carefully. It requires you to arbitrate disputes between you
-                        and Genfluence, which means you will only be able to pursue claims and
+                        and FantazyPro, which means you will only be able to pursue claims and
                         seek relief against us on an individual basis through arbitration. You
                         are also waiving your right to seek relief in a court of law and to have
                         a jury trial.
@@ -419,7 +419,7 @@ export default function TermsOfServicePage() {
                         Services, or to any aspect of your relationship with us, will be
                         resolved by binding arbitration, rather than in court, except that: (a)
                         you may bring claims in small claims court if your claims qualify; and
-                        (b) you and Genfluence can seek equitable relief in court for
+                        (b) you and FantazyPro can seek equitable relief in court for
                         infringement or other misuse of intellectual property rights (such as
                         trademarks, trade secrets, copyrights, and patents). This Arbitration
                         Agreement applies, without limitation, to all disputes or claims and
@@ -449,7 +449,7 @@ export default function TermsOfServicePage() {
                         at 800-352-5267.
                     </p>
                     <p>
-                        If JAMS is unable to handle the matter, you and Genfluence will work
+                        If JAMS is unable to handle the matter, you and FantazyPro will work
                         together to select an alternative arbitral forum. If the arbitrator
                         finds that you cannot afford to pay their filing, administrative,
                         hearing and/or other fees and you cannot obtain a waiver, we will pay
@@ -466,7 +466,7 @@ export default function TermsOfServicePage() {
                         to: (a) determine the scope and enforceability of this Arbitration
                         Agreement; and (b) resolve any dispute related to the interpretation,
                         applicability, enforceability, or formation of this Arbitration
-                        Agreement. The arbitration will decide each of your and Genfluence’s
+                        Agreement. The arbitration will decide each of your and FantazyPro’s
                         rights and liabilities, if any. The arbitration proceeding will not be
                         consolidated or joined with any other matters or parties. The arbitrator
                         will have the authority to grant motions resolving any claim, to award
@@ -475,12 +475,12 @@ export default function TermsOfServicePage() {
                         Agreement. The arbitrator will issue a written award and decision
                         describing the essential findings and conclusions underlying any award,
                         including the calculation of any damages. The award of the arbitrator is
-                        final and binding upon both you and Genfluence.
+                        final and binding upon both you and FantazyPro.
                     </p>
                     <p>
-                        Waiver of Jury Trial. You and Genfluence both waive any constitutional
+                        Waiver of Jury Trial. You and FantazyPro both waive any constitutional
                         and statutory rights to sue in court and have a trial in front of a
-                        judge or a jury. You and Genfluence instead choose that all disputes,
+                        judge or a jury. You and FantazyPro instead choose that all disputes,
                         claims, or requests for relief will be resolved by arbitration, except
                         as specified above. An arbitrator can award the same damages and relief
                         as a court and must follow our Agreement as a court would.
@@ -499,9 +499,9 @@ export default function TermsOfServicePage() {
                     <p>
                         30-Day Right to Opt Out. You have the right to opt out of the provisions
                         of this Arbitration Agreement by sending written notice of your decision
-                        to opt out to hello@Genfluence.com, within 30 days after you agree to
+                        to opt out to hello@FantazyPro.com, within 30 days after you agree to
                         these Terms and this Arbitration Agreement. Your notice must include
-                        your name and address, your Genfluence username (if any), the email
+                        your name and address, your FantazyPro username (if any), the email
                         address used to set up your Account, and an unequivocal statement that
                         you want to opt out of this Arbitration Agreement. Opting out of this
                         Arbitration Agreement has no effect on any other agreements that you
@@ -512,11 +512,11 @@ export default function TermsOfServicePage() {
                         Modifications. If we make any material change to this Arbitration
                         Agreement, you may reject that change within thirty (30) days of such
                         change becoming effective by writing us at the following address:
-                        Genfluence, 855 61st, Oakland, CA 94608, Attn: Legal - Arbitration Opt
+                        FantazyPro, 855 61st, Oakland, CA 94608, Attn: Legal - Arbitration Opt
                         Out.
                     </p>
                     <h2>12. PAYMENT DETAILS</h2>
-                    <p>Customers will be billed by Genfluence</p>
+                    <p>Customers will be billed by FantazyPro</p>
                     <h2>12. GENERAL</h2>
                     <p>
                         This section provides important legal information which you should
@@ -549,17 +549,17 @@ export default function TermsOfServicePage() {
                         electronic means. Texts, calls or other messages may be generated by
                         automatic telephone dialing systems. Standard text messaging charges
                         applied by your cell phone carrier will apply to text messages that we
-                        send. You consent to receive communications from Genfluence in an
+                        send. You consent to receive communications from FantazyPro in an
                         electronic form, and you agree that all terms and conditions,
                         agreements, notices, disclosures, and other communications that
-                        Genfluence provides to you electronically satisfy any legal requirement
+                        FantazyPro provides to you electronically satisfy any legal requirement
                         that we are communicating to you in writing. The foregoing does not
                         affect your statutory rights. If you wish to opt out of promotional
                         emails, you can unsubscribe from our promotional email list by following
                         the Unsubscribe options in the promotional email.
                     </p>
                     <p>
-                        Limitation Period. You and Genfluence both agree that any cause of
+                        Limitation Period. You and FantazyPro both agree that any cause of
                         action arising out of or related to the terms, our services or the
                         content must commence within one (1) year after the cause of action
                         accrues. otherwise, such cause of action is permanently barred.
@@ -568,9 +568,9 @@ export default function TermsOfServicePage() {
                         Governing Law and Venue. These terms and any related action will be
                         governed and interpreted by and under the laws of the State of Florida,
                         consistent with the Federal Arbitration Act, other than conflict of laws
-                        principles. To the extent you and Genfluence are permitted to initiate
-                        litigation in a court, you and Genfluence both agree that all claims and
-                        disputes between you and Genfluence will be litigated exclusively in the
+                        principles. To the extent you and FantazyPro are permitted to initiate
+                        litigation in a court, you and FantazyPro both agree that all claims and
+                        disputes between you and FantazyPro will be litigated exclusively in the
                         state or federal courts located in Florida.
                     </p>
                     <p>
@@ -619,7 +619,7 @@ export default function TermsOfServicePage() {
                         Entire Agreement; Severability. These Terms, together with any
                         amendments and any additional agreements you may enter into with us in
                         connection with the Services, serve as the entire agreement between you
-                        and Genfluence relating to our Services. If any provision of this
+                        and FantazyPro relating to our Services. If any provision of this
                         Agreement is deemed invalid by a court of competent jurisdiction, the
                         remaining valid provisions will be in full force and effect.
                     </p>
@@ -630,7 +630,7 @@ export default function TermsOfServicePage() {
                     </p>
                     <p>
                         Contact Us. Please contact us with any questions regarding these Terms
-                        or our Services by emailing hello@Genfluence.com
+                        or our Services by emailing hello@FantazyPro.com
                     </p>
                 </div>
             </div>

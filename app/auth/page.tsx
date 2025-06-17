@@ -11,13 +11,14 @@ import { useCsrfToken } from "@/hooks/useCsrfToken";
 import { IconBrandGoogle, IconBrandGoogleFilled } from "@tabler/icons-react";
 import { Header } from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 export default function AuthPage() {
-	const [mode, setMode] = useState<"signin" | "signup">("signin");
+	const [mode, setMode] = useQueryState('auth_mode', parseAsStringLiteral(["signin", "signup"] as const).withDefault("signin"))
 	const [isSendingMagicLink, setIsSendingMagicLink] = useState(false);
 	const [isAuthenticating, setIsAuthenticating] = useState(false);
 	const [isEmailLinkAuthenticating, setIsEmailLinkAuthenticating] = useState(false);
@@ -310,12 +311,12 @@ export default function AuthPage() {
 			<Group w="full" my={40} align="center" justify="center" gap={30}>
 				<Box p={30} mt={30} w={380}>
 					<Title order={2} mt="md">
-						{mode === "signup" ? "Sign Up" : "Sign In"}
+						{mode === "signup" ? "Sign Up" : "Login"}
 					</Title>
 					<Text c="dimmed" size="sm" mt={5} mb={20}>
 						{mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
 						<Anchor size="sm" component="button" onClick={() => setMode(mode === "signup" ? "signin" : "signup")}>
-							{mode === "signup" ? "Sign in" : "Sign up"}
+							{mode === "signup" ? "Login" : "Sign up"}
 						</Anchor>
 					</Text>
 					<form onSubmit={form.onSubmit(handleSubmit)}>
@@ -351,7 +352,7 @@ export default function AuthPage() {
 							{...form.getInputProps('rememberMe', { type: 'checkbox' })}
 						/>
 						<Button fullWidth mt="xl" type="submit" loading={isAuthenticating}>
-							{mode === "signup" ? "Sign Up" : mode === "signin" ? "Sign In" : "Send Sign-In Link"}
+							{mode === "signup" ? "Sign Up" : mode === "signin" ? "Login" : "Send Sign-In Link"}
 						</Button>
 					</form>
 
@@ -364,7 +365,7 @@ export default function AuthPage() {
 					</Group>
 				</Box>
 				<div className="relative text-center lg:text-left lg:w-1/2 max-w-lg mantine-visible-from-md">
-					<img src="/landing/signin.png" alt="signup_model" className="rounded-3xl hidden lg:block brightness-90" />
+					<img src="/landing/signin.png" alt="signup_model" className="rounded-3xl hidden lg:block brightness-80" />
 					<div className="absolute inset-0 flex-col items-center justify-center w-full h-full text-center text-white text-6xl font-bold font-['Outfit'] hidden lg:flex">
 						<span>Very good things</span><span>are waiting for</span><span>you!!!</span>
 					</div>

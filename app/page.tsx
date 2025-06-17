@@ -96,7 +96,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="relative min-h-screen">
         {/* Navigation */}
-        <div className="absolute inset-0 z-12">
+        <div className="absolute inset-0 z-12 h-30">
           <Header></Header>
         </div>
         {/* Background Image */}

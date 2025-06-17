@@ -9,6 +9,7 @@ import {
     IconNews,
     IconBook,
     IconUserCircle,
+    IconUserPlus,
 } from '@tabler/icons-react';
 import {
     Box,
@@ -37,7 +38,7 @@ const data = [
     { link: '/character', title: 'Character', icon: IconUser },
     { link: '/pricing', title: 'Pricing', icon: IconCurrencyDollar },
     { link: '/news', title: 'News', icon: IconNews },
-    { link: '/', title: 'Learn', icon: IconBook },
+    // { link: '/auth?auth_mode=signup', title: 'Sign Up', icon: IconUserPlus },
 ];
 
 export function Header({ children }: { children?: React.ReactNode }) {
@@ -79,7 +80,15 @@ export function Header({ children }: { children?: React.ReactNode }) {
                         {/* User Section */}
 
                         <Group>
-                            {!userLoggedIn && <Anchor href='/auth'><Button size='md' radius="xl">Login</Button></Anchor>}
+                            {!userLoggedIn && <>
+                                <Link
+                                    href="/auth?auth_mode=signup"
+                                    className={classes.navLink}
+                                >
+                                    Sign Up
+                                </Link>
+                                <Anchor href='/auth'><Button size='md' radius="xl">Login</Button></Anchor>
+                            </>}
                             {userLoggedIn && <>
                                 <Link href="/account">
                                     {userData?.displayName ?
@@ -140,11 +149,18 @@ export function Header({ children }: { children?: React.ReactNode }) {
                     <Divider my="sm" />
 
                     <Group justify="center" p="md">
-                        {!userLoggedIn &&
+                        {/* {!userLoggedIn && <>
+                            <Link
+                                href="/auth?auth_mode=signup"
+                                className={classes.navLink}
+                            >
+                                Sign Up
+                            </Link>
                             <Anchor href='/auth' onClick={closeDrawer}>
                                 <Button size='md' radius="xl">Login</Button>
                             </Anchor>
-                        }
+                        </>
+                        } */}
                         {userLoggedIn &&
                             <Group>
                                 <Link href="/account" onClick={closeDrawer}>

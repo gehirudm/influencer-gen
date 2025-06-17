@@ -29,7 +29,7 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-2">Legal</h3>
             <ul className="space-y-1">
-              <li><a href="/about/privacy_policy" className="hover:underline">Privacy Policy</a></li>
+              {/* <li><a href="/about/privacy_policy" className="hover:underline">Privacy Policy</a></li> */}
               <li><a href="/about/tos" className="hover:underline">Terms of Service</a></li>
               <li><a href="/about/content_moderation" className="hover:underline">Content Moderation</a></li>
             </ul>

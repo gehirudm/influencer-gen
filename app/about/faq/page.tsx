@@ -20,10 +20,6 @@ const faqs = [
     answer: 'Flux is a revolutionary new AI model which produces photorealistic, highly detailed results with amazing accuracy against text prompts. We have two versions of Flux available: Flux Dev and Flux Dev Custom. The latter is geared towards more explicit NSFW image creation.\n\nTo access both Flux models on Fantazy.Pro, you need to purchase the Creator or Master pack.'
   },
   {
-    question: 'How do I post to the discover page and do I get any rewards?',
-    answer: 'To post, locate the "post to discover" button beneath any image on your create page. Simply select an image, click the button, add a title, and you\'re done.\n\nYou\'ll receive 50 tokens when we approve your post. Additionally, you\'ll earn 20 tokens each time another user likes or saves your image.'
-  },
-  {
     question: 'Some of my images are distorted with things like extra fingers. How do I fix it?',
     answer: 'While we use the best AI models available on Fantazy.Pro, occasional imperfections can occur. You can easily fix any distortions using our inpaint feature.'
   },
