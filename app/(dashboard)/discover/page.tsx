@@ -19,6 +19,7 @@ import { IconHeart, IconBookmark, IconShare } from '@tabler/icons-react';
 import classes from './Discover.module.css';
 import RoundTabs from '@/components/RoundTabs/RoundTabs';
 import DiscoverPageCard from '@/components/DiscoverPageCard/DiscoverPageCard';
+import { parseAsStringLiteral, useQueryState } from 'nuqs';
 
 export interface ImagePost {
   id: string;
@@ -33,7 +34,7 @@ export interface ImagePost {
 }
 
 export default function DiscoverPage() {
-  const [filter, setFilter] = useState('new');
+  const [filter, setFilter] = useQueryState('filter', parseAsStringLiteral(["new", "popular"] as const).withDefault("new"))
   const [showNSFW, setShowNSFW] = useState(false);
 
   // Sample data for development
@@ -125,7 +126,7 @@ export default function DiscoverPage() {
 
   // Sort posts based on selected filter
   const displayPosts = [...filteredPosts].sort((a, b) => {
-    if (filter === 'popular' || filter === 'hall-of-fame') {
+    if (filter === 'popular') {
       return b.likes - a.likes;
     }
     // For 'new', we would normally sort by date, but since we don't have dates in our dummy data,
@@ -142,11 +143,11 @@ export default function DiscoverPage() {
       <Group justify="center" mb="md">
         <SegmentedControl
           value={filter}
-          onChange={setFilter}
+          onChange={v => setFilter(v as "new" | "popular") }
           data={[
             { label: 'New', value: 'new' },
             { label: 'Popular', value: 'popular' },
-            { label: 'Hall of Fame', value: 'hall-of-fame' }
+            // { label: 'Hall of Fame', value: 'hall-of-fame' }
           ]}
           className={classes.segmentedControl}
           classNames={{
