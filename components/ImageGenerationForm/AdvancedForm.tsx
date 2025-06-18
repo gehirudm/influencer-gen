@@ -90,7 +90,6 @@ export function AdvancedForm({
     return (
         <form onSubmit={onSubmit}>
             <Stack gap="md">
-                <Title order={3}>Image Generation</Title>
 
                 {/* Basic Settings */}
                 <TextInput
@@ -118,7 +117,7 @@ export function AdvancedForm({
                 {/* Image Upload for img2img */}
                 <Title order={4}>Upload Image (Optional)</Title>
                 <Text size="sm" c="dimmed">Upload an image to transform it rather than generating from scratch</Text>
-                
+
                 <FileDropzonePreview
                     selectedImage={selectedImage}
                     setSelectedImage={setSelectedImage}
@@ -134,16 +133,16 @@ export function AdvancedForm({
                 {selectedImage && (
                     <>
                         <Group grow>
-                            <Button 
-                                variant="light" 
+                            <Button
+                                variant="light"
                                 onClick={() => setMaskEditorOpen(true)}
                                 disabled={!selectedImage}
                             >
                                 Edit Mask
                             </Button>
-                            <Button 
-                                variant="light" 
-                                color="red" 
+                            <Button
+                                variant="light"
+                                color="red"
                                 onClick={() => {
                                     setSelectedImage(null);
                                     setMaskImage(null);
@@ -154,11 +153,39 @@ export function AdvancedForm({
                             </Button>
                         </Group>
 
+                        {maskImage && (
+                            <Paper withBorder={false} p="xs" mt="xs">
+                                <Text size="sm" fw={500} mb="xs">Current Mask:</Text>
+                                <Group justify="center">
+                                    <Paper withBorder style={{ position: 'relative', maxWidth: '100%' }}>
+                                        <img
+                                            src={maskImage}
+                                            alt="Mask"
+                                            style={{
+                                                maxWidth: '200px',
+                                                borderRadius: 'var(--mantine-radius-md)'
+                                            }}
+                                            onLoad={e => {
+                                                console.log({
+                                                    width: e.currentTarget.naturalWidth,
+                                                    height: e.currentTarget.naturalHeight
+                                                })
+                                            }}
+                                        />
+                                    </Paper>
+                                </Group>
+                            </Paper>
+                        )}
+
+                        <Text size="sm" c="dimmed">Transformation Strength</Text>
+
                         <Slider
                             label={`Transformation Strength: ${form.values.strength}`}
+                            pb={20}
+                            px={20}
                             min={0}
                             max={1}
-                            step={0.01}
+                            step={0.05}
                             marks={[
                                 { value: 0, label: 'Subtle' },
                                 { value: 0.5, label: 'Balanced' },

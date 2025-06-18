@@ -40,7 +40,15 @@ type USER_LEVEL = ElementType<typeof SUBSCRIPTION_TIERS> | "admin";
 
 export const SUBSCRIPTION_FEATURES: Record<USER_LEVEL, FeatureId[]> = {
     // Free tier has basic features
-    'free': [],
+    'free': [
+        FeatureId.IMAGE_GENENRATION_SIMPLE,
+        FeatureId.IMAGE_GENERATION_ADVANCED,
+        FeatureId.IMAGE_GENERATION_IMG2IMG,
+        FeatureId.IMAGE_EDITING,
+        FeatureId.IMAGE_GENERATION_WITH_CHARACTER,
+        FeatureId.CHARACTER_CREATION,
+        FeatureId.PROJECT_CREATION,
+    ],
 
     // Promo tier has all basic features plus no watermark
     'Promo': [

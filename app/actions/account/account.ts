@@ -108,3 +108,45 @@ export async function deleteUserAccount(): Promise<{ success: boolean; message: 
         };
     }
 }
+
+export async function changeUserName(newDisplayName: string): Promise<{ success: boolean; message: string }> {
+    try {
+        // Initialize Firebase Admin
+        const db = getFirestore(firebaseApp);
+        const auth = getAuth(firebaseApp);
+
+        // Get session cookie
+        const sessionCookie = (await cookies()).get('session')?.value;
+        
+        if (!sessionCookie) {
+            return { success: false, message: 'Authentication required' };
+        }
+        
+        // Verify the session cookie
+        const decodedToken = await auth.verifySessionCookie(sessionCookie, true);
+        const userId = decodedToken.uid;
+        
+        if (!userId) {
+            return { success: false, message: 'User not authenticated' };
+        }
+
+        // Update the user's display name in Firestore
+        const userRef = db.collection('users').doc(userId);
+        await userRef.update({
+            displayName: newDisplayName
+        });
+
+        return {
+            success: true,
+            message: 'Display name updated successfully'
+        };
+        
+    } catch (error: any) {
+        console.error('Error updating user display name:', error);
+        
+        return { 
+            success: false, 
+            message: error.message || 'Failed to update display name. Please try again.' 
+        };
+    }
+}

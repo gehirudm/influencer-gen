@@ -27,8 +27,8 @@ interface ImageMaskEditorModalProps {
 
 export default function ImageMaskEditorModal({
     imageUrl,
-    width = 512,
-    height = 512,
+    width: _width = 512,
+    height: _height = 512,
     opened,
     onClose,
     onConfirm,
@@ -38,6 +38,10 @@ export default function ImageMaskEditorModal({
     const [brushSize, setBrushSize] = useState(20);
     const [isEraser, setIsEraser] = useState(false);
     const [backgroundImage, setBackgroundImage] = useState(imageUrl);
+
+    const aspectRatio = _width / _height;
+    const width = Math.min(_width, 512);
+    const height = Math.round(width / aspectRatio);
 
     const handleClear = () => {
         canvasRef.current?.clearCanvas();
@@ -150,9 +154,16 @@ export default function ImageMaskEditorModal({
                     <Slider
                         label={`Size: ${brushSize}px`}
                         labelAlwaysOn
-                        step={1}
+                        step={25}
                         min={1}
                         max={100}
+                        marks={[
+                            { value: 1 },
+                            { value: 25 },
+                            { value: 50 },
+                            { value: 75 },
+                            { value: 100 },
+                        ]}
                         value={brushSize}
                         onChange={(value) => setBrushSize(value)}
                         mb="md"
@@ -183,17 +194,16 @@ export default function ImageMaskEditorModal({
                 </Paper>
 
                 <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: height,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                     width: "100%",
                     overflow: 'auto',
-                    position: 'relative'
+                    position: 'relative',
                 }}>
                     <ReactSketchCanvas
-                        width={`${width}px`}
-                        height={`${height}px`}
+                        width={width + "px"}
+                        height={height + "px"}
                         ref={canvasRef}
                         strokeWidth={brushSize}
                         eraserWidth={brushSize}
@@ -201,6 +211,7 @@ export default function ImageMaskEditorModal({
                         canvasColor="black"
                         backgroundImage={backgroundImage}
                         exportWithBackgroundImage={false}
+                        preserveBackgroundImageAspectRatio="xMidYMax"
                     />
                 </div>
 

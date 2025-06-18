@@ -28,7 +28,6 @@ export function FileDropzonePreview({
 
         reader.onloadend = () => {
             const base64String = reader.result as string;
-            console.log(base64String);
             setSelectedImage(base64String);
             setSelectedImageFile?.(file);
             setLoading(false);

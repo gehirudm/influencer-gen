@@ -79,12 +79,14 @@ export function ImageGenerationForm({
                 <RoundTabs value={generationMode} onChange={v => setGenerationMode(v as "simple" | "advanced" | "nudify")} tabs={[
                     {
                         name: 'Simple',
-                        panel: <SimpleForm
-                            form={form}
-                            loading={loading}
-                            onSubmit={onSubmit}
-                            setFormValue={setFormValue}
-                        />,
+                        panel: <FeatureLock featureId={FeatureId.IMAGE_GENENRATION_SIMPLE}>
+                            <SimpleForm
+                                form={form}
+                                loading={loading}
+                                onSubmit={onSubmit}
+                                setFormValue={setFormValue}
+                            />
+                        </FeatureLock>,
                         value: 'simple'
                     },
                     {
@@ -108,16 +110,18 @@ export function ImageGenerationForm({
                     },
                     {
                         name: 'Undress AI',
-                        panel: <NudifyForm
-                            form={form}
-                            loading={loading}
-                            selectedImage={selectedImage}
-                            setSelectedImage={setSelectedImage}
-                            // selectedImageDimensions={selectedImageDimensions}
-                            // setSelectedImageDimensions={setSelectedImageDimensions}
-                            onSubmit={onSubmit}
-                            setFormValue={setFormValue}
-                        />,
+                        panel: <FeatureLock featureId={FeatureId.NUDIFY}>
+                            <NudifyForm
+                                form={form}
+                                loading={loading}
+                                selectedImage={selectedImage}
+                                setSelectedImage={setSelectedImage}
+                                // selectedImageDimensions={selectedImageDimensions}
+                                // setSelectedImageDimensions={setSelectedImageDimensions}
+                                onSubmit={onSubmit}
+                                setFormValue={setFormValue}
+                            />
+                        </FeatureLock>,
                         value: "nudify"
                     },
                 ]} />
