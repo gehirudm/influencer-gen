@@ -183,11 +183,16 @@ interface StableDiffusionRequestInput {
      * Will trigger the auto cloth masking and image inpainting for the base image
      */
     auto_mask_clothes?: boolean;
+
+    /**
+     * Will add the watermark to the image
+     */
+    add_watermark?: boolean;
 }
 
 type ImageGenerationRequestInput =
     StableDiffusionRequestInput &
     {
         model_name: "lustify" | "realism",
-        generation_type: "simple" | "advanced" | "nudify"
+        generation_type: "simple" | "advanced" | "nudify",
     };

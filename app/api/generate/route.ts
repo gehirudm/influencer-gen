@@ -63,6 +63,20 @@ async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firest
     return currentTokens - IMAGE_GENERATION_COST;
 }
 
+async function checkShouldAddWatermark(userId: string, db: FirebaseFirestore.Firestore) {
+    const userRef = db.collection('users').doc(userId).collection('private').doc('system');
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+        throw new Error('User profile not found');
+    }
+
+    const userData = userDoc.data();
+    const userTier = userData?.subscription_tier || "free";
+
+    return userTier === "free";
+}
+
 async function handleBaseAndMaskImages(storage: any, userId: string, jobId: string, cleanedBody: Partial<StableDiffusionRequestInput>) {
     // Handle image uploads if present
     const imageFiles: { baseImagePath?: string, maskImagePath?: string } = {};
@@ -227,6 +241,9 @@ export async function POST(request: NextRequest) {
         const db = getFirestore(adminApp);
         const storage = getStorage(adminApp);
         const tokensRemaining = await checkAndDeductTokens(userId, db);
+        const addWatermark = await checkShouldAddWatermark(userId, db);
+
+        cleanedBody["add_watermark"] = addWatermark;
 
         console.log('Image generation requested:', {
             ...cleanedBody,
