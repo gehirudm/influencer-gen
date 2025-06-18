@@ -46,6 +46,7 @@ export const SUBSCRIPTION_FEATURES: Record<USER_LEVEL, FeatureId[]> = {
         FeatureId.IMAGE_GENERATION_IMG2IMG,
         FeatureId.IMAGE_EDITING,
         FeatureId.IMAGE_GENERATION_WITH_CHARACTER,
+        FeatureId.NUDIFY,
         FeatureId.CHARACTER_CREATION,
         FeatureId.PROJECT_CREATION,
     ],
