@@ -12,6 +12,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ImageGenerationForm, aspectRatios } from '@/components/ImageGenerationForm/ImageGenerationForm';
 import { UserJobsExplorer } from '@/components/UserJobsExplorer/UserJobsExplorer';
 import { parseAsStringLiteral, useQueryState } from 'nuqs'
+import RoundTabs from '@/components/RoundTabs/RoundTabs';
+import { UserProjectsExplorer } from '@/components/UserProjectsExplorer/UserProjectsExplorer';
 
 export default function ImageGeneratorPage() {
     const form = useForm({
@@ -48,8 +50,10 @@ export default function ImageGeneratorPage() {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [selectedImageDimentions, setSelectedImageDimensions] = useState<{ width: number, height: number } | null>(null);
     const [maskImage, setMaskImage] = useState<string | null>(null);
-    const [generationMode, setGenerationMode] = useQueryState('gen_type', parseAsStringLiteral(["simple", "advanced", "nudify"] as const).withDefault("simple"))
     const [maskEditorOpen, setMaskEditorOpen] = useState(false);
+
+    const [generationMode, setGenerationMode] = useQueryState('gen_type', parseAsStringLiteral(["simple", "advanced", "nudify"] as const).withDefault("simple"))
+    const [explorerTab, setExplorerTab] = useQueryState('explorer_tab', parseAsStringLiteral(["history", "projects", "posts"] as const).withDefault("history"))
 
     const router = useRouter();
 
@@ -285,14 +289,36 @@ export default function ImageGeneratorPage() {
                 </Grid.Col>
 
                 <Grid.Col span={{ base: 12, md: 7 }}>
-                    <UserJobsExplorer
-                        userProjects={userProjects}
-                        onEdit={handleEdit}
-                        onRecreate={handleRecreate}
-                        onInpaint={handleInpaint}
-                        onAddToProject={handleAddToProject}
-                        onRecheckStatus={handleRecheckStatus}
-                    />
+                    <RoundTabs value={explorerTab} onChange={v => setExplorerTab(v as "history" | "projects" | "posts")} tabs={[
+                        {
+                            name: 'History',
+                            panel: (
+                                <UserJobsExplorer
+                                    userProjects={userProjects}
+                                    onEdit={handleEdit}
+                                    onRecreate={handleRecreate}
+                                    onInpaint={handleInpaint}
+                                    onAddToProject={handleAddToProject}
+                                    onRecheckStatus={handleRecheckStatus}
+                                />
+                            ),
+                            value: 'history'
+                        },
+                        {
+                            name: 'Projects',
+                            panel: (
+                                <UserProjectsExplorer></UserProjectsExplorer>
+                            ),
+                            value: "projects"
+                        },
+                        {
+                            name: 'Posts',
+                            panel: (
+                                <></>
+                            ),
+                            value: "posts"
+                        },
+                    ]} />
                 </Grid.Col>
             </Grid>
 

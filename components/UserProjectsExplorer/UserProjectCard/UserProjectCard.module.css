@@ -1,0 +1,195 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  min-width: 200px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--mantine-shadow-lg);
+}
+
+.imageSection {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  border-radius: var(--mantine-radius-md) var(--mantine-radius-md) 0 0;
+}
+
+.image {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+.imageSection:hover .image {
+  transform: scale(1.05);
+}
+
+.controls {
+  margin-top: auto;
+  padding-top: var(--mantine-spacing-md);
+}
+
+/* Modal styles */
+.modalContent {
+  overflow: hidden;
+  border-radius: var(--mantine-radius-lg);
+  max-width: 90vw;
+}
+
+.modalBody {
+  padding: 0;
+}
+
+.modalInner {
+  padding: 0;
+}
+
+.previewContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.imagePreview {
+  position: relative;
+  width: 100%;
+  height: 70vh;
+  max-height: 80vh;
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.navButton:hover {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.watermark {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.pagination {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 4px 8px;
+  border-radius: var(--mantine-radius-sm);
+  font-size: 12px;
+}
+
+.previewControls {
+  padding: var(--mantine-spacing-md);
+  background-color: var(--mantine-color-body);
+}
+
+.actionButton {
+  flex: 1;
+  min-width: 80px;
+}
+
+.seedControl {
+  padding-top: var(--mantine-spacing-xs);
+  border-top: 1px solid var(--mantine-color-gray-2);
+}
+
+.switchRoot {
+  align-items: center;
+}
+
+.switchTrack {
+  cursor: pointer;
+}
+
+.switchThumb {
+  cursor: pointer;
+}
+
+.switchLabel {
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.closeButton {
+  transition: background-color 0.2s ease;
+}
+
+.closeButton:hover {
+  background-color: var(--mantine-color-red-6);
+}
+
+/* Loading and empty states */
+.generatingContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.generatingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(45deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
+}
+
+.generatingText {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modalContent {
+    max-width: 95vw;
+  }
+  
+  .imagePreview {
+    height: 50vh;
+  }
+  
+  .actionButton {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}

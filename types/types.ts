@@ -38,6 +38,8 @@ interface UserProject {
     userId: string;
     name: string;
     description: string;
+    imageIds: string[];
+    imageUrls: string[];
 }
 
 // Interface for the 'characters' collection

@@ -35,7 +35,6 @@ export function UserJobsExplorer({
     changeSortOrder
   } = useUserJobs();
 
-  const [activeTab, setActiveTab] = useState('History');
   const [itemsPerPage, setItemsPerPage] = useState('25');
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>();
 
@@ -87,25 +86,6 @@ export function UserJobsExplorer({
 
   return (
     <Stack gap="md">
-      {/* Navigation tabs */}
-      <SegmentedControl
-        value={activeTab}
-        onChange={setActiveTab}
-        data={[
-          { label: 'History', value: 'History' },
-          { label: 'Projects', value: 'Projects' },
-          { label: 'Collected', value: 'Collected' },
-          { label: 'Posts', value: 'Posts' },
-        ]}
-        className={classes.segmentedControl}
-        classNames={{
-          indicator: classes.segmentedIndicator,
-          root: classes.segmentedRoot,
-          control: classes.segmentedControl,
-          label: classes.segmentedLabel
-        }}
-      />
-
       {/* Filters and controls */}
       <Paper p="md" radius="md" className={classes.controlsContainer}>
         <Group justify="space-between" align="center">
@@ -205,7 +185,7 @@ export function UserJobsExplorer({
                   onDelete={() => deleteJob(job.id)}
                 /> */}
                 <GenJobCardWithPreview
-                  // jobId={job.id}
+                  imageIds={job.imageIds}
                   // prompt={job.metadata?.prompt || ""}
                   // status={job.status}
                   isGenerating={job.status != 'COMPLETED'}
