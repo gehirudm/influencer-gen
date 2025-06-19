@@ -268,6 +268,9 @@ export async function POST(request: NextRequest) {
         const addWatermark = await checkShouldAddWatermark(userId, db);
 
         cleanedBody["add_watermark"] = addWatermark;
+        // if (generation_type === "nudify") {
+        //     cleanedBody["auto_mask_clothes"] = true;
+        // }
 
         console.log('Image generation requested:', {
             ...cleanedBody,

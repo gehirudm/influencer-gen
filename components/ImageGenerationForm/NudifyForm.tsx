@@ -11,7 +11,8 @@ import {
     Center,
     Paper,
     UnstyledButton,
-    Collapse
+    Collapse,
+    Switch
 } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { IconAlertCircle, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
@@ -19,6 +20,8 @@ import { FileDropzonePreview } from '@/components/FileDropzonePreview';
 import { aspectRatios } from './ImageGenerationForm';
 import { useImageToDataUrl } from '@/hooks/useImgToDataUrl';
 import { COST_MAP } from '@/lib/cost';
+import { notifications } from '@mantine/notifications';
+import { useRouter } from 'next/navigation';
 
 interface NudifyFormProps {
     form: UseFormReturnType<any>;
@@ -95,7 +98,6 @@ const nudifyOptions: Record<string, { label: string, values: string[] }> = {
 
 export function NudifyForm({
     form,
-    loading,
     selectedImage,
     setSelectedImage,
     onSubmit,
@@ -103,6 +105,11 @@ export function NudifyForm({
 }: NudifyFormProps) {
     const { dataUrl, loading: dataUrlLoading } = useImageToDataUrl(selectedImage);
     const [expandedSection, setExpandedSection] = useState<string | null>(null);
+
+    const [loading, setLoading] = useState(false);
+    const [removeClothingOnly, setRemoveClothingOnly] = useState(true);
+
+    const router = useRouter();
 
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({
         age: "18",
@@ -180,26 +187,83 @@ export function NudifyForm({
         );
     };
 
-    const handleSubmit = () => {
-        if (dataUrl) {
-            const promptParts = [
-                `${selectedOptions.age} years old woman`,
-                `${selectedOptions.body_type.toLowerCase()} body type`,
-                `${selectedOptions.breast_size.toLowerCase()} breasts`,
-                `${selectedOptions.butt_size.toLowerCase()} butt`,
-                `${selectedOptions.cloth}`,
-                `${selectedOptions.pose} pose`,
-                "high quality, detailed, realistic"
-            ];
+    const handleSubmit = async () => {
+        if (!dataUrl) return;
 
-            const prompt = promptParts.join(", ");
+        const prompt = [
+            `${selectedOptions.age} years old woman`,
+            `${selectedOptions.body_type.toLowerCase()} body type`,
+            `${selectedOptions.breast_size.toLowerCase()} breasts`,
+            `${selectedOptions.butt_size.toLowerCase()} butt`,
+            `${selectedOptions.cloth}`,
+            `${selectedOptions.pose} pose`,
+            "high quality, detailed, realistic"
+        ].join(", ");
 
-            // Set the base image and prompt for nudify processing
-            form.setFieldValue('base_img', dataUrl.split(',')[1]); // Remove the data:image/... prefix
-            form.setFieldValue('prompt', prompt); // Set the constructed prompt
-            form.setFieldValue('model_name', 'nudify'); // Force nudify model
-            form.setFieldValue('nudify', true);
-            onSubmit();
+        // Set the base image and prompt for nudify processing
+        form.setFieldValue('base_img', dataUrl.split(',')[1]); // Remove the data:image/... prefix
+        form.setFieldValue('prompt', prompt); // Set the constructed prompt
+        form.setFieldValue('model_name', 'nudify'); // Force nudify model
+        form.setFieldValue('nudify', true);
+
+        // Get dimensions based on selected aspect ratio
+        const selectedRatio = aspectRatios.find(ratio => ratio.value === form.values.aspectRatio);
+        const dimensions = selectedRatio ? { width: selectedRatio.width, height: selectedRatio.height } : { width: 800, height: 1200 };
+
+        setLoading(true);
+
+        try {
+            // Prepare request payload
+            const payload = {
+                prompt: prompt,
+                negative_prompt: "",
+                width: dimensions.width,
+                height: dimensions.height,
+                model_name: "lustify",
+                generation_type: 'nudify',
+                base_img: dataUrl,
+                auto_mask_clothes: removeClothingOnly
+            };
+
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.status === 401) {
+                notifications.show({
+                    title: 'Session Expired',
+                    message: 'Please log in again to continue generating images.',
+                    color: 'blue'
+                });
+
+                router.push('/auth');
+                setLoading(false);
+                return;
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate image');
+            }
+
+            notifications.show({
+                title: 'Success',
+                message: 'Image generation started successfully!',
+                color: 'green'
+            });
+        } catch (error: any) {
+            console.error('Error generating image:', error);
+            notifications.show({
+                title: 'Error',
+                message: error.message || 'Failed to generate image',
+                color: 'red'
+            });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -235,6 +299,16 @@ export function NudifyForm({
                     onChange={(value: string) => setSelectedOptions({ ...selectedOptions, [key]: value })}
                 />
             ))}
+
+            <Group mt="md">
+                <Switch
+                    label="Remove clothing only"
+                    description="Only remove clothes without changing body features"
+                    checked={removeClothingOnly}
+                    onChange={(event) => setRemoveClothingOnly(event.currentTarget.checked)}
+                    size="md"
+                />
+            </Group>
 
             {renderImageFormatSelector()}
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, Image, Group, ActionIcon, Modal, Stack, Switch, Button, Skeleton } from '@mantine/core';
+import { Card, Image, Group, ActionIcon, Modal, Stack, Switch, Button, Skeleton, Anchor } from '@mantine/core';
 import { IconPlus, IconDownload, IconTrash, IconChevronLeft, IconChevronRight, IconX, IconFolderPlus } from '@tabler/icons-react';
 import classes from './GenJobCardWithPreview.module.css';
 import ShinyText from '@/components/blocks/TextAnimations/ShinyText/ShinyText';
@@ -74,13 +74,13 @@ export function GenJobCardWithPreview({
                     className={classes.imageSection}
                     onClick={(isLoading || isGenerating) ? undefined : handleOpenPreview}
                     style={{ cursor: isLoading ? 'default' : 'pointer' }}
-                > 
+                >
                     {isGenerating ? (
                         <div className={classes.generatingContainer}>
                             <div className={classes.generatingOverlay}>
-                                <ShinyText 
-                                    text="Generating..." 
-                                    speed={3} 
+                                <ShinyText
+                                    text="Generating..."
+                                    speed={3}
                                     className={classes.generatingText}
                                 />
                             </div>
@@ -110,17 +110,19 @@ export function GenJobCardWithPreview({
                             <IconFolderPlus size={20} />
                         </ActionIcon>
 
-                        <ActionIcon
-                            variant="subtle"
-                            color="gray"
-                            size="lg"
-                            radius="md"
-                            onClick={isLoading ? undefined : () => onDownload?.(images[thumbnailIndex])}
-                            disabled={isLoading || isGenerating}
-                            style={{ opacity: isLoading ? 0.5 : 1 }}
-                        >
-                            <IconDownload size={20} />
-                        </ActionIcon>
+                        {!(isLoading || isGenerating) && (
+                            <Anchor href={images[thumbnailIndex]} download={images[thumbnailIndex].split("/").pop() || "image.png"} target="_blank">
+                                <ActionIcon
+                                    variant="subtle"
+                                    color="gray"
+                                    size="lg"
+                                    radius="md"
+                                    style={{ opacity: isLoading ? 0.5 : 1 }}
+                                >
+                                    <IconDownload size={20} />
+                                </ActionIcon>
+                            </Anchor>
+                        )}
                     </Group>
 
                     <ActionIcon
