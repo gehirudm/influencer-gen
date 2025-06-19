@@ -4,6 +4,7 @@ import { getAuth } from 'firebase-admin/auth';
 import adminApp from '@/lib/firebaseAdmin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
+import { checkGenerateRequestUserAllowance } from '@/lib/subscriptions';
 
 // Define the cost of generating an image
 const IMAGE_GENERATION_COST = 1; // Cost in tokens
@@ -203,7 +204,9 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json();
 
-        const cleanedBody: Partial<ImageGenerationRequestInput> = {};
+        let cleanedBody = {} as {
+            [K in typeof VALID_INPUT_KEYS[number]]?: any;
+        } & ImageGenerationRequestInput;
 
         for (const key of VALID_INPUT_KEYS) {
             if (body[key] !== undefined) {
@@ -239,6 +242,27 @@ export async function POST(request: NextRequest) {
         }
 
         const db = getFirestore(adminApp);
+
+        const userSystemRef = db.collection('users').doc(userId).collection('private').doc('system');
+        const userSystemDoc = await userSystemRef.get();
+        
+        if (!userSystemDoc.exists) {
+            return NextResponse.json(
+                { error: 'User profile not found' },
+                { status: 404 }
+            );
+        }
+
+        const userData = userSystemDoc.data();
+        const userSubTier = userData?.subscription_tier || "free";
+
+        if (!checkGenerateRequestUserAllowance(cleanedBody, userSubTier)) {
+            return NextResponse.json(
+                { error: 'Unauthorized: Subscription required' },
+                { status: 401 }
+            );
+        }
+
         const storage = getStorage(adminApp);
         const tokensRemaining = await checkAndDeductTokens(userId, db);
         const addWatermark = await checkShouldAddWatermark(userId, db);
@@ -249,6 +273,7 @@ export async function POST(request: NextRequest) {
             ...cleanedBody,
             base_img: cleanedBody.base_img ? 'base_img present' : null,
             mask_img: cleanedBody.mask_img ? 'mask_img present' : null,
+            userTier: userSubTier,
         });
 
         const jobData = await generateImage({

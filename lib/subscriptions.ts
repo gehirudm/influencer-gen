@@ -12,6 +12,8 @@ export enum FeatureId {
     PROJECT_CREATION = 'project_creation',
 }
 
+const _ALL_FEATURES = Object.values(FeatureId);
+
 export const FeatureDisplayNames: Record<FeatureId, string> = {
     [FeatureId.IMAGE_GENENRATION_SIMPLE]: 'AI Image Generation (Simple)',
     [FeatureId.IMAGE_GENERATION_ADVANCED]: 'AI Image Generation (Advanced)',
@@ -24,6 +26,20 @@ export const FeatureDisplayNames: Record<FeatureId, string> = {
     [FeatureId.NUDIFY]: 'Nudify',
     [FeatureId.CHARACTER_CREATION]: 'Character Creation',
     [FeatureId.PROJECT_CREATION]: 'Project Creation',
+}
+
+export const GenerationRequestFeatureCheck: Record<FeatureId, (req: ImageGenerationRequestInput) => boolean> = {
+    [FeatureId.IMAGE_GENENRATION_SIMPLE]: (req) => req.generation_type === 'simple',
+    [FeatureId.IMAGE_GENERATION_ADVANCED]: (req) => req.generation_type === 'advanced',
+    [FeatureId.IMAGE_GENERATION_IMG2IMG]: (req) => req.generation_type === 'advanced' && !!req.base_img,
+    [FeatureId.IMAGE_GENERATION_NO_WATERMARK]: (req) => req.add_watermark != undefined && !req.add_watermark,
+    [FeatureId.IMAGE_EDITING]: (req) => !!req.base_img && !!req.mask_img,
+    [FeatureId.IMAGE_GENERATION_WITH_CHARACTER]: (req) => req.generation_type === 'advanced' && !!req.base_img,
+    [FeatureId.CHARACTER_ENGINE_TRAINING]: (req) => false,
+    [FeatureId.IMAGE_GENERATION_CHARACTER_ENGINE]: (req) => false,
+    [FeatureId.NUDIFY]: (req) => req.generation_type === "nudify",
+    [FeatureId.CHARACTER_CREATION]: (req) => false,
+    [FeatureId.PROJECT_CREATION]: (req) => false,
 }
 
 export const SUBSCRIPTION_TIERS = ["free", "Basic Plan", "Premium Plan", "Promo"] as const;
@@ -122,4 +138,14 @@ export const getSubscriptionTierForFeature = (featureId: FeatureId): SUBSCRIPTIO
     }
 
     return "Premium Plan";
+}
+
+export const checkGenerateRequestUserAllowance = (request: ImageGenerationRequestInput, userTier: SUBSCRIPTION_TIERS_TYPE): boolean => {
+    for (const feature of _ALL_FEATURES) {
+        if (GenerationRequestFeatureCheck[feature](request) 
+            && !SUBSCRIPTION_FEATURES[userTier].includes(feature))
+        return false;
+    }
+
+    return true;
 }
