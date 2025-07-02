@@ -197,7 +197,7 @@ export function NudifyForm({
             `${selectedOptions.butt_size.toLowerCase()} butt`,
             `${selectedOptions.cloth}`,
             `${selectedOptions.pose} pose`,
-            "high quality, detailed, realistic"
+            "high quality, detailed, realistic, match the image as closely as possible, match the lighting",
         ].join(", ");
 
         // Set the base image and prompt for nudify processing
@@ -222,6 +222,7 @@ export function NudifyForm({
                 model_name: "lustify",
                 generation_type: 'nudify',
                 base_img: dataUrl,
+                cfg_scale: 5,
                 auto_mask_clothes: removeClothingOnly
             };
 

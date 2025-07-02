@@ -28,10 +28,10 @@ interface AddToProjectModalProps {
 }
 
 export function AddToProjectModal({ opened, onClose, imageUrl, imageId }: AddToProjectModalProps) {
-  const { projects, loading: projectsLoading } = useUserProjects();
+  const { projects, loading: projectsLoading, addImagesToProject } = useUserProjects();
   const [selectedProject, setSelectedProject] = useState<UserProject & { id: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Reset selected project when modal opens
   useEffect(() => {
     if (opened && projects.length > 0) {
@@ -54,15 +54,18 @@ export function AddToProjectModal({ opened, onClose, imageUrl, imageId }: AddToP
 
     try {
       // Update the image document with the project ID
+      console.log({ imageId, userId: selectedProject.userId });
       const imageDocRef = doc(db, 'images', imageId);
       await updateDoc(imageDocRef, { projectId: selectedProject.id });
+
+      await addImagesToProject(selectedProject.id, [imageId], [imageUrl] as string[]);
 
       notifications.show({
         title: 'Success',
         message: `Image added to project "${selectedProject.name}" successfully!`,
         color: 'green',
       });
-      
+
       onClose();
     } catch (error) {
       console.error('Error adding image to project:', error);
@@ -128,7 +131,7 @@ export function AddToProjectModal({ opened, onClose, imageUrl, imageId }: AddToP
         {/* Project Selection */}
         <Paper withBorder p="xs" radius="md">
           <Text size="sm" fw={500} mb="xs">Select Project</Text>
-          
+
           {projectsLoading ? (
             <Center p="md">
               <Loader size="sm" />
@@ -173,7 +176,7 @@ export function AddToProjectModal({ opened, onClose, imageUrl, imageId }: AddToP
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleAddToProject}
             loading={isSubmitting}
             disabled={projectsLoading || projects.length === 0 || !selectedProject}

@@ -32,20 +32,21 @@ export function GenJobCardWithPreview({
     onSaveChar,
     onRemake
 }: GenJobCardWithPreviewProps) {
+    console.log(imageIds)
     const [previewOpen, setPreviewOpen] = useState(false);
     const [withSeed, setWithSeed] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(thumbnailIndex);
     const [addToProjectModalOpen, setAddToProjectModalOpen] = useState(false);
 
     // Check if we're in loading state
-    const isLoading = !imageUrls || imageUrls.length == 0;
+    const isLoading = !imageUrls || imageUrls.length == 0 && !isGenerating;
 
     // Use empty array for loading state or empty imageUrls
     const images = imageUrls || [];
 
     // Get the current image URL if available
     const currentImageUrl = images.length > 0 ? images[currentImageIndex] : '';
-    const currentImageId = images.length > 0 ? (imageUrls || [])[currentImageIndex] : '';
+    const currentImageId = images.length > 0 ? (imageIds || [])[currentImageIndex] : '';
 
     // Handle navigation between images
     const goToNextImage = () => {
@@ -136,7 +137,7 @@ export function GenJobCardWithPreview({
                         size="lg"
                         radius="md"
                         onClick={isLoading ? undefined : onDelete}
-                        disabled={isLoading || isGenerating}
+                        disabled={isLoading}
                         style={{ opacity: isLoading ? 0.5 : 1 }}
                     >
                         <IconTrash size={20} />
@@ -190,8 +191,6 @@ export function GenJobCardWithPreview({
                                 <IconChevronRight size={30} />
                             </ActionIcon>
                         )}
-
-                        <div className={classes.watermark}>GenInfluence.ai</div>
 
                         {images.length > 1 && (
                             <div className={classes.pagination}>

@@ -193,6 +193,8 @@ export function useUserJobs(initialPageSize: number = 10, initialSortOrder: Sort
             const jobRef = doc(db, 'jobs', jobId);
             const jobDoc = await getDoc(jobRef);
 
+            console.log(jobRef.id)
+
             if (!jobDoc.exists()) {
                 console.error(`Job with ID ${jobId} not found`);
                 return null;
@@ -250,6 +252,8 @@ export function useUserJobs(initialPageSize: number = 10, initialSortOrder: Sort
             for (const doc of querySnapshot.docs) {
                 const jobData = doc.data() as JobData;
                 jobData.id = doc.id;
+
+                console.log(jobData)
 
                 // Skip jobs with COMPLETED status but no imageUrls (backward compatibility)
                 if (jobData.status === 'COMPLETED' && !jobData.imageUrls) {

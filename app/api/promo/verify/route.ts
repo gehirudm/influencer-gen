@@ -37,6 +37,16 @@ export async function POST(request: NextRequest) {
     
     // Use transaction to ensure atomic operations
     const result = await db.runTransaction(async (transaction) => {
+      // First, check if the user has already used any promo code
+      const userTokenHistoryRef = db.collection('users').doc(userId).collection('tokenHistory');
+      const promoUsageQuery = await transaction.get(
+        userTokenHistoryRef.where('type', '==', 'promo')
+      );
+      
+      if (!promoUsageQuery.empty) {
+        throw new Error("You have already redeemed a promo code on this account");
+      }
+
       const promoDoc = await transaction.get(promoRef);
       
       // Check if promo code exists
@@ -68,7 +78,8 @@ export async function POST(request: NextRequest) {
         transaction.set(userSystemRef, {
           subscription_tier: "promo",
           tokens: promoData?.tokenAmount,
-          lastUpdated: new Date().toISOString()
+          lastUpdated: new Date().toISOString(),
+          hasUsedPromoCode: true
         });
         
         // Mark promo code as used
@@ -103,7 +114,8 @@ export async function POST(request: NextRequest) {
       transaction.update(userSystemRef, {
         subscription_tier,
         tokens: currentTokens + tokenAmount,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
+        hasUsedPromoCode: true
       });
       
       // Add redemption record to user's history

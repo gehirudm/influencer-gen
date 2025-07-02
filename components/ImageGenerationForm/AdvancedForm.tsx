@@ -16,11 +16,13 @@ import {
     Center,
     Paper
 } from '@mantine/core';
-import { UseFormReturnType } from '@mantine/form';
+import { useForm, UseFormReturnType } from '@mantine/form';
 import { IconRefresh, IconEraser, IconChevronUp } from '@tabler/icons-react';
 import { FileDropzonePreview } from '@/components/FileDropzonePreview';
 import { aspectRatios } from './ImageGenerationForm';
 import { COST_MAP } from '@/lib/cost';
+import { notifications } from '@mantine/notifications';
+import { useRouter } from 'next/navigation';
 
 interface AdvancedFormProps {
     form: UseFormReturnType<any>;
@@ -37,8 +39,6 @@ interface AdvancedFormProps {
 }
 
 export function AdvancedForm({
-    form,
-    loading,
     selectedImage,
     setSelectedImage,
     selectedImageDimensions,
@@ -46,9 +46,53 @@ export function AdvancedForm({
     maskImage,
     setMaskImage,
     setMaskEditorOpen,
-    onSubmit,
     setFormValue
 }: AdvancedFormProps) {
+    const generationMode = "advanced";
+    const [loading, setLoading] = useState(false);
+
+    const router = useRouter();
+
+    // Function to get dimensions based on selected aspect ratio
+    const getDimensions = () => {
+        // If we have an image and we're doing img2img, use its dimensions
+        if (selectedImage && selectedImageDimensions) {
+            return selectedImageDimensions;
+        }
+
+        // Otherwise use the selected aspect ratio
+        const ratio = aspectRatios.find(r => r.value === form.values.aspectRatio);
+        if (!ratio) {
+            return { width: 512, height: 768 }; // Default to portrait if not found
+        }
+        
+        return {
+            width: ratio.width,
+            height: ratio.height
+        };
+    };
+
+    const form = useForm({
+        initialValues: {
+            prompt: '',
+            negative_prompt: '',
+            aspectRatio: 'portrait',
+            steps: 30,
+            cfg_scale: 3,
+            seed: '',
+            batch_size: 1,
+            solver_order: 2 as 2 | 3,
+            strength: 0.75,
+            model_name: 'realism' as 'lustify' | 'realism',
+            nudify: false
+        },
+        validate: {
+            prompt: (value) => value.trim().length === 0 ? 'Prompt is required' : null,
+            batch_size: (value) => value < 1 || value > 4 ? 'Batch size must be between 1 and 4' : null,
+            strength: (value) => value < 0 || value > 1 ? 'Strength must be between 0 and 1' : null,
+        }
+    });
+
     // Generate a random seed
     const generateRandomSeed = () => {
         const randomSeed = Math.floor(Math.random() * 1000000000).toString();
@@ -87,8 +131,87 @@ export function AdvancedForm({
         );
     };
 
+    const handleGenerate = async () => {
+        const { width, height } = getDimensions();
+        console.log(width, height);
+        setLoading(true);
+
+        try {
+            // Prepare request payload
+            const payload: Partial<ImageGenerationRequestInput> = {
+                prompt: form.values.prompt,
+                negative_prompt: form.values.negative_prompt || undefined,
+                width,
+                height,
+                steps: form.values.steps,
+                cfg_scale: form.values.cfg_scale,
+                seed: form.values.seed ? Number(form.values.seed) : undefined,
+                batch_size: form.values.batch_size,
+                solver_order: form.values.solver_order,
+                model_name: form.values.model_name,
+                auto_mask_clothes: form.values.nudify,
+                generation_type: generationMode,
+            };
+
+            // Add base image if selected
+            if (selectedImage) {
+                payload.base_img = selectedImage;
+                payload.strength = form.values.strength;
+            }
+
+            // Add mask image if selected
+            if (maskImage && selectedImage) {
+                payload.mask_img = maskImage;
+            }
+
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.status === 401) {
+                notifications.show({
+                    title: 'Session Expired',
+                    message: 'Please log in again to continue generating images.',
+                    color: 'blue'
+                });
+                router.push('/auth');
+                setLoading(false);
+                return;
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate image');
+            }
+
+            notifications.show({
+                title: 'Success',
+                message: 'Image generation started successfully!',
+                color: 'green'
+            });
+
+            // Reset form if needed
+            // form.reset();
+            // setSelectedImage(null);
+            // setMaskImage(null);
+        } catch (error: any) {
+            console.error('Error generating image:', error);
+            notifications.show({
+                title: 'Error',
+                message: error.message || 'Failed to generate image',
+                color: 'red'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <form onSubmit={onSubmit}>
+        <form>
             <Stack gap="md">
 
                 {/* Basic Settings */}
@@ -239,12 +362,12 @@ export function AdvancedForm({
                 {renderImageFormatSelector()}
 
                 <Button
-                    type="submit"
                     loading={loading}
                     size="lg"
                     fullWidth
                     mt="md"
                     color="indigo"
+                    onClick={handleGenerate}
                 >
                     Generate | {COST_MAP.image_generation_advanced} tokens
                 </Button>

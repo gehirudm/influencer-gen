@@ -16,7 +16,8 @@ import {
 	Loader,
 	Modal,
 	Anchor,
-	Tooltip
+	Tooltip,
+	Alert
 } from '@mantine/core';
 import { IconEdit, IconAlertCircle, IconAlertTriangle } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
@@ -250,7 +251,7 @@ export default function ProfilePage() {
 
 	const handleChangeEmail = async (newEmail: string | null) => {
 		if (!newEmail) return;
-		
+
 		const auth = getAuth(app);
 		const user = auth.currentUser;
 
@@ -547,6 +548,15 @@ export default function ProfilePage() {
 					<Paper radius="lg" className={classes.paper} mt="xl">
 						<Title order={2} mb="xl" className={classes.sectionTitle}>Promo Code</Title>
 
+						{!user?.emailVerified ? (
+							<Alert icon={<IconAlertCircle size={16} />} title="Email Verification Required" color="orange" mb="md">
+								Please verify your email address to use promo codes.
+								<Anchor component="button" ml={5} onClick={handleVerifyEmail}>
+									Send verification email
+								</Anchor>
+							</Alert>
+						) : null}
+
 						<Group grow>
 							<TextInput
 								placeholder="Code"
@@ -554,6 +564,7 @@ export default function ProfilePage() {
 								onChange={(event) => setPromoCode(event.currentTarget.value)}
 								radius="md"
 								className={classes.promoInput}
+								disabled={!user?.emailVerified}
 							/>
 							<Button
 								color="orange"
@@ -561,6 +572,7 @@ export default function ProfilePage() {
 								onClick={handlePromoCodeSubmit}
 								loading={applyingPromoCode}
 								className={classes.submitButton}
+								disabled={!user?.emailVerified}
 							>
 								Submit
 							</Button>
