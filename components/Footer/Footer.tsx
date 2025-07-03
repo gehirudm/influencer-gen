@@ -20,6 +20,7 @@ const Footer = () => {
             <h3 className="font-semibold mb-2">Support</h3>
             <ul className="space-y-1">
               <li><a href="https://t.me/FantazyPro" className="hover:underline">Telegram community</a></li>
+              <li><a href="https://discord.gg/yRSTYdzyzb" className="hover:underline">Discord community</a></li>
               <li><a href="/about/faq" className="hover:underline">FAQs</a></li>
               <li><a href="/about/refund_policy" className="hover:underline">Refund Policy</a></li>
             </ul>
