@@ -222,8 +222,8 @@ export function NudifyForm({
                 model_name: "lustify",
                 generation_type: 'nudify',
                 base_img: dataUrl,
-                cfg_scale: 5,
-                auto_mask_clothes: removeClothingOnly
+                cfg_scale: 9,
+                auto_mask_clothes: true
             };
 
             const response = await fetch('/api/generate', {
