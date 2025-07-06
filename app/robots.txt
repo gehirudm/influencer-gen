@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /create
+Disallow: /character
+Disallow: /discover
