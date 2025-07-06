@@ -215,8 +215,8 @@ export function NudifyForm({
         try {
             // Prepare request payload
             const payload = {
-                prompt: prompt,
-                negative_prompt: "",
+                prompt: prompt + "remove clothing, match the image as closely as possible, match the lighting, realistic",
+                negative_prompt: "ugly, distorted, low quality, blurry, deformed features, drawing",
                 width: dimensions.width,
                 height: dimensions.height,
                 model_name: "lustify",
