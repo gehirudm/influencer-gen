@@ -215,7 +215,7 @@ export function NudifyForm({
         try {
             // Prepare request payload
             const payload = {
-                prompt: prompt + "remove clothing, match the image as closely as possible, match the lighting, realistic",
+                prompt: prompt,
                 negative_prompt: "ugly, distorted, low quality, blurry, deformed features, drawing",
                 width: dimensions.width,
                 height: dimensions.height,
@@ -223,6 +223,7 @@ export function NudifyForm({
                 generation_type: 'nudify',
                 base_img: dataUrl,
                 cfg_scale: 9,
+                steps: 100,
                 auto_mask_clothes: true
             };
 
