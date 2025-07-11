@@ -107,7 +107,7 @@ export function NudifyForm({
     const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
     const [loading, setLoading] = useState(false);
-    const [removeClothingOnly, setRemoveClothingOnly] = useState(true);
+    const [useFaceId, setUseFaceId] = useState(true);
 
     const router = useRouter();
 
@@ -224,7 +224,8 @@ export function NudifyForm({
                 base_img: dataUrl,
                 cfg_scale: 9,
                 steps: 100,
-                auto_mask_clothes: true
+                auto_mask_clothes: true,
+                use_face_id: useFaceId
             };
 
             const response = await fetch('/api/generate', {
@@ -304,10 +305,10 @@ export function NudifyForm({
 
             <Group mt="md">
                 <Switch
-                    label="Remove clothing only"
-                    description="Only remove clothes without changing body features"
-                    checked={removeClothingOnly}
-                    onChange={(event) => setRemoveClothingOnly(event.currentTarget.checked)}
+                    label="Use Face ID"
+                    description="Keep the face from the original image"
+                    checked={useFaceId}
+                    onChange={(event) => setUseFaceId(event.currentTarget.checked)}
                     size="md"
                 />
             </Group>
