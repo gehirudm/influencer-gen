@@ -16,7 +16,7 @@ const WEBHOOK_URL = "https://influencer-gen.vercel.app/api/webhook";
 const VALID_INPUT_KEYS = [
     'prompt', 'negative_prompt', 'width', 'height', 'steps', 'cfg_scale',
     'seed', 'batch_size', 'solver_order', 'base_img', 'strength', 'mask_img', 'model_name',
-    'auto_mask_clothes', 'generation_type'
+    'auto_mask_clothes', 'generation_type', 'use_face_id'
 ] as const;
 
 const MODEL_ENDPOINTS = {
