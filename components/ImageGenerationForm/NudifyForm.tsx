@@ -107,7 +107,7 @@ export function NudifyForm({
     const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
     const [loading, setLoading] = useState(false);
-    const [useFaceId, setUseFaceId] = useState(true);
+    const [useFaceId, setUseFaceId] = useState(false);
 
     const router = useRouter();
 
