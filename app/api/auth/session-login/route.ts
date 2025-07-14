@@ -4,6 +4,7 @@ import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import csrf from "csrf";
 import { serialize } from 'cookie';
+import { TOKEN_AMOUNT_PER_SUBSCRIPTION } from '@/lib/subscriptions';
 
 const tokens = new csrf();
 const secret = process.env.CSRF_SECRET || tokens.secretSync();
@@ -83,7 +84,7 @@ async function ensureUserDocumentExists(decoded: DecodedIdToken): Promise<string
         await userRef.set(userData);
 
         await userRef.collection('private').doc('system').set({
-            tokens: 50,
+            tokens: TOKEN_AMOUNT_PER_SUBSCRIPTION.free,
             subscription_tier: "free",
             isAdmin: false
         });

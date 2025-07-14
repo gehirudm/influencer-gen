@@ -315,6 +315,17 @@ export function NudifyForm({
 
             {renderImageFormatSelector()}
 
+            <Alert
+                icon={<IconAlertCircle size="1rem" />}
+                title="Pro Tip"
+                color="blue"
+                variant="light"
+                mt="md"
+            >
+                For better results than Undress AI, use Character Engine to create custom characters.
+            </Alert>
+
+
             <Button
                 onClick={handleSubmit}
                 loading={loading || dataUrlLoading}

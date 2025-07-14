@@ -124,7 +124,7 @@ export const SUBSCRIPTION_FEATURES: Record<USER_LEVEL, FeatureId[]> = {
 };
 
 export const TOKEN_AMOUNT_PER_SUBSCRIPTION: Record<ElementType<typeof SUBSCRIPTION_TIERS>, number> = {
-    "free": 0,
+    "free": 100,
     "Promo": 50,
     "Basic Plan": 1000,
     "Premium Plan": 10000,

@@ -5,6 +5,7 @@ import adminApp from '@/lib/firebaseAdmin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { checkGenerateRequestUserAllowance } from '@/lib/subscriptions';
+import { calculateRequestCost } from '@/lib/cost';
 
 // Define the cost of generating an image
 const IMAGE_GENERATION_COST = 1; // Cost in tokens
@@ -29,7 +30,7 @@ async function verifySessionCookie(sessionCookie: string) {
     return decodedClaims.uid;
 }
 
-async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firestore) {
+async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firestore, requestInput: ImageGenerationRequestInput) {
     const userRef = db.collection('users').doc(userId).collection('private').doc('system');
     const userDoc = await userRef.get();
 
@@ -39,8 +40,11 @@ async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firest
 
     const userData = userDoc.data();
     const currentTokens = userData?.tokens || 0;
+    
+    // Calculate the cost dynamically based on the request features
+    const requestCost = calculateRequestCost(requestInput);
 
-    if (currentTokens < IMAGE_GENERATION_COST) {
+    if (currentTokens < requestCost) {
         throw new Error('Insufficient tokens');
     }
 
@@ -51,7 +55,7 @@ async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firest
         }
 
         const userDataInTransaction = userDocInTransaction.data();
-        const updatedTokens = (userDataInTransaction?.tokens || 0) - IMAGE_GENERATION_COST;
+        const updatedTokens = (userDataInTransaction?.tokens || 0) - requestCost;
 
         if (updatedTokens < 0) {
             throw new Error('Insufficient tokens');
@@ -60,8 +64,8 @@ async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firest
         transaction.update(userRef, { tokens: updatedTokens });
     });
 
-    console.log(`Deducted ${IMAGE_GENERATION_COST} tokens from user ${userId}`);
-    return currentTokens - IMAGE_GENERATION_COST;
+    console.log(`Deducted ${requestCost} tokens from user ${userId}`);
+    return currentTokens - requestCost;
 }
 
 async function checkShouldAddWatermark(userId: string, db: FirebaseFirestore.Firestore) {
@@ -264,7 +268,7 @@ export async function POST(request: NextRequest) {
         }
 
         const storage = getStorage(adminApp);
-        const tokensRemaining = await checkAndDeductTokens(userId, db);
+        const tokensRemaining = await checkAndDeductTokens(userId, db, cleanedBody);
         const addWatermark = await checkShouldAddWatermark(userId, db);
 
         cleanedBody["add_watermark"] = addWatermark;

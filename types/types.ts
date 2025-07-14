@@ -187,6 +187,11 @@ interface StableDiffusionRequestInput {
     auto_mask_clothes?: boolean;
 
     /**
+     * Will trigger the IP-Adapter_FaceID for the base image
+     */
+    use_face_id?: boolean;
+
+    /**
      * Will add the watermark to the image
      */
     add_watermark?: boolean;
