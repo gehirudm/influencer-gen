@@ -137,6 +137,23 @@ export async function POST(request: NextRequest) {
                 updateData.imageIds = output.image_ids;
                 updateData.imageUrls = await Promise.all(output.image_ids.map((imageId: string) => getImageUrls(storage, imageId, userId)));
             }
+        } else if (status === 'FAILED') {
+            // Handle failed job status
+            console.error(`Job ${id} failed with error:`, output);
+            
+            // Store the error traceback in the job document
+            if (output && output.traceback) {
+                updateData.error = {
+                    traceback: output.traceback,
+                    timestamp: new Date().toISOString()
+                };
+            } else {
+                // If there's no traceback, store a generic error message
+                updateData.error = {
+                    message: 'Job failed without specific error details',
+                    timestamp: new Date().toISOString()
+                };
+            }
         }
 
         await db.collection('jobs').doc(id).update(updateData);

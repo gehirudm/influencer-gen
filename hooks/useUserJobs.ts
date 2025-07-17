@@ -16,6 +16,12 @@ interface JobData {
     executionTime: number;
     baseImagePath?: string;
     maskImagePath?: string;
+    error?: string;
+    errorDetails?: {
+        message: string;
+        code?: string;
+        timestamp?: string;
+    };
 }
 
 interface ImageURLS { publicUrl: string, privateUrl: string };

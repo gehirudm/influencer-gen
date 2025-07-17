@@ -160,48 +160,31 @@ export function UserJobsExplorer({
             // Add ref to last element for infinite scrolling
             const isLastElement = index === userJobs.length - 1;
 
-            console.log(job.imageUrls)
-
+            // Check if job has failed
+            const isFailed = job.status === 'FAILED' || job.status === 'ERROR';
+            
             return (
               <div
                 key={job.id}
                 ref={isLastElement ? lastJobElementRef : null}
               >
-                {/* <GenJobCard
-                  jobId={job.id}
-                  prompt={job.metadata?.prompt || ""}
-                  status={job.status}
-                  imageUrls={job.imageUrls?.map(url => url.privateUrl) || []}
-                  generationTime={job.executionTime ? job.executionTime / 1000 : undefined}
-                  dimensions={{ width, height }}
-                  aspectRatio={aspectRatio}
-                  batchSize={job.metadata?.batch_size || 1}
-                  userProjects={userProjects}
-                  onEdit={() => onEdit(job.id)}
-                  onRecreate={() => onRecreate(job)}
-                  onInpaint={() => onInpaint(job)}
-                  onAddToProject={() => onAddToProject(job)}
-                  onRecheckStatus={(jobId, newStatus) => onRecheckStatus(jobId, newStatus)}
-                  onDelete={() => deleteJob(job.id)}
-                /> */}
                 <GenJobCardWithPreview
                   imageIds={job.imageIds}
-                  // prompt={job.metadata?.prompt || ""}
-                  // status={job.status}
-                  isGenerating={job.status != 'COMPLETED'}
-                  // isGenerating={true}
+                  isGenerating={job.status === 'PENDING' || job.status === 'PROCESSING'}
                   imageUrls={job.imageUrls ? job.imageUrls.map(url => url.publicUrl) : []}
-                  // generationTime={job.executionTime ? job.executionTime / 1000 : undefined}
-                  // dimensions={{ width, height }}
-                  // aspectRatio={aspectRatio}
-                  // batchSize={job.metadata?.batch_size || 1}
-                  // userProjects={userProjects}
-                  // onEdit={() => onEdit(job.id)}
-                  // onRecreate={() => onRecreate(job)}
                   onInpaint={() => onInpaint(job)}
                   onAddToProject={() => onAddToProject(job)}
-                  // onRecheckStatus={(jobId, newStatus) => onRecheckStatus(jobId, newStatus)}
                   onDelete={() => deleteJob(job.id)}
+                  isFailed={isFailed}
+                  errorMessage={job.error || "Generation failed. Please try again."}
+                  onRetry={() => {
+                    // Retry the job by recreating it with the same parameters
+                    onRecreate(job);
+                    // Delete the failed job
+                    deleteJob(job.id);
+                  }}
+                  onImg2Img={() => onRecreate(job)}
+                  onRemake={() => onRecreate(job)}
                 />
               </div>
             );
