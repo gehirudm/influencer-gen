@@ -22,7 +22,7 @@ const VALID_INPUT_KEYS = [
 
 const MODEL_ENDPOINTS = {
     "realism": "https://api.runpod.ai/v2/9c6y8ue4f8ie0e/run",
-    "lustify": "https://api.runpod.ai/v2/k7649vd0rf6sof/run",
+    "lustify": "https://api.runpod.ai/v2/n0uzbkcyeh2nor/run",
 }
 
 async function verifySessionCookie(sessionCookie: string) {

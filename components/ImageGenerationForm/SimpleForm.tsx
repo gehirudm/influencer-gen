@@ -117,7 +117,7 @@ export function SimpleForm({ form, onSubmit, setFormValue }: SimpleFormProps) {
                 negative_prompt: "",
                 width: dimensions.width,
                 height: dimensions.height,
-                model_name: "realism",
+                model_name: "lustify",
                 generation_type: 'simple',
             };
 
