@@ -170,7 +170,7 @@ export function UserJobsExplorer({
               >
                 <GenJobCardWithPreview
                   imageIds={job.imageIds}
-                  isGenerating={job.status === 'PENDING' || job.status === 'PROCESSING'}
+                  isGenerating={["PENDING", "PROCESSING", "IN_QUEUE"].includes(job.status)}
                   imageUrls={job.imageUrls ? job.imageUrls.map(url => url.publicUrl) : []}
                   onInpaint={() => onInpaint(job)}
                   onAddToProject={() => onAddToProject(job)}
