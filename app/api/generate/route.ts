@@ -21,7 +21,7 @@ const VALID_INPUT_KEYS = [
 ] as const;
 
 const MODEL_ENDPOINTS = {
-    "realism": "https://api.runpod.ai/v2/9c6y8ue4f8ie0e/run",
+    "realism": "https://api.runpod.ai/v2/9gy8zoh7u41qn2/run",
     "lustify": "https://api.runpod.ai/v2/n0uzbkcyeh2nor/run",
 }
 
