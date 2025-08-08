@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     TextInput,
     Select,
@@ -14,15 +14,21 @@ import {
     Box,
     SimpleGrid,
     Center,
-    Paper
+    Paper,
+    Card,
+    Avatar,
+    Flex,
+    Badge
 } from '@mantine/core';
 import { useForm, UseFormReturnType } from '@mantine/form';
-import { IconRefresh, IconEraser, IconChevronUp } from '@tabler/icons-react';
+import { IconRefresh, IconEraser, IconChevronUp, IconX } from '@tabler/icons-react';
 import { FileDropzonePreview } from '@/components/FileDropzonePreview';
 import { aspectRatios } from './ImageGenerationForm';
 import { COST_MAP } from '@/lib/cost';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
+import { useCharacterContext } from '@/contexts/character-context';
+import { convertImageUrlToDataUrl } from '@/lib/image-utils';
 
 interface AdvancedFormProps {
     form: UseFormReturnType<any>;
@@ -50,27 +56,9 @@ export function AdvancedForm({
 }: AdvancedFormProps) {
     const generationMode = "advanced";
     const [loading, setLoading] = useState(false);
+    const { selectedCharacter, selectCharacter, isLoading: characterLoading } = useCharacterContext();
 
     const router = useRouter();
-
-    // Function to get dimensions based on selected aspect ratio
-    const getDimensions = () => {
-        // If we have an image and we're doing img2img, use its dimensions
-        if (selectedImage && selectedImageDimensions) {
-            return selectedImageDimensions;
-        }
-
-        // Otherwise use the selected aspect ratio
-        const ratio = aspectRatios.find(r => r.value === form.values.aspectRatio);
-        if (!ratio) {
-            return { width: 512, height: 768 }; // Default to portrait if not found
-        }
-        
-        return {
-            width: ratio.width,
-            height: ratio.height
-        };
-    };
 
     const form = useForm({
         initialValues: {
@@ -93,6 +81,68 @@ export function AdvancedForm({
         }
     });
 
+    // Load character image when a character is selected
+    useEffect(() => {
+        const loadCharacterImage = async () => {
+            if (selectedCharacter && selectedCharacter.imageUrls && selectedCharacter.imageUrls.length > 0) {
+                try {
+                    // Convert the first character image to data URL
+                    const dataUrl = await convertImageUrlToDataUrl(selectedCharacter.imageUrls[0]);
+                    if (!dataUrl) {
+                        throw new Error('Failed to convert character image to data URL');
+                    }
+
+                    // Set the image and update form
+                    setSelectedImage(dataUrl);
+
+                    // Load image to get dimensions
+                    const img = new Image();
+                    img.onload = () => {
+                        setSelectedImageDimensions({
+                            width: img.naturalWidth,
+                            height: img.naturalHeight
+                        });
+                    };
+
+                    img.src = dataUrl;
+
+                    // Update prompt with character description if available
+                    if (selectedCharacter.description) {
+                        form.setFieldValue('prompt', selectedCharacter.description);
+                    }
+                } catch (error) {
+                    console.error('Error loading character image:', error);
+                    notifications.show({
+                        title: 'Error',
+                        message: 'Failed to load character image',
+                        color: 'red'
+                    });
+                }
+            }
+        };
+
+        loadCharacterImage();
+    }, [selectedCharacter]);
+
+    // Function to get dimensions based on selected aspect ratio
+    const getDimensions = () => {
+        // If we have an image and we're doing img2img, use its dimensions
+        if (selectedImage && selectedImageDimensions) {
+            return selectedImageDimensions;
+        }
+
+        // Otherwise use the selected aspect ratio
+        const ratio = aspectRatios.find(r => r.value === form.values.aspectRatio);
+        if (!ratio) {
+            return { width: 512, height: 768 }; // Default to portrait if not found
+        }
+
+        return {
+            width: ratio.width,
+            height: ratio.height
+        };
+    };
+
     // Generate a random seed
     const generateRandomSeed = () => {
         const randomSeed = Math.floor(Math.random() * 1000000000).toString();
@@ -102,33 +152,6 @@ export function AdvancedForm({
     // Clear the seed field
     const clearSeed = () => {
         form.setFieldValue('seed', '');
-    };
-
-    // Render the image format selector
-    const renderImageFormatSelector = () => {
-        return (
-            <Box mt="md">
-                <Text mb="md">Image Format</Text>
-                <SimpleGrid cols={4} spacing="xs">
-                    {aspectRatios.map((ratio) => (
-                        <Paper
-                            key={ratio.value}
-                            withBorder
-                            p="md"
-                            radius="md"
-                            style={{
-                                borderColor: form.values.aspectRatio === ratio.value ? 'var(--mantine-color-blue-6)' : undefined,
-                                cursor: 'pointer',
-                                backgroundColor: form.values.aspectRatio === ratio.value ? 'var(--mantine-color-blue-9)' : undefined,
-                            }}
-                            onClick={() => form.setFieldValue('aspectRatio', ratio.value)}
-                        >
-                            {ratio.label}
-                        </Paper>
-                    ))}
-                </SimpleGrid>
-            </Box>
-        );
     };
 
     const handleGenerate = async () => {
@@ -210,9 +233,91 @@ export function AdvancedForm({
         }
     };
 
+    // Render the image format selector
+    const renderImageFormatSelector = () => {
+        return (
+            <Box mt="md">
+                <Text mb="md">Image Format</Text>
+                <SimpleGrid cols={4} spacing="xs">
+                    {aspectRatios.map((ratio) => (
+                        <Paper
+                            key={ratio.value}
+                            withBorder
+                            p="md"
+                            radius="md"
+                            style={{
+                                borderColor: form.values.aspectRatio === ratio.value ? 'var(--mantine-color-blue-6)' : undefined,
+                                cursor: 'pointer',
+                                backgroundColor: form.values.aspectRatio === ratio.value ? 'var(--mantine-color-blue-9)' : undefined,
+                            }}
+                            onClick={() => form.setFieldValue('aspectRatio', ratio.value)}
+                        >
+                            {ratio.label}
+                        </Paper>
+                    ))}
+                </SimpleGrid>
+            </Box>
+        );
+    };
+
+    // Render character selection card
+    const renderSelectedCharacter = () => {
+        if (!selectedCharacter) return null;
+
+        return (
+            <Card withBorder p="md" radius="md" mb="md">
+                <Group justify="space-between">
+                    <Group>
+                        <Avatar
+                            src={selectedCharacter.imageUrls?.[0]}
+                            size="md"
+                            radius="xl"
+                        />
+                        <div>
+                            <Text fw={500}>{selectedCharacter.name}</Text>
+                            <Text size="xs" c="dimmed">
+                                Selected Character
+                            </Text>
+                        </div>
+                    </Group>
+                    <Button
+                        variant="light"
+                        color="red"
+                        leftSection={<IconX size={16} />}
+                        onClick={() => selectCharacter(null)}
+                    >
+                        Deselect
+                    </Button>
+                </Group>
+
+                {selectedCharacter.description && (
+                    <Text size="sm" mt="xs" lineClamp={2} c="dimmed">
+                        {selectedCharacter.description}
+                    </Text>
+                )}
+
+                {/* {selectedCharacter.characteristics && (
+                    <Flex gap="xs" mt="xs" wrap="wrap">
+                        {selectedCharacter.characteristics.map(({ name, value }) =>
+                            <Badge key={name} size="sm" variant="light">
+                                {name}: {value}
+                            </Badge>
+                        )}
+                    </Flex>
+                )} */}
+            </Card>
+        );
+    };
+
     return (
         <form>
             <Stack gap="md">
+                {/* Character Selection Card */}
+                {characterLoading ? (
+                    <Text size="sm" c="dimmed">Loading character...</Text>
+                ) : (
+                    renderSelectedCharacter()
+                )}
 
                 {/* Basic Settings */}
                 <TextInput

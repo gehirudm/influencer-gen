@@ -1,9 +1,9 @@
-.characterImage {
-    transition: transform 0.3s ease-in-out;
-}
-
 .characterCard {
     transition: transform 0.2s ease;
+}
+
+.characterImage {
+    transition: transform 0.3s ease-in-out;
 }
 
 .characterCard:hover .characterImage {

@@ -24,9 +24,9 @@ import {
 } from '@mantine/core';
 import { IconTrash, IconPhoto, IconPhotoSpark, IconWoman } from '@tabler/icons-react';
 import { FileDropzonePreview } from '@/components/FileDropzonePreview';
-import classes from './CharacterCreationPage.module.css';
 import { useCharacters } from '@/hooks/useUserCharacters';
 import { notifications } from '@mantine/notifications';
+import { CharacterCard } from './components/character-card';
 
 interface FormData {
     name: string;
@@ -39,110 +39,6 @@ interface FormData {
 }
 
 type AttributeCategory = 'hair' | 'bodyType' | 'ethnicity';
-
-interface CharacterCardProps {
-    character: {
-        id: string;
-        name: string;
-        imageUrls: string[];
-    };
-    onDelete: (id: string) => void;
-    onUse: (id: string) => void;
-}
-
-function CharacterCard({ character, onDelete, onUse }: CharacterCardProps) {
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-
-    const handleDelete = async () => {
-        setIsDeleting(true);
-        setDeleteModalOpen(false);
-        onDelete(character.id);
-    };
-
-    return (
-        <Card
-            key={character.id}
-            padding={0}
-            radius="md"
-            w={{ base: 200, md: 250 }}
-            className={classes.characterCard}
-        >
-            <Box style={{ position: 'relative' }}>
-                <Image
-                    src={character.imageUrls[0]}
-                    alt={character.name}
-                    style={{
-                        width: '100%',
-                        height: "auto",
-                        objectFit: 'cover',
-                        objectPosition: 'center'
-                    }}
-                    className={classes.characterImage}
-                    fallbackSrc="/placeholder-character.png"
-                />
-            </Box>
-
-            <Text size="xl" fw={700} c="white">
-                {character.name}
-            </Text>
-
-            <Group
-                justify="space-between"
-            >
-                <Button
-                    variant="filled"
-                    radius="sm"
-                    size="sm"
-                    rightSection={<IconPhotoSpark size={20} />}
-                    p={10}
-                    style={{
-                        fontWeight: 700
-                    }}
-                    onClick={() => onUse(character.id)}
-                    disabled={isDeleting}
-                >
-                    USE
-                </Button>
-
-                <ActionIcon
-                    color="gray"
-                    variant="transparent"
-                    size="xl"
-                    onClick={() => setDeleteModalOpen(true)}
-                    loading={isDeleting}
-                >
-                    <IconTrash size={24} />
-                </ActionIcon>
-            </Group>
-
-            {/* Delete Confirmation Modal */}
-            <Modal
-                opened={deleteModalOpen}
-                onClose={() => setDeleteModalOpen(false)}
-                title="Delete Character"
-                centered
-                size="sm"
-            >
-                <Text size="sm" mb="lg">
-                    Are you sure you want to delete "{character.name}"? This action cannot be undone.
-                </Text>
-                <Group justify="flex-end">
-                    <Button variant="default" onClick={() => setDeleteModalOpen(false)}>
-                        Cancel
-                    </Button>
-                    <Button
-                        color="red"
-                        onClick={handleDelete}
-                        loading={isDeleting}
-                    >
-                        Delete
-                    </Button>
-                </Group>
-            </Modal>
-        </Card>
-    );
-}
 
 export default function CharacterCreationPage() {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -246,38 +142,6 @@ export default function CharacterCreationPage() {
                 color: 'red',
             });
         }
-    }
-
-    const handleDeleteCharacter = async (characterId: string) => {
-        try {
-            const success = await deleteCharacter(characterId);
-
-            if (success) {
-                notifications.show({
-                    title: 'Success',
-                    message: 'Character deleted successfully!',
-                    color: 'green',
-                });
-            } else {
-                notifications.show({
-                    title: 'Error',
-                    message: 'Failed to delete character. Please try again.',
-                    color: 'red',
-                });
-            }
-        } catch (error) {
-            console.error('Error deleting character:', error);
-            notifications.show({
-                title: 'Error',
-                message: 'Failed to delete character. Please try again.',
-                color: 'red',
-            });
-        }
-    }
-
-    const handleUseCharacter = (characterId: string) => {
-        // Redirect to create page with character ID
-        window.location.href = `/create?ucid=${characterId}`;
     }
 
     const handleReset = () => {
@@ -475,8 +339,6 @@ export default function CharacterCreationPage() {
                                     <CharacterCard
                                         key={character.id}
                                         character={character}
-                                        onDelete={handleDeleteCharacter}
-                                        onUse={handleUseCharacter}
                                     />
                                 ))}
                             </Group>

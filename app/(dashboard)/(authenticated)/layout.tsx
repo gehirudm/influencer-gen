@@ -6,6 +6,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Loader, Center } from '@mantine/core';
 import app from '@/lib/firebase';
 import { useUserData } from '@/hooks/useUserData';
+import { CharacterProvider } from '@/contexts/character-context';
 
 const auth = getAuth(app);
 
@@ -38,8 +39,8 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
     }
 
     return (
-        <>
+        <CharacterProvider>
             {children}
-        </>
+        </CharacterProvider>
     );
 }
