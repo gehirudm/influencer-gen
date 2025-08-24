@@ -162,6 +162,8 @@ export function UserJobsExplorer({
 
             // Check if job has failed
             const isFailed = job.status === 'FAILED' || job.status === 'ERROR';
+
+            const contentModerationStatus = job.contentModerationStatus ? job.contentModerationStatus : "pending";
             
             return (
               <div
@@ -185,6 +187,7 @@ export function UserJobsExplorer({
                   }}
                   onImg2Img={() => onRecreate(job)}
                   onRemake={() => onRecreate(job)}
+                  contentModerationStatus={contentModerationStatus}
                 />
               </div>
             );

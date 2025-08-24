@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Card, Image, Group, ActionIcon, Modal, Stack, Switch, Button, Skeleton, Anchor, Text, Tooltip } from '@mantine/core';
-import { IconPlus, IconDownload, IconTrash, IconChevronLeft, IconChevronRight, IconX, IconFolderPlus, IconAlertTriangle, IconRefresh } from '@tabler/icons-react';
+import { Card, Image, Group, ActionIcon, Modal, Stack, Switch, Button, Skeleton, Anchor, Text, Tooltip, Badge } from '@mantine/core';
+import { IconPlus, IconDownload, IconTrash, IconChevronLeft, IconChevronRight, IconX, IconFolderPlus, IconAlertTriangle, IconRefresh, IconShieldCheck, IconShieldX } from '@tabler/icons-react';
 import classes from './GenJobCardWithPreview.module.css';
 import ShinyText from '@/components/blocks/TextAnimations/ShinyText/ShinyText';
 import { AddToProjectModal } from '../AddToProjectModal/AddToProjectModal';
@@ -20,6 +20,7 @@ interface GenJobCardWithPreviewProps {
     isFailed?: boolean;
     errorMessage?: string;
     onRetry?: () => void;
+    contentModerationStatus?: string;
 }
 
 export function GenJobCardWithPreview({
@@ -36,9 +37,9 @@ export function GenJobCardWithPreview({
     onRemake,
     isFailed = false,
     errorMessage,
-    onRetry
+    onRetry,
+    contentModerationStatus
 }: GenJobCardWithPreviewProps) {
-    console.log(imageIds)
     const [previewOpen, setPreviewOpen] = useState(false);
     const [withSeed, setWithSeed] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(thumbnailIndex);
@@ -47,6 +48,12 @@ export function GenJobCardWithPreview({
 
     // Check if we're in loading state
     const isLoading = !imageUrls || imageUrls.length == 0 && !isGenerating && !isFailed;
+    
+    // Check if content moderation failed
+    const isContentModerationFailed = contentModerationStatus === 'declined';
+    
+    // Check if content moderation is pending
+    const isContentModerationPending = contentModerationStatus === 'pending';
 
     // Use empty array for loading state or empty imageUrls
     const images = imageUrls || [];
@@ -74,7 +81,7 @@ export function GenJobCardWithPreview({
 
     // Reset to thumbnail index when opening preview
     const handleOpenPreview = () => {
-        if (isLoading || isFailed) return;
+        if (isLoading || isFailed || isContentModerationFailed || isContentModerationPending) return;
 
         setCurrentImageIndex(thumbnailIndex);
         setPreviewOpen(true);
@@ -85,8 +92,8 @@ export function GenJobCardWithPreview({
             <Card radius="md" p={0} className={classes.card}>
                 <Card.Section
                     className={classes.imageSection}
-                    onClick={(isLoading || isGenerating || isFailed) ? undefined : handleOpenPreview}
-                    style={{ cursor: (isLoading || isFailed) ? 'default' : 'pointer' }}
+                    onClick={(isLoading || isGenerating || isFailed || isContentModerationFailed || isContentModerationPending) ? undefined : handleOpenPreview}
+                    style={{ cursor: (isLoading || isFailed || isContentModerationFailed || isContentModerationPending) ? 'default' : 'pointer' }}
                 >
                     {isGenerating ? (
                         <div className={classes.generatingContainer}>
@@ -126,6 +133,45 @@ export function GenJobCardWithPreview({
                                 )}
                             </div>
                         </div>
+                    ) : isContentModerationFailed ? (
+                        <div className={classes.failedContainer}>
+                            <div className={classes.failedOverlay}>
+                                <IconShieldX size={40} color="var(--mantine-color-red-6)" />
+                                <Text size="md" fw={600} c="red.6" mt={10}>Content Moderation Failed</Text>
+                                <Text size="xs" c="dimmed" mt={5} ta="center">
+                                    This image violates our content policy and cannot be displayed.
+                                </Text>
+                                <Button 
+                                    variant="light" 
+                                    color="red" 
+                                    size="xs" 
+                                    mt={10}
+                                    leftSection={<IconRefresh size={14} />}
+                                    onClick={onRetry}
+                                >
+                                    Try Again
+                                </Button>
+                            </div>
+                        </div>
+                    ) : isContentModerationPending ? (
+                        <div className={classes.pendingContainer}>
+                            <Image
+                                src={images[thumbnailIndex] || 'https://placehold.co/600x400?text=No+Image+Available'}
+                                alt="Generated image"
+                                className={classes.image}
+                                style={{ filter: 'blur(10px)' }}
+                            />
+                            <div className={classes.pendingOverlay}>
+                                <IconShieldCheck size={40} color="var(--mantine-color-blue-6)" />
+                                <Text size="md" fw={600} c="blue.6" mt={10}>Content Review</Text>
+                                <Badge color="blue" variant="light" mt={5}>
+                                    Pending Moderation
+                                </Badge>
+                                <Text size="xs" c="dimmed" mt={5} ta="center" maw={180}>
+                                    This image is being reviewed for content policy compliance.
+                                </Text>
+                            </div>
+                        </div>
                     ) : isLoading ? (
                         <Skeleton height="250" width="200" animate={true} />
                     ) : (
@@ -145,13 +191,13 @@ export function GenJobCardWithPreview({
                             size="lg"
                             radius="md"
                             onClick={() => setAddToProjectModalOpen(true)}
-                            disabled={isLoading || isGenerating || isFailed}
-                            style={{ opacity: (isLoading || isFailed) ? 0.5 : 1 }}
+                            disabled={isLoading || isGenerating || isFailed || isContentModerationFailed || isContentModerationPending}
+                            style={{ opacity: (isLoading || isFailed || isContentModerationFailed || isContentModerationPending) ? 0.5 : 1 }}
                         >
                             <IconFolderPlus size={20} />
                         </ActionIcon>
 
-                        {!(isLoading || isGenerating || isFailed) && images.length > 0 && (
+                        {!(isLoading || isGenerating || isFailed || isContentModerationFailed || isContentModerationPending) && images.length > 0 && (
                             <Anchor href={images[thumbnailIndex]} download={images[thumbnailIndex].split("/").pop() || "image.png"} target="_blank">
                                 <ActionIcon
                                     variant="subtle"
@@ -164,7 +210,7 @@ export function GenJobCardWithPreview({
                             </Anchor>
                         )}
                         
-                        {isFailed && (
+                        {(isFailed || isContentModerationFailed) && (
                             <Tooltip label="Retry generation">
                                 <ActionIcon
                                     variant="subtle"
@@ -194,7 +240,7 @@ export function GenJobCardWithPreview({
             </Card>
 
             <Modal
-                opened={previewOpen && !isLoading && !isFailed}
+                opened={previewOpen && !isLoading && !isFailed && !isContentModerationFailed && !isContentModerationPending}
                 onClose={() => setPreviewOpen(false)}
                 size="xl"
                 padding={0}
@@ -299,7 +345,7 @@ export function GenJobCardWithPreview({
                                     setPreviewOpen(false);
                                 }}
                             >
-                                save Char
+                                Save Char
                             </Button>
 
                             <Button
@@ -312,69 +358,72 @@ export function GenJobCardWithPreview({
                                     setPreviewOpen(false);
                                 }}
                             >
-                                ReMake
+                                Remake
                             </Button>
                         </Group>
 
-                        <Group justify="space-between" align="center" className={classes.seedControl}>
-                            <Switch
-                                checked={withSeed}
-                                onChange={(event) => setWithSeed(event.currentTarget.checked)}
-                                label="with seed"
-                                labelPosition="right"
-                                color="indigo"
-                                classNames={{
-                                    root: classes.switchRoot,
-                                    track: classes.switchTrack,
-                                    thumb: classes.switchThumb,
-                                    label: classes.switchLabel
-                                }}
-                            />
-
-                            <ActionIcon
-                                variant="filled"
+                        <Group justify="center" gap="md">
+                            <Button
+                                variant="light"
                                 color="blue"
-                                size="lg"
-                                radius="md"
-                                className={classes.closeButton}
-                                onClick={() => setPreviewOpen(false)}
+                                radius="xl"
+                                className={classes.actionButton}
+                                onClick={() => {
+                                    onAddToProject?.();
+                                    setPreviewOpen(false);
+                                }}
                             >
-                                <IconX size={20} />
-                            </ActionIcon>
+                                Add to Project
+                            </Button>
+
+                            <Anchor href={currentImageUrl} download={currentImageUrl.split("/").pop() || "image.png"} target="_blank">
+                                <Button
+                                    variant="light"
+                                    color="green"
+                                    radius="xl"
+                                    className={classes.actionButton}
+                                >
+                                    Download
+                                </Button>
+                            </Anchor>
                         </Group>
+
+                        <ActionIcon
+                            className={classes.closeButton}
+                            variant="filled"
+                            color="gray"
+                            size="lg"
+                            radius="xl"
+                            onClick={() => setPreviewOpen(false)}
+                        >
+                            <IconX size={20} />
+                        </ActionIcon>
                     </Stack>
                 </div>
             </Modal>
 
-            <AddToProjectModal
-                opened={addToProjectModalOpen}
-                onClose={() => setAddToProjectModalOpen(false)}
-                imageUrl={currentImageUrl}
-                imageId={currentImageId}
-            />
+            {/* Add to Project Modal */}
+            {addToProjectModalOpen && currentImageUrl && currentImageId && (
+                <AddToProjectModal
+                    opened={addToProjectModalOpen}
+                    onClose={() => setAddToProjectModalOpen(false)}
+                    imageUrl={images[thumbnailIndex]}
+                    imageId={imageIds?.[thumbnailIndex] || ''}
+                />
+            )}
 
-            {/* Error details modal */}
+            {/* Error Details Modal */}
             <Modal
                 opened={showErrorDetails}
                 onClose={() => setShowErrorDetails(false)}
-                title="Generation Error Details"
-                size="lg"
+                title="Error Details"
+                size="md"
             >
                 <Text size="sm" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-                    {errorMessage || "No detailed error information available."}
+                    {errorMessage || 'No error details available'}
                 </Text>
-                <Button 
-                    fullWidth 
-                    mt="md" 
-                    variant="light" 
-                    color="red" 
-                    leftSection={<IconRefresh size={16} />}
-                    onClick={() => {
-                        onRetry?.();
-                        setShowErrorDetails(false);
-                    }}
-                >
-                    Retry Generation
+                <Button fullWidth mt="md" onClick={() => setShowErrorDetails(false)}>
+                    Close
                 </Button>
             </Modal>
         </>

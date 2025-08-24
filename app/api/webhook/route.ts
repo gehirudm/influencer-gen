@@ -68,6 +68,32 @@ async function createImageDocument(db: FirebaseFirestore.Firestore, imageId: str
     });
 }
 
+async function createImageDocumentFromId(db: FirebaseFirestore.Firestore, storage: Storage, imageId: string, userId: string, jobId: string, metadata: any = {}) {
+    try {
+        const imageURLs = await getImageUrls(storage, imageId, userId);
+        
+        // Create a new document in the images collection
+        const imageDocRef = db.collection('images').doc(imageId);
+        
+        await imageDocRef.set({
+            userId,
+            jobId, // Add the jobId field
+            isPublic: false, // Default to false
+            metadata: metadata || {},
+            contentModerationStatus: "pending", // Add content moderation status
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            ...imageURLs
+        });
+        
+        console.log(`Created image document for image ID: ${imageId}`);
+        return imageDocRef;
+    } catch (error) {
+        console.error(`Error creating image document for image ID ${imageId}:`, error);
+        throw error;
+    }
+}
+
 async function generateBlurHash(imageData: string): Promise<string> {
     const buffer = Buffer.from(imageData, 'base64');
     const { base64 } = await getPlaiceholder(buffer);
@@ -135,12 +161,12 @@ export async function POST(request: NextRequest) {
                 updateData.imageUrls = imageData.map((imageData) => imageData.imageURLs);
             } else {
                 updateData.imageIds = output.image_ids;
-                updateData.imageUrls = await Promise.all(output.image_ids.map((imageId: string) => getImageUrls(storage, imageId, userId)));
+                updateData.imageUrls = await Promise.all(output.image_ids.map((imageId: string) => createImageDocumentFromId(db, storage, imageId, userId, id, output.parameters)));
             }
         } else if (status === 'FAILED') {
             // Handle failed job status
             console.error(`Job ${id} failed with error:`, output);
-            
+
             // Store the error traceback in the job document
             if (output && output.traceback) {
                 updateData.error = {
@@ -156,7 +182,10 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        await db.collection('jobs').doc(id).update(updateData);
+        await db.collection('jobs').doc(id).update({
+            contentModerationStatus: "pending",
+            ...updateData
+        });
 
         console.log(`Job ${id} updated successfully with status: ${status}`);
 

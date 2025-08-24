@@ -16,6 +16,7 @@ interface JobData {
     executionTime: number;
     baseImagePath?: string;
     maskImagePath?: string;
+    contentModerationStatus?: string;
     error?: string;
     errorDetails?: {
         message: string;
