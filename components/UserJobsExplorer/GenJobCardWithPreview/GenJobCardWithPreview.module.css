@@ -173,6 +173,28 @@
   background-color: #3a3ad1;
 }
 
+.pendingContainer {
+  position: relative;
+  width: 100%;
+  height: 350px;
+}
+
+.pendingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2;
+  padding: 20px;
+  text-align: center;
+}
+
 /* Error state styling */
 .failedContainer {
   position: relative;

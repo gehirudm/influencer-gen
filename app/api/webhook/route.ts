@@ -71,10 +71,10 @@ async function createImageDocument(db: FirebaseFirestore.Firestore, imageId: str
 async function createImageDocumentFromId(db: FirebaseFirestore.Firestore, storage: Storage, imageId: string, userId: string, jobId: string, metadata: any = {}) {
     try {
         const imageURLs = await getImageUrls(storage, imageId, userId);
-        
+
         // Create a new document in the images collection
         const imageDocRef = db.collection('images').doc(imageId);
-        
+
         await imageDocRef.set({
             userId,
             jobId, // Add the jobId field
@@ -85,9 +85,9 @@ async function createImageDocumentFromId(db: FirebaseFirestore.Firestore, storag
             updatedAt: new Date().toISOString(),
             ...imageURLs
         });
-        
+
         console.log(`Created image document for image ID: ${imageId}`);
-        return imageDocRef;
+        return imageURLs;
     } catch (error) {
         console.error(`Error creating image document for image ID ${imageId}:`, error);
         throw error;
@@ -154,15 +154,9 @@ export async function POST(request: NextRequest) {
             [`statusTimestamps.${status}`]: new Date().toISOString(),
         };
 
-        if (status === 'COMPLETED' && output && (output.images || output.image_ids)) {
-            if (output.images !== undefined) {
-                const imageData = await processImages(storage, db, userId, id, output, jobData); // Pass jobData here
-                updateData.imageIds = imageData.map((imageData) => imageData.imageId);
-                updateData.imageUrls = imageData.map((imageData) => imageData.imageURLs);
-            } else {
-                updateData.imageIds = output.image_ids;
-                updateData.imageUrls = await Promise.all(output.image_ids.map((imageId: string) => createImageDocumentFromId(db, storage, imageId, userId, id, output.parameters)));
-            }
+        if (status === 'COMPLETED' && output && output.image_ids) {
+            updateData.imageIds = output.image_ids;
+            updateData.imageUrls = await Promise.all(output.image_ids.map((imageId: string) => createImageDocumentFromId(db, storage, imageId, userId, id, output.parameters)));
         } else if (status === 'FAILED') {
             // Handle failed job status
             console.error(`Job ${id} failed with error:`, output);

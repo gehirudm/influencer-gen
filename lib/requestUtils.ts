@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import firebaseApp from "@/lib/firebaseAdmin";
 import { getAuth } from "firebase-admin/auth";
 
-export async function verifyRequestCookies(request: NextRequest): Promise<{ shouldReturn: boolean, response: NextResponse | null, userId: string }> {
+export async function verifyRequestCookies(request: NextRequest): Promise<{ shouldReturn: boolean, response: NextResponse, userId: string }> {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get('session')?.value;
     
@@ -32,7 +32,8 @@ export async function verifyRequestCookies(request: NextRequest): Promise<{ shou
 
     return {
         shouldReturn: false,
-        response: null,
+        // @ts-ignore
+        response: null as NextResponse,
         userId
     }
 }

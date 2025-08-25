@@ -376,7 +376,7 @@ export function GenJobCardWithPreview({
                                 Add to Project
                             </Button>
 
-                            <Anchor href={currentImageUrl} download={currentImageUrl.split("/").pop() || "image.png"} target="_blank">
+                            <Anchor href={currentImageUrl} download={currentImageUrl} target="_blank">
                                 <Button
                                     variant="light"
                                     color="green"

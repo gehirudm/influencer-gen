@@ -163,7 +163,7 @@ export function UserJobsExplorer({
             // Check if job has failed
             const isFailed = job.status === 'FAILED' || job.status === 'ERROR';
 
-            const contentModerationStatus = job.contentModerationStatus ? job.contentModerationStatus : "pending";
+            const contentModerationStatus = job.contentModerationStatus;
             
             return (
               <div
@@ -173,7 +173,8 @@ export function UserJobsExplorer({
                 <GenJobCardWithPreview
                   imageIds={job.imageIds}
                   isGenerating={["PENDING", "PROCESSING", "IN_QUEUE"].includes(job.status)}
-                  imageUrls={job.imageUrls ? job.imageUrls.map(url => url.publicUrl) : []}
+                  // @ts-ignore
+                  imageUrls={job.imageUrls ? job.imageUrls.map(url => url.publicUrl ? url.publicUrl : url) : []}
                   onInpaint={() => onInpaint(job)}
                   onAddToProject={() => onAddToProject(job)}
                   onDelete={() => deleteJob(job.id)}
