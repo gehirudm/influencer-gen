@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import firebaseApp from "@/lib/firebaseAdmin";
-import { getFirestore } from "firebase-admin/firestore";
+import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { createHmac } from 'crypto';
 
 // Define subscription tiers and their token amounts
 const SUBSCRIPTION_CREDITS = {
@@ -14,103 +15,73 @@ const SUBSCRIPTION_CREDITS = {
   }
 };
 
-// NOW Payments API key for verification
-const NOW_PAYMENTS_API_KEY = process.env.NOWPAYMENTS_API_KEY;
-
 export async function POST(request: NextRequest) {
+  if (!process.env.NOWPAYMENTS_IPN_KEY) {
+    console.error("NOW Payments API key not configured");
+    return NextResponse.json({ error: "NOW Payments API key not configured" }, { status: 500 });
+  }
+
   try {
     // Initialize Firestore
     const db = getFirestore(firebaseApp);
-    
+
     // Get the webhook payload
     const webhookData = await request.json();
-    
-    // Basic validation of the webhook data
-    if (!webhookData || !webhookData.order_id || !webhookData.payment_status) {
-      console.error("Invalid webhook data received:", webhookData);
-      return NextResponse.json({ error: "Invalid webhook data" }, { status: 400 });
+
+    const bodySign = getCallbackBodySignature(webhookData, process.env.NOWPAYMENTS_IPN_KEY);
+    const headerSign = request.headers.get('x-nowpayments-sig');
+
+    if (!headerSign || bodySign !== headerSign) {
+      console.error("Invalid signature:", {
+        headerSign,
+        bodySign
+      });
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
-    
-    console.log("Payment webhook received:", JSON.stringify(webhookData));
-    
+
+    console.log("NowPayment payment webhook received:", webhookData);
+
     // Check if payment is completed
     if (webhookData.payment_status !== 'finished') {
       // Update order status but don't process further
       await updateOrderStatus(db, webhookData.order_id, webhookData.payment_status, webhookData);
-      return NextResponse.json({ success: true, status: "Payment not yet completed" });
+      return NextResponse.json({ success: true });
     }
-    
+
     // Get the order from Firestore
     const orderRef = db.collection('orders').doc(webhookData.order_id);
     const orderDoc = await orderRef.get();
-    
+
     if (!orderDoc.exists) {
       console.error("Order not found:", webhookData.order_id);
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-    
-    const orderData = orderDoc.data();
-    if (!orderData) {
-      return NextResponse.json({ error: "Order data is empty" }, { status: 500 });
-    }
-    
-    // Verify the payment amount matches the order amount
-    // This is a basic check - you might want to add more verification
-    if (parseFloat(webhookData.price_amount) !== orderData.amount) {
-      console.error("Payment amount mismatch:", {
-        expected: orderData.amount,
-        received: webhookData.price_amount
-      });
-      
-      await updateOrderStatus(db, webhookData.order_id, 'amount_mismatch', webhookData);
-      return NextResponse.json({ error: "Payment amount mismatch" }, { status: 400 });
-    }
-    
+
+    const orderData = orderDoc.data() as FirebaseFirestore.DocumentData;
+
     // Get subscription tier and user ID from the order
     const { tier, userId } = orderData;
-    
-    if (!tier || !userId || !SUBSCRIPTION_CREDITS[tier as keyof typeof SUBSCRIPTION_CREDITS]) {
-      console.error("Invalid tier or userId in order:", { tier, userId });
-      await updateOrderStatus(db, webhookData.order_id, 'invalid_data', webhookData);
-      return NextResponse.json({ error: "Invalid order data" }, { status: 400 });
-    }
-    
+
     // Get the token amount for the subscription tier
     const subscriptionDetails = SUBSCRIPTION_CREDITS[tier as keyof typeof SUBSCRIPTION_CREDITS];
-    
-    // Update user's subscription tier in system document
-    const userSystemRef = db.collection('users').doc(userId).collection('private').doc('system');
-    const userSystemDoc = await userSystemRef.get();
-    
-    if (!userSystemDoc.exists) {
-      // Create the system document if it doesn't exist
-      await userSystemRef.set({
-        tokens: subscriptionDetails.tokens,
-        subscription_tier: tier,
-        updatedAt: new Date().toISOString()
-      });
-    } else {
-      // Update the existing system document
-      const userData = userSystemDoc.data();
-      const currentTokens = userData?.tokens || 0;
 
-      await userSystemRef.update({
-        tokens: currentTokens + subscriptionDetails.tokens,
-        subscription_tier: tier,
-        updatedAt: new Date().toISOString()
-      });
-    }
-    
+    // Update user's subscription tier in system document
+    db.collection('users').doc(userId).collection('private').doc('system').set({
+      tokens: FieldValue.increment(subscriptionDetails.tokens),
+      subscription_tier: tier,
+      updatedAt: new Date().toISOString()
+    });
+
     // Update the order status to completed
     await updateOrderStatus(db, webhookData.order_id, 'completed', webhookData);
-    
+
     console.log(`Successfully processed payment for order ${webhookData.order_id}. Added ${subscriptionDetails.tokens} tokens to user ${userId}`);
-    
+
     return NextResponse.json({
       success: true,
       message: "Payment processed successfully"
     });
-    
+
   } catch (error) {
     console.error("Error processing payment webhook:", error);
     return NextResponse.json({ error: "Failed to process payment webhook" }, { status: 500 });
@@ -119,17 +90,34 @@ export async function POST(request: NextRequest) {
 
 // Helper function to update order status
 async function updateOrderStatus(
-  db: FirebaseFirestore.Firestore, 
-  orderId: string, 
-  status: string, 
+  db: FirebaseFirestore.Firestore,
+  orderId: string,
+  status: string,
   webhookData: any
 ) {
-  const orderRef = db.collection('orders').doc(orderId);
-  
-  await orderRef.update({
+  await db.collection('orders').doc(orderId).update({
     status,
     paymentStatus: webhookData.payment_status,
     updatedAt: new Date().toISOString(),
     webhookData: webhookData,
   });
+}
+
+function getCallbackBodySignature(params: any, ipnKey: string) {
+  function sortObject(obj: any) {
+    return Object.keys(obj).sort().reduce(
+      (result, key) => {
+        // @ts-ignore
+        result[key] = (obj[key] && typeof obj[key] === 'object') ? sortObject(obj[key]) : obj[key]
+        return result
+      },
+      {}
+    )
+  }
+
+  const hmac = createHmac('sha512', ipnKey);
+  hmac.update(JSON.stringify(sortObject(params)));
+  const signature = hmac.digest('hex');
+
+  return signature;
 }

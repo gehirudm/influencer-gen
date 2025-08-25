@@ -3,6 +3,7 @@ import firebaseApp from "@/lib/firebaseAdmin";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
 import { cookies } from 'next/headers';
+import { verifyRequestCookies } from '@/lib/requestUtils';
 
 // Define subscription tiers and their prices
 const SUBSCRIPTION_TIERS = {
@@ -22,18 +23,18 @@ const NOW_PAYMENTS_API_URL = "https://api.nowpayments.io/v1/invoice";
 
 export async function POST(request: NextRequest) {
     try {
-        const cookieStore = await cookies();
+        const { shouldReturn, response, userId } = await verifyRequestCookies(request);
+        if (shouldReturn) {
+            return response;
+        }
 
-        // Initialize Firebase Admin
         const db = getFirestore(firebaseApp);
-        const auth = getAuth(firebaseApp);
 
         // Get request data
         const { tier } = await request.json();
-        const sessionCookie = cookieStore.get('session')?.value;
 
         // Validate required parameters
-        if (!tier || !sessionCookie) {
+        if (!tier) {
             return NextResponse.json({
                 error: "Subscription tier and authentication are required"
             }, { status: 400 });
@@ -42,19 +43,8 @@ export async function POST(request: NextRequest) {
         // Validate tier
         if (!SUBSCRIPTION_TIERS[tier as keyof typeof SUBSCRIPTION_TIERS]) {
             return NextResponse.json({
-                error: "Invalid subscription tier"
-            }, { status: 400 });
-        }
-
-        // Verify user authentication
-        let userId;
-        try {
-            const decodedToken = await auth.verifySessionCookie(sessionCookie, true);
-            userId = decodedToken.uid;
-        } catch (error) {
-            return NextResponse.json({
-                error: "Invalid or expired authentication"
-            }, { status: 401 });
+                error: "Server configuration error"
+            }, { status: 500 });
         }
 
         // Get subscription details

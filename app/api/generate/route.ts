@@ -6,6 +6,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { checkGenerateRequestUserAllowance } from '@/lib/subscriptions';
 import { calculateRequestCost } from '@/lib/cost';
+import { verifyRequestCookies } from '@/lib/requestUtils';
 
 // Define the cost of generating an image
 const IMAGE_GENERATION_COST = 1; // Cost in tokens
@@ -40,7 +41,7 @@ async function checkAndDeductTokens(userId: string, db: FirebaseFirestore.Firest
 
     const userData = userDoc.data();
     const currentTokens = userData?.tokens || 0;
-    
+
     // Calculate the cost dynamically based on the request features
     const requestCost = calculateRequestCost(requestInput);
 
@@ -185,25 +186,9 @@ async function createJobDocument(
 
 export async function POST(request: NextRequest) {
     try {
-        const cookieStore = await cookies();
-        const sessionCookie = cookieStore.get('session')?.value;
-
-        if (!sessionCookie) {
-            return NextResponse.json(
-                { error: 'Unauthorized: No session found' },
-                { status: 401 }
-            );
-        }
-
-        let userId: string;
-
-        try {
-            userId = await verifySessionCookie(sessionCookie);
-        } catch (error) {
-            return NextResponse.json(
-                { error: 'Unauthorized: Unable to verify session' },
-                { status: 401 }
-            );
+        const { shouldReturn, response, userId } = await verifyRequestCookies(request);
+        if (shouldReturn) {
+            return response;
         }
 
         const body = await request.json();
@@ -249,7 +234,7 @@ export async function POST(request: NextRequest) {
 
         const userSystemRef = db.collection('users').doc(userId).collection('private').doc('system');
         const userSystemDoc = await userSystemRef.get();
-        
+
         if (!userSystemDoc.exists) {
             return NextResponse.json(
                 { error: 'User profile not found' },
@@ -294,13 +279,11 @@ export async function POST(request: NextRequest) {
         // Create a job document in Firestore
         await createJobDocument(db, userId, jobData, cleanedBody, imageFiles);
 
-        const response = {
+        return NextResponse.json({
             success: true,
             jobId: jobData.id,
             tokensRemaining
-        };
-
-        return NextResponse.json(response);
+        });
 
     } catch (error: any) {
         console.error('Error in image generation endpoint:', error);
