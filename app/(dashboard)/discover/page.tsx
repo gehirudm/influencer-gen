@@ -31,6 +31,14 @@ export interface ImagePost {
   imageCount?: number;
   currentImageIndex?: number;
   nsfw?: boolean;
+  params: {
+    seed?: number;
+    prompt: string;
+    width?: number;
+    height?: number;
+    cfg_scale?: number;
+    negative_prompt?: string;
+  }
 }
 
 export default function DiscoverPage() {
@@ -41,78 +49,69 @@ export default function DiscoverPage() {
   const allPosts: ImagePost[] = [
     {
       id: '05700cc4-d54b-4c5d-bbaf-64cdec7a2762',
-      title: 'Beautiful Chinese Girlfriend By Archxngel',
-      creator: 'Archxngel',
-      imageUrls: ['/discover/sample1.png'],
+      title: 'Amanda Cerny',
+      creator: 'FantazyPro',
+      imageUrls: ['/discover/sample3.png'],
       likes: 141,
       isMultiImage: true,
       imageCount: 2,
-      currentImageIndex: 1
+      currentImageIndex: 1,
+      params: {
+        seed: 1583768832,
+        prompt: 'Realistic editorial photograph of (((Amanda Cerny))), (21 years old). <lora:WeddingDressEXv0.4:0.3> , wearing black wedding dress,off the shoulder, deep vee neckline, (exposed breast), (cleavage), ( view from front), striking features, large breasts, perfect teeth,  beauty, intricate details, dramatic composition, tension, slight freckles,perfect teeth, wispy hair, contrast, texture, realism, high-quality rendering, stunning art, high quality, film grain, detailed skin, detailed face ,  athletic body',
+        width: 512,
+        height: 768,
+        cfg_scale: 8
+      }
     },
     {
       id: 'a3469c0c-e11b-4a22-98e4-ff6b797c7068',
-      title: 'Beautiful Girl With Pink Hoodie By Archxngel',
-      creator: 'Archxngel',
-      imageUrls: ['/discover/sample2.png'],
+      title: 'Beautiful Girl wearing a Flannel shirt',
+      creator: 'FantazyPro',
+      imageUrls: ['/discover/sample1.png'],
       likes: 134,
-      isMultiImage: false
+      isMultiImage: false,
+      params: {
+        seed: 1583768832,
+        prompt: 'Full body shot of 28 year old. Flannel shirt, denim shorts, striking features, medium breasts, ((cleavage)), beauty, intricate details, dramatic composition, tension, updo hair, wispy hair, beautiful skin, contrast, texture, realism, high-quality rendering, stunning art, high quality, film grain, acne, blemishes, detailed skin, detailed face , freckled , perfect face , athletic body, house background',
+        width: 512,
+        height: 768,
+        cfg_scale: 8,
+      }
     },
     {
       id: '3a267170-fb3d-4a00-8fef-c0fb7115511',
-      title: 'Forest Date By Archxngel',
+      title: 'Cute blondie in a night dress',
       creator: 'Archxngel',
-      imageUrls: ['/discover/sample1.png', '/discover/sample2.png'],
+      imageUrls: ['/discover/sample4.png'],
       likes: 134,
       isMultiImage: true,
       imageCount: 2,
-      currentImageIndex: 1
+      currentImageIndex: 1,
+      params: {
+        seed: 1583768832,
+        prompt: 'cute blonde model, smiling, night dress, sitting in a chair, (medium shot: 1.2), photorealistic, (highly detailed face: 1.2), striking facial features, perfect tits exposed',
+        width: 512,
+        height: 768,
+        cfg_scale: 8,
+      }
     },
     {
       id: '0b1e4102-c49e-42c6-839f-9c4d09e904ac',
-      title: 'Handsome Daddy By Archxngel',
+      title: 'Teen in a french maid dress',
       creator: 'Archxngel',
-      imageUrls: ['/discover/sample1.png', '/discover/sample2.png'],
+      imageUrls: ['/discover/sample2.png'],
       likes: 63,
       isMultiImage: true,
       imageCount: 2,
-      currentImageIndex: 1
-    },
-    // Additional dummy posts with NSFW flag for testing the filter
-    {
-      id: '698834fe-9d73-4958-9410-5edab2b67465',
-      title: 'Beach Day By Creator',
-      creator: 'Creator',
-      imageUrls: ['/discover/sample2.png'],
-      likes: 89,
-      nsfw: true
-    },
-    {
-      id: 'b5f0f720-74f5-419f-8ecc-bb8f39dcc5f9',
-      title: 'City Night By Creator',
-      creator: 'Creator',
-      imageUrls: ['/discover/sample2.png', '/discover/sample3.png'],
-      likes: 210,
-      isMultiImage: true,
-      imageCount: 3,
-      currentImageIndex: 1
-    },
-    {
-      id: '8edc22c8-2555-4b83-a037-f1fae71fa12a',
-      title: 'Mountain View By Creator',
-      creator: 'Creator',
-      imageUrls: ['/discover/sample2.png'],
-      likes: 175
-    },
-    {
-      id: '64996d28-5456-4836-accd-150a2191b68b',
-      title: 'Studio Portrait By Creator',
-      creator: 'Creator',
-      imageUrls: ['/discover/sample1.png', '/discover/sample2.png'],
-      likes: 320,
-      nsfw: true,
-      isMultiImage: true,
-      imageCount: 2,
-      currentImageIndex: 1
+      currentImageIndex: 1,
+      params: {
+        seed: 1583768832,
+        prompt: 'short, blonde, white teen, long blonde hair, french maid outfit in black, feather duster, in bedroom, cute face, blue eyes, dimples',
+        width: 512,
+        height: 768,
+        cfg_scale: 8,
+      }
     }
   ];
 
@@ -140,10 +139,10 @@ export default function DiscoverPage() {
         Discover
       </Title>
 
-      <Group justify="center" mb="md">
+      {/* <Group justify="center" mb="md">
         <SegmentedControl
           value={filter}
-          onChange={v => setFilter(v as "new" | "popular") }
+          onChange={v => setFilter(v as "new" | "popular")}
           data={[
             { label: 'New', value: 'new' },
             { label: 'Popular', value: 'popular' },
@@ -157,7 +156,7 @@ export default function DiscoverPage() {
             label: classes.segmentedLabel
           }}
         />
-      </Group>
+      </Group> */}
 
       <Group justify="center" mb="xl">
         <Switch

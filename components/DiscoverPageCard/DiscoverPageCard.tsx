@@ -25,11 +25,11 @@ export default function DiscoverPageCard({ post }: { post: ImagePost }) {
     // Mock image parameters for demonstration
     const imageParams = {
         seed: 1583768832,
-        prompt: "cute blonde model, smiling, night dress, (medium shot: 1.2), photorealistic, (highly detailed face: 1.2), striking facial features",
         width: 512,
         height: 768,
         cfg_scale: 8,
-        negative_prompt: "NG_DeepNegative_V1_75T,(greyscale:1.2), cross-eye, paintings, sketches, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, ((monochrome)), ((grayscale)), skin spots, acne, skin blemishes, age spot, glans"
+        negative_prompt: "NG_DeepNegative_V1_75T,(greyscale:1.2), cross-eye, paintings, sketches, (worst quality:2), (low quality:2), (normal quality:2), lowres, normal quality, ((monochrome)), ((grayscale)), skin spots, acne, skin blemishes, age spot, glans",
+        ...post.params
     };
 
     // Navigate between images in the preview modal

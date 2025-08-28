@@ -420,7 +420,9 @@ export function GenJobCardWithPreview({
                 size="md"
             >
                 <Text size="sm" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-                    {errorMessage || 'No error details available'}
+                    {
+                    // @ts-ignore
+                    errorMessage?.traceback || 'No error details available'}
                 </Text>
                 <Button fullWidth mt="md" onClick={() => setShowErrorDetails(false)}>
                     Close
