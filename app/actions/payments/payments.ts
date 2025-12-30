@@ -44,7 +44,7 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
         const auth = getAuth(firebaseApp);
 
         // Get session cookie
-        const sessionCookie = cookieStore.get('session')?.value;
+        const sessionCookie = cookieStore.get('__session')?.value;
 
         // Validate required parameters
         if (!tier || !sessionCookie) {

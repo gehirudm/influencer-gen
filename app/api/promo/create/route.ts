@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Get session cookie
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session')?.value;
+    const sessionCookie = cookieStore.get('__session')?.value;
 
     if (!sessionCookie) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });

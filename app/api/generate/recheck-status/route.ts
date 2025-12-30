@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
         const auth = getAuth(firebaseApp);
 
         const cookieStore = await cookies();
-        const sessionCookie = cookieStore.get('session')?.value;
+        const sessionCookie = cookieStore.get('__session')?.value;
 
         // Get request data
         const { jobId } = await request.json();

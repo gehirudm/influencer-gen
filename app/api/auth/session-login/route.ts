@@ -65,7 +65,7 @@ function createCookie(sessionCookie: string, remember: boolean): string {
         cookieOptions.maxAge = 60 * 60 * 24 * 14;
     }
 
-    return serialize("session", sessionCookie, cookieOptions);
+    return serialize("__session", sessionCookie, cookieOptions);
 }
 
 async function ensureUserDocumentExists(decoded: DecodedIdToken): Promise<string> {

@@ -17,7 +17,7 @@ export async function getCharacterImageUrls(
 ): Promise<string[]> {
     try {
         // Get the session cookie
-        const sessionCookie = (await cookies()).get('session')?.value;
+        const sessionCookie = (await cookies()).get('__session')?.value;
 
         if (!sessionCookie) {
             throw new Error('Authentication required');
@@ -79,7 +79,7 @@ export async function deleteCharacterImages(
 ): Promise<{ success: boolean; message: string }> {
     try {
         // Get the session cookie
-        const sessionCookie = (await cookies()).get('session')?.value;
+        const sessionCookie = (await cookies()).get('__session')?.value;
 
         if (!sessionCookie) {
             return { success: false, message: 'Authentication required' };

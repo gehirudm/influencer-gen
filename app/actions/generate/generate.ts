@@ -196,7 +196,7 @@ type GenerateImageResponse = {
 export async function generateImageAction(input: GenerateImageInput): Promise<GenerateImageResponse> {
     try {
         const cookieStore = await cookies();
-        const sessionCookie = cookieStore.get('session')?.value;
+        const sessionCookie = cookieStore.get('__session')?.value;
 
         if (!sessionCookie) {
             return {
