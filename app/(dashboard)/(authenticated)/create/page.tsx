@@ -1,80 +1,207 @@
 "use client"
 
 import { useState } from 'react';
-import { Grid } from '@mantine/core';
+import { 
+    Grid, 
+    Card, 
+    Stack, 
+    Button, 
+    Textarea, 
+    NumberInput, 
+    TextInput, 
+    Switch,
+    Box,
+    Text,
+    Title,
+    ScrollArea,
+    Group,
+    Badge,
+    Image,
+    Container,
+    SimpleGrid
+} from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useForm } from '@mantine/form';
+import { useRouter } from 'next/navigation';
+import { aspectRatios } from '@/components/ImageGenerationForm/ImageGenerationForm';
+import { useCharacters } from '@/hooks/useUserCharacters';
 import { useUserJobs } from '@/hooks/useUserJobs';
-import { useUserProjects } from '@/hooks/useUserProjects';
-import EditImageModel from '@/components/Models/EditImageModel';
-import ImageMaskEditor from '@/components/ImageMaskEditor';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { ImageGenerationForm, aspectRatios } from '@/components/ImageGenerationForm/ImageGenerationForm';
-import { UserJobsExplorer } from '@/components/UserJobsExplorer/UserJobsExplorer';
-import { parseAsStringLiteral, useQueryState } from 'nuqs'
-import RoundTabs from '@/components/RoundTabs/RoundTabs';
-import { UserProjectsExplorer } from '@/components/UserProjectsExplorer/UserProjectsExplorer';
+import { IconPhoto } from '@tabler/icons-react';
+
+// Add CSS for pulse animation
+if (typeof document !== 'undefined') {
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+    `;
+    if (!document.querySelector('[data-pulse-animation]')) {
+        style.setAttribute('data-pulse-animation', 'true');
+        document.head.appendChild(style);
+    }
+}
 
 export default function ImageGeneratorPage() {
     const form = useForm({
         initialValues: {
-            prompt: '',
+            prompt: 'Generate image with selected character and reference style',
             negative_prompt: '',
             aspectRatio: 'portrait',
             steps: 30,
-            cfg_scale: 3,
+            cfg_scale: 7,
             seed: '',
-            batch_size: 1,
-            solver_order: 2 as 2 | 3,
-            strength: 0.75,
-            model_name: 'realism' as 'lustify' | 'realism',
-            nudify: false
         },
         validate: {
-            prompt: (value) => value.trim().length === 0 ? 'Prompt is required' : null,
-            batch_size: (value) => value < 1 || value > 4 ? 'Batch size must be between 1 and 4' : null,
-            strength: (value) => value < 0 || value > 1 ? 'Strength must be between 0 and 1' : null,
+            steps: (value) => value < 1 || value > 100 ? 'Steps must be between 1 and 100' : null,
+            cfg_scale: (value) => value < 1 || value > 20 ? 'CFG must be between 1 and 20' : null,
         }
     });
 
-    const setFormValue = (field: string, value: any) => {
-        console.log({ field, value });
-        form.setFieldValue(field, value, { forceUpdate: true });
-    };
-
+    const { characters, loading: charactersLoading } = useCharacters();
     const { jobs: userJobs } = useUserJobs();
-    const { projects: userProjects } = useUserProjects();
-    const [loading, setLoading] = useState(false);
-    const [editModalOpen, setEditModalOpen] = useState(false);
-    const [selectedJobImages, setSelectedJobImages] = useState<string[]>([]);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const [selectedImageDimentions, setSelectedImageDimensions] = useState<{ width: number, height: number } | null>(null);
-    const [maskImage, setMaskImage] = useState<string | null>(null);
-    const [maskEditorOpen, setMaskEditorOpen] = useState(false);
-
-    const [generationMode, setGenerationMode] = useQueryState('gen_type', parseAsStringLiteral(["simple", "advanced", "nudify"] as const).withDefault("simple"))
-    const [explorerTab, setExplorerTab] = useQueryState('explorer_tab', parseAsStringLiteral(["history", "projects", "posts"] as const).withDefault("history"))
-
     const router = useRouter();
+
+    const [loading, setLoading] = useState(false);
+    const [useCharacter, setUseCharacter] = useState(true);
+    const [selectedCharacter, setSelectedCharacter] = useState<string | null>('premade-1');
+    const [selectedReference, setSelectedReference] = useState<string | null>(null);
+    const [imageBlur, setImageBlur] = useState(0);
+
+    // Premade character placeholders
+    const premadeCharacters = [
+        { 
+            id: 'premade-1', 
+            name: 'Emily Carter',
+            age: '19',
+            image: '/character/premade characters/Emily Carter.webp',
+            tags: ['College', 'Blonde', 'Cheerful']
+        },
+        { 
+            id: 'premade-2', 
+            name: 'Laura Bennett',
+            age: '38',
+            image: '/character/premade characters/Laura Bennett.webp',
+            tags: ['Mature', 'Confident', 'Caring']
+        },
+        { 
+            id: 'premade-3', 
+            name: 'Aiko Tanaka',
+            age: '20',
+            image: '/character/premade characters/Aiko Tanaka.webp',
+            tags: ['Anime', 'Energetic', 'Cute']
+        },
+        { 
+            id: 'premade-4', 
+            name: 'Raven Blackwood',
+            age: '22',
+            image: '/character/premade characters/Raven Blackwood.webp',
+            tags: ['Goth', 'Aesthetic', 'Mysterious']
+        },
+        { 
+            id: 'premade-5', 
+            name: 'Nyla Monroe',
+            age: '25',
+            image: '/character/premade characters/Nyla Monroe.webp',
+            tags: ['Elegant', 'Bold', 'Stylish']
+        },
+    ];
+
+    // Reference image placeholders
+    const referenceImages = [
+        { id: 'ref-1', name: 'Bathroom Mirror Selfie', image: '/character/premade characters/reference images/bathroom mirror selfie/0.webp', folder: 'bathroom mirror selfie' },
+        { id: 'ref-2', name: 'Spiderman cosplay', image: '/character/premade characters/reference images/spiderman cosplay/0.webp', folder: 'spiderman cosplay' },
+        { id: 'ref-3', name: 'Balcony at sunset', image: '/character/premade characters/reference images/balcony at sunset/0.webp', folder: 'balcony at sunset' },
+        { id: 'ref-4', name: 'Leaning forward', image: '/character/premade characters/reference images/leaning forward/0.webp', folder: 'leaning forward' },
+        { id: 'ref-5', name: 'Kneeling', image: '/character/premade characters/reference images/kneeling/0.webp', folder: 'kneeling' },
+        { id: 'ref-6', name: 'Lingerie', image: '/character/premade characters/reference images/lingerie/0.webp', folder: 'lingerie' },
+        { id: 'ref-7', name: 'School-style', image: '/character/premade characters/reference images/school-style/0.webp', folder: 'school-style' },
+        { id: 'ref-8', name: 'Blowing a kiss', image: '/character/premade characters/reference images/blowing a kiss/0.webp', folder: 'blowing a kiss' },
+        { id: 'ref-9', name: 'Gym fitness pose', image: '/character/premade characters/reference images/gym fitness pose/0.webp', folder: 'gym fitness pose' },
+        { id: 'ref-10', name: 'Picnic lifestyle', image: '/character/premade characters/reference images/picnic lifestyle/0.webp', folder: 'picnic lifestyle' },
+    ];
+
+    const allCharacters = [...characters, ...premadeCharacters];
 
     // Get dimensions based on selected aspect ratio
     const getDimensions = () => {
-        if (selectedImageDimentions != null) {
-            return selectedImageDimentions;
-        }
-
         const selected = aspectRatios.find(ratio => ratio.value === form.values.aspectRatio);
         return selected ? { width: selected.width, height: selected.height } : { width: 800, height: 1200 };
     };
 
+    // Map premade character to bathroom selfie image number
+    const getPremadeCharacterImageNumber = (characterId: string): string | null => {
+        const mapping: { [key: string]: string } = {
+            'premade-1': '1', // Emily Carter
+            'premade-2': '2', // Laura Bennett
+            'premade-3': '3', // Aiko Tanaka
+            'premade-4': '4', // Raven Blackwood
+            'premade-5': '5', // Nyla Monroe
+        };
+        return mapping[characterId] || null;
+    };
+
     const handleGenerate = async () => {
+        const validation = form.validate();
+        if (validation.hasErrors) {
+            return;
+        }
+
+        // Check if using any reference image with premade character
+        if (selectedReference && selectedCharacter && selectedCharacter.startsWith('premade-')) {
+            const imageNumber = getPremadeCharacterImageNumber(selectedCharacter);
+            const selectedRef = referenceImages.find(ref => ref.id === selectedReference);
+            
+            if (imageNumber && selectedRef) {
+                setLoading(true);
+                
+                // Random loading time between 8-15 seconds
+                const randomLoadingTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
+                
+                setTimeout(() => {
+                    const mockJob = {
+                        id: `local-${Date.now()}`,
+                        status: 'completed',
+                        imageUrls: [{
+                            privateUrl: `/character/premade characters/reference images/${selectedRef.folder}/${imageNumber}.webp`,
+                            publicUrl: ''
+                        }],
+                        metadata: {
+                            prompt: form.values.prompt || selectedRef.name,
+                        }
+                    };
+                    
+                    // Add to jobs list (this will update the UI)
+                    userJobs.unshift(mockJob as any);
+                    
+                    setLoading(false);
+                    
+                    // Start blur effect: 100% -> 20% -> 0%
+                    setImageBlur(50);
+                    setTimeout(() => {
+                        setImageBlur(20);
+                        setTimeout(() => {
+                            setImageBlur(0);
+                        }, 300);
+                    }, 300);
+                    
+                    notifications.show({
+                        title: 'Success',
+                        message: 'Image generated successfully!',
+                        color: 'green'
+                    });
+                }, randomLoadingTime);
+                
+                return;
+            }
+        }
+
         const { width, height } = getDimensions();
-        console.log(width, height);
         setLoading(true);
 
         try {
-            // Prepare request payload
-            const payload: Partial<ImageGenerationRequestInput> = {
+            const payload: any = {
                 prompt: form.values.prompt,
                 negative_prompt: form.values.negative_prompt || undefined,
                 width,
@@ -82,23 +209,8 @@ export default function ImageGeneratorPage() {
                 steps: form.values.steps,
                 cfg_scale: form.values.cfg_scale,
                 seed: form.values.seed ? Number(form.values.seed) : undefined,
-                batch_size: form.values.batch_size,
-                solver_order: form.values.solver_order,
-                model_name: form.values.model_name,
-                auto_mask_clothes: form.values.nudify,
-                generation_type: generationMode,
+                character_id: useCharacter && selectedCharacter ? selectedCharacter : undefined,
             };
-
-            // Add base image if selected
-            if (selectedImage) {
-                payload.base_img = selectedImage;
-                payload.strength = form.values.strength;
-            }
-
-            // Add mask image if selected
-            if (maskImage && selectedImage) {
-                payload.mask_img = maskImage;
-            }
 
             const response = await fetch('/api/generate', {
                 method: 'POST',
@@ -129,11 +241,6 @@ export default function ImageGeneratorPage() {
                 message: 'Image generation started successfully!',
                 color: 'green'
             });
-
-            // Reset form if needed
-            // form.reset();
-            // setSelectedImage(null);
-            // setMaskImage(null);
         } catch (error: any) {
             console.error('Error generating image:', error);
             notifications.show({
@@ -146,208 +253,306 @@ export default function ImageGeneratorPage() {
         }
     };
 
-    const handleEdit = (jobId: string) => {
-        const job = userJobs.find(job => job.id === jobId);
-        if (job && job.imageUrls) {
-            setSelectedJobImages(job.imageUrls.map(url => url.privateUrl));
-            setEditModalOpen(true);
-        }
-    };
-
-    const handleImageSelect = async (imageUrl: string) => {
-        setEditModalOpen(false);
-        try {
-            const response = await fetch(imageUrl);
-            const blob = await response.blob();
-            const reader = new FileReader();
-
-            reader.onloadend = () => {
-                const dataUrl = reader.result as string;
-                setSelectedImage(dataUrl);
-            };
-
-            reader.readAsDataURL(blob);
-        } catch (error) {
-            console.error('Error fetching image data URL:', error);
-            notifications.show({
-                title: 'Error',
-                message: 'Failed to load image data.',
-                color: 'red',
-            });
-        }
-    };
-
-    const handleRecreate = (job: any) => {
-        // Pre-fill form with job settings
-        if (job && job.metadata) {
-            const { prompt, negative_prompt, width, height, steps, cfg_scale, batch_size, model_name } = job.metadata;
-
-            // Find matching aspect ratio or default to portrait
-            let aspectRatio = 'portrait';
-            for (const ratio of aspectRatios) {
-                if (ratio.width === width && ratio.height === height) {
-                    aspectRatio = ratio.value;
-                    break;
-                }
-            }
-
-            form.setValues({
-                prompt,
-                negative_prompt: negative_prompt || '',
-                aspectRatio,
-                steps,
-                cfg_scale,
-                batch_size,
-                model_name: model_name || 'realism',
-                seed: '',
-                solver_order: job.metadata.solver_order || 2,
-                strength: 0.75,
-            });
-
-            // Scroll to form
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
-
-    const handleInpaint = async (job: any) => {
-        if (job && job.imageUrls && job.imageUrls.length > 0) {
-            // Set the first image as base image
-            await handleImageSelect(job.imageUrls[0]);
-
-            // Pre-fill form with job settings
-            if (job.metadata) {
-                const { prompt, negative_prompt, width, height, steps, cfg_scale, batch_size, model_name } = job.metadata;
-
-                // Find matching aspect ratio or default to portrait
-                let aspectRatio = 'portrait';
-                for (const ratio of aspectRatios) {
-                    if (ratio.width === width && ratio.height === height) {
-                        aspectRatio = ratio.value;
-                        break;
-                    }
-                }
-
-                form.setValues({
-                    prompt,
-                    negative_prompt: negative_prompt || '',
-                    aspectRatio,
-                    steps,
-                    cfg_scale,
-                    batch_size,
-                    model_name: model_name || 'realism',
-                    seed: '',
-                    solver_order: job.metadata.solver_order || 2,
-                    strength: 0.5, // Set a moderate strength for inpainting
-                });
-
-                // Scroll to form
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
-    };
-
-    const handleAddToProject = (job: any) => {
-        // Implementation would be similar to the ImageGenCard's project modal
-        // For now, just show a notification
-        notifications.show({
-            title: 'Feature Coming Soon',
-            message: 'Add to project functionality will be available soon.',
-            color: 'blue'
-        });
-    };
-
-    const handleRecheckStatus = (jobId: string) => {
-        notifications.show({
-            title: 'Checking Status',
-            message: 'Rechecking job status...',
-            loading: true,
-            autoClose: 2000,
-        });
-
-        // Actual implementation would involve checking the job status from the server
-    };
+    // Get completed jobs with images
+    const completedJobs = userJobs.filter(job => job.status === 'completed' && job.imageUrls && job.imageUrls.length > 0);
+    const latestJob = completedJobs[0];
+    const previousJobs = completedJobs.slice(1);
 
     return (
-        <>
-            <Grid>
-                <Grid.Col span={{ base: 12, md: 5 }}>
-                    <ImageGenerationForm
-                        form={form}
-                        loading={loading}
-                        selectedImage={selectedImage}
-                        setSelectedImage={setSelectedImage}
-                        selectedImageDimensions={selectedImageDimentions}
-                        setSelectedImageDimensions={setSelectedImageDimensions}
-                        maskImage={maskImage}
-                        setMaskImage={setMaskImage}
-                        setMaskEditorOpen={setMaskEditorOpen}
-                        onSubmit={handleGenerate}
-                        generationMode={generationMode}
-                        setGenerationMode={setGenerationMode}
-                        setFormValue={setFormValue}
-                    />
-                </Grid.Col>
+        <Container size="xl" py={{ base: 'md', md: 'xl' }}>
+            <Grid gutter="md">
+                {/* Left Column - Input Data */}
+                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: 'calc(100vh - 120px)' }}>
+                <Card p="lg" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <ScrollArea 
+                        style={{ flex: 1, marginBottom: '1rem' }} 
+                        scrollbarSize={10}
+                        offsetScrollbars
+                        styles={{
+                            scrollbar: {
+                                '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
+                                    backgroundColor: '#4a7aba',
+                                },
+                                '&:hover [data-orientation="vertical"] .mantine-ScrollArea-thumb': {
+                                    backgroundColor: '#5a8aca',
+                                }
+                            }
+                        }}
+                    >
+                    <Stack gap="md" pr="md">
+                        <Title size="h3" c="white">Generate Image</Title>
 
-                <Grid.Col span={{ base: 12, md: 7 }}>
-                    <RoundTabs value={explorerTab} onChange={v => setExplorerTab(v as "history" | "projects" | "posts")} tabs={[
-                        {
-                            name: 'History',
-                            panel: (
-                                <UserJobsExplorer
-                                    userProjects={userProjects}
-                                    onEdit={handleEdit}
-                                    onRecreate={handleRecreate}
-                                    onInpaint={handleInpaint}
-                                    onAddToProject={handleAddToProject}
-                                    onRecheckStatus={handleRecheckStatus}
-                                />
-                            ),
-                            value: 'history'
-                        },
-                        {
-                            name: 'Projects',
-                            panel: (
-                                <UserProjectsExplorer></UserProjectsExplorer>
-                            ),
-                            value: "projects"
-                        },
-                        {
-                            name: 'Posts',
-                            panel: (
-                                <></>
-                            ),
-                            value: "posts"
-                        },
-                    ]} />
+                        {/* Character Toggle */}
+                        <Switch
+                            label="Use Character"
+                            description="Character selection is required"
+                            checked={useCharacter}
+                            onChange={(event) => setUseCharacter(event.currentTarget.checked)}
+                            size="md"
+                            disabled
+                        />
+
+                        {/* Character Selection */}
+                        <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
+                            <Text size="sm" fw={500} mb="sm" c="white">Select a Character</Text>
+                            {charactersLoading && (
+                                <Text size="sm" c="dimmed">Loading characters...</Text>
+                            )}
+                            <SimpleGrid cols={{ base: 2, sm: 3, md: 5 }} spacing="xs">
+                                {allCharacters.map((character) => (
+                                    <Card
+                                        key={character.id}
+                                        p="sm"
+                                        style={{
+                                            backgroundColor: selectedCharacter === character.id ? '#3a5a8a' : '#333',
+                                            border: selectedCharacter === character.id ? '2px solid #4a7aba' : '1px solid #555',
+                                            cursor: 'pointer',
+                                        }}
+                                        onClick={() => setSelectedCharacter(character.id)}
+                                    >
+                                        <Stack gap="xs">
+                                            <Box
+                                                style={{
+                                                    width: '100%',
+                                                    aspectRatio: '3/4',
+                                                    backgroundColor: '#2a2a2a',
+                                                    borderRadius: '4px',
+                                                    overflow: 'hidden',
+                                                }}
+                                            >
+                                                <img 
+                                                    src={character.image} 
+                                                    alt={character.name}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover'
+                                                    }}
+                                                />
+                                            </Box>
+                                            <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
+                                                {character.name} ({character.age})
+                                            </Text>
+                                        </Stack>
+                                    </Card>
+                                ))}
+                            </SimpleGrid>
+                        </Card>
+
+                        {/* Reference Image Selection */}
+                        <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
+                            <Text size="sm" fw={500} mb="sm" c="white">Reference Image Style</Text>
+                            <Text size="xs" c="dimmed" mb="sm">Choose a visual style for your generation</Text>
+                            <SimpleGrid cols={{ base: 2, sm: 3, md: 5 }} spacing="xs">
+                                {referenceImages.map((ref) => (
+                                    <Card
+                                        key={ref.id}
+                                        p="sm"
+                                        style={{
+                                            backgroundColor: selectedReference === ref.id ? '#3a5a8a' : '#333',
+                                            border: selectedReference === ref.id ? '2px solid #4a7aba' : '1px solid #555',
+                                            cursor: 'pointer',
+                                        }}
+                                        onClick={() => setSelectedReference(ref.id)}
+                                    >
+                                        <Stack gap="xs">
+                                            <Box
+                                                style={{
+                                                    width: '100%',
+                                                    aspectRatio: '3/4',
+                                                    backgroundColor: '#2a2a2a',
+                                                    borderRadius: '4px',
+                                                    overflow: 'hidden',
+                                                }}
+                                            >
+                                                <img 
+                                                    src={ref.image} 
+                                                    alt={ref.name}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover'
+                                                    }}
+                                                />
+                                            </Box>
+                                            <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
+                                                {ref.name}
+                                            </Text>
+                                        </Stack>
+                                    </Card>
+                                ))}
+                            </SimpleGrid>
+                        </Card>
+
+                        {/* Image Prompt */}
+                        <Textarea
+                            label="Image Prompt"
+                            placeholder="Describe the image you want to generate..."
+                            minRows={4}
+                            {...form.getInputProps('prompt')}
+                            disabled
+                            styles={{ input: { opacity: 0.6 } }}
+                        />
+
+                        {/* Negative Prompt */}
+                        <Textarea
+                            label="Negative Prompt"
+                            placeholder="What you don't want in the image..."
+                            minRows={2}
+                            {...form.getInputProps('negative_prompt')}
+                            disabled
+                            styles={{ input: { opacity: 0.6 } }}
+                        />
+
+                        {/* Steps and CFG in one line */}
+                        <Group grow align="flex-start">
+                            <NumberInput
+                                label="Steps"
+                                description="Inference steps"
+                                min={1}
+                                max={100}
+                                {...form.getInputProps('steps')}
+                                disabled
+                                styles={{ input: { opacity: 0.6 } }}
+                            />
+                            <NumberInput
+                                label="CFG Scale"
+                                description="Prompt adherence"
+                                min={1}
+                                max={20}
+                                step={0.5}
+                                decimalScale={1}
+                                {...form.getInputProps('cfg_scale')}
+                                disabled
+                                styles={{ input: { opacity: 0.6 } }}
+                            />
+                        </Group>
+
+                        {/* Seed */}
+                        <TextInput
+                            label="Seed"
+                            placeholder="Leave empty for random"
+                            description="Use a specific seed for reproducible results"
+                            {...form.getInputProps('seed')}
+                            disabled
+                            styles={{ input: { opacity: 0.6 } }}
+                        />
+
+                        {/* Image Format (Aspect Ratio) - Card Selection */}
+                        <Box style={{ opacity: 0.6, pointerEvents: 'none' }}>
+                            <Text size="sm" fw={500} mb="xs" c="white">Image Format</Text>
+                            <Text size="xs" c="dimmed" mb="sm">Select the aspect ratio for the output image</Text>
+                            <SimpleGrid cols={4} spacing="xs">
+                                {aspectRatios.map((ratio) => (
+                                    <Card
+                                        key={ratio.value}
+                                        p="sm"
+                                        style={{
+                                            backgroundColor: form.values.aspectRatio === ratio.value ? '#3a5a8a' : '#2a2a2a',
+                                            border: form.values.aspectRatio === ratio.value ? '2px solid #4a7aba' : '1px solid #444',
+                                            cursor: 'not-allowed',
+                                            textAlign: 'center',
+                                        }}
+                                    >
+                                        <Text size="sm" fw={500} c="white">{ratio.label}</Text>
+                                        <Text size="xs" c="dimmed">{ratio.width}×{ratio.height}</Text>
+                                    </Card>
+                                ))}
+                            </SimpleGrid>
+                        </Box>
+                    </Stack>
+                    </ScrollArea>
+                    
+                    {/* Generate Button - Sticky at bottom */}
+                    <Button
+                        fullWidth
+                        size="lg"
+                        disabled={loading}
+                        onClick={handleGenerate}
+                    >
+                        Generate (Costs Tokens)
+                    </Button>
+                </Card>
+            </Grid.Col>
+
+                {/* Right Column - Output */}
+                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: 'calc(100vh - 120px)' }}>
+                <Card p="lg" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <Stack gap="md" pb="md">
+                        <Title size="h3" c="white">Generated Images</Title>
+
+                        {/* Current/Latest Image */}
+                        <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
+                            <Box
+                                style={{
+                                    width: '100%',
+                                    aspectRatio: '3/4',
+                                    backgroundColor: '#1a1a1a',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '2px dashed #555',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                {loading ? (
+                                    <Stack align="center" gap="sm">
+                                        <IconPhoto size={64} color="#4a7aba" style={{ animation: 'pulse 1.5s ease-in-out infinite' }} />
+                                        <Text c="#4a7aba" size="lg" fw={500}>Generating...</Text>
+                                        <Text c="dimmed" size="sm">This may take a few moments</Text>
+                                    </Stack>
+                                ) : !latestJob ? (
+                                    <Stack align="center" gap="sm">
+                                        <IconPhoto size={64} color="#666" />
+                                        <Text c="dimmed" size="lg">No images generated yet</Text>
+                                        <Text c="dimmed" size="sm">Your generated image will appear here</Text>
+                                    </Stack>
+                                ) : (
+                                    <Image
+                                        src={latestJob.imageUrls[0].privateUrl}
+                                        alt="Latest generated image"
+                                        fit="contain"
+                                        style={{ 
+                                            width: '100%', 
+                                            height: '100%',
+                                            filter: `blur(${imageBlur}px)`,
+                                            transition: 'none'
+                                        }}
+                                    />
+                                )}
+                            </Box>
+                        </Card>
+
+                        {/* Previous Images */}
+                        {previousJobs.length > 0 && (
+                            <>
+                                <Title size="h4" c="white" mt="md">Previous Images</Title>
+                                <ScrollArea h={500}>
+                                    <Stack gap="md">
+                                        {previousJobs.map((job, index) => (
+                                            <Card key={job.id} p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
+                                                <Image
+                                                    src={job.imageUrls[0].privateUrl}
+                                                    alt={`Generated image ${index + 2}`}
+                                                    fit="contain"
+                                                    style={{ width: '100%', maxHeight: 400 }}
+                                                />
+                                                {job.metadata?.prompt && (
+                                                    <Text size="sm" c="dimmed" mt="sm" lineClamp={2}>
+                                                        {job.metadata.prompt}
+                                                    </Text>
+                                                )}
+                                            </Card>
+                                        ))}
+                                    </Stack>
+                                </ScrollArea>
+                            </>
+                        )}
+                    </Stack>
+                </Card>
                 </Grid.Col>
             </Grid>
-
-            <EditImageModel
-                selectedJobImages={selectedJobImages}
-                editModalOpen={editModalOpen}
-                setEditModalOpen={setEditModalOpen}
-                handleImageSelect={handleImageSelect}
-            />
-
-            {selectedImage && (
-                <ImageMaskEditor
-                    imageUrl={selectedImage}
-                    width={getDimensions().width}
-                    height={getDimensions().height}
-                    opened={maskEditorOpen}
-                    onClose={() => setMaskEditorOpen(false)}
-                    onConfirm={(maskDataURL) => {
-                        setMaskImage(maskDataURL);
-                        setMaskEditorOpen(false);
-                        notifications.show({
-                            title: 'Mask Created',
-                            message: 'Mask has been created successfully',
-                            color: 'green'
-                        });
-                    }}
-                    title="Create Image Mask"
-                />
-            )}
-        </>
+        </Container>
     );
 }
