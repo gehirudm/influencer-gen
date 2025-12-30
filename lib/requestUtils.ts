@@ -5,7 +5,7 @@ import { getAuth } from "firebase-admin/auth";
 
 export async function verifyRequestCookies(request: NextRequest): Promise<{ shouldReturn: boolean, response: NextResponse, userId: string }> {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('session')?.value;
+    const sessionCookie = cookieStore.get('__session')?.value;
     
     // Validate required parameters
     if (!sessionCookie) {

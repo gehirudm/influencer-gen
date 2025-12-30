@@ -10,7 +10,7 @@ export async function clearSessionCookie(): Promise<boolean> {
     try {
         // Delete the session cookie
         (await cookies()).delete({
-            name: 'session',
+            name: '__session',
             path: '/',
             // Use the same settings that were used when creating the cookie
             httpOnly: true,

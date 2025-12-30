@@ -23,7 +23,7 @@ export async function deleteUserAccount(): Promise<{ success: boolean; message: 
         const auth = getAuth(firebaseApp);
 
         // Get session cookie
-        const sessionCookie = (await cookies()).get('session')?.value;
+        const sessionCookie = (await cookies()).get('__session')?.value;
         
         if (!sessionCookie) {
             return { success: false, message: 'Authentication required' };
@@ -86,7 +86,7 @@ export async function deleteUserAccount(): Promise<{ success: boolean; message: 
         
         // 3. Clear the session cookie
         (await cookies()).delete({
-            name: 'session',
+            name: '__session',
             path: '/',
             // Use the same settings that were used when creating the cookie
             httpOnly: true,
@@ -116,7 +116,7 @@ export async function changeUserName(newDisplayName: string): Promise<{ success:
         const auth = getAuth(firebaseApp);
 
         // Get session cookie
-        const sessionCookie = (await cookies()).get('session')?.value;
+        const sessionCookie = (await cookies()).get('__session')?.value;
         
         if (!sessionCookie) {
             return { success: false, message: 'Authentication required' };
