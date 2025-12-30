@@ -115,7 +115,7 @@ export default function ImageGeneratorPage() {
         { id: 'ref-3', name: 'Balcony at sunset', image: '/character/premade characters/reference images/balcony at sunset/0.webp', folder: 'balcony at sunset' },
         { id: 'ref-4', name: 'Yellow bikini', image: '/character/premade characters/reference images/Yellow bikini/0.webp', folder: 'Yellow bikini' },
         { id: 'ref-5', name: 'Kneeling', image: '/character/premade characters/reference images/kneeling/0.webp', folder: 'kneeling' },
-        { id: 'ref-6', name: 'Naked in bathtub', image: '/character/premade characters/reference images/Naked in bathtub/0.webp', folder: 'naked in bathtub' },
+        { id: 'ref-6', name: 'Lingerie', image: '/character/premade characters/reference images/lingerie/0.webp', folder: 'lingerie' },
         { id: 'ref-7', name: 'School-style', image: '/character/premade characters/reference images/school-style/0.webp', folder: 'school-style' },
         { id: 'ref-8', name: 'Blowing a kiss', image: '/character/premade characters/reference images/blowing a kiss/0.webp', folder: 'blowing a kiss' },
         { id: 'ref-9', name: 'Gym fitness pose', image: '/character/premade characters/reference images/gym fitness pose/0.webp', folder: 'gym fitness pose' },
