@@ -95,6 +95,39 @@ interface ImageGenerationJob {
     tokens: number;
 }
 
+// Interface for the 'loras' collection - Custom trained LoRA characters
+interface LoRA {
+    displayName: string;           // Public display name
+    loraName: string;              // Must match the storage bucket filename
+    keyword: string;               // Keyword that triggers this LoRA in generation
+    description: string;
+    thumbnailImageId: string;      // Thumbnail image ID in storage
+    displayImageIds: string[];     // Gallery image IDs in storage
+    thumbnailUrl: string;          // Thumbnail image URL
+    displayImageUrls: string[];    // Gallery of display image URLs
+    createdAt: string;
+    createdBy: string;             // Admin who created it
+
+    // Assignment
+    assignedUserId: string | null; // If assigned to specific user
+    isPublic: boolean;             // If available in marketplace
+
+    // Marketplace options (only applicable if isPublic is true)
+    isFree: boolean;               // Free public LoRA
+    isLimitedEdition: boolean;     // Limited quantity
+    availableQuantity: number | null;  // How many available (if limited)
+    purchasedCount: number;        // How many have been purchased
+    price: number | null;          // Price in tokens
+}
+
+// Interface for tracking LoRA purchases
+interface UserLoRAPurchase {
+    userId: string;
+    loraId: string;
+    purchasedAt: string;
+    price: number;
+}
+
 interface RunPodsCompletedResponseData {
     "delayTime": number,      // Time in queue (ms)
     "executionTime": number, // Processing time (ms)

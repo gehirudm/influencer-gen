@@ -36,3 +36,27 @@ jobs/{jobId}
   - status       // e.g., pending, processing, complete, failed
   - generatedImageId (nullable)
   - createdAt
+
+loras/{loraId}
+  - displayName           // Public display name
+  - loraName              // Must match storage bucket filename
+  - description
+  - thumbnailImageId
+  - displayImageIds: [imageId1, ...]
+  - thumbnailUrl
+  - displayImageUrls: [url1, ...]
+  - createdAt
+  - createdBy             // Admin userId who created
+  - assignedUserId        // User ID if assigned, null if public
+  - isPublic              // true if marketplace item
+  - isFree                // true if free public LoRA
+  - isLimitedEdition      // true if limited quantity
+  - availableQuantity     // Number available (if limited)
+  - purchasedCount        // Number purchased
+  - price                 // Price in tokens (if paid)
+
+user-lora-purchases/{userId}_{loraId}
+  - userId
+  - loraId
+  - purchasedAt
+  - price
