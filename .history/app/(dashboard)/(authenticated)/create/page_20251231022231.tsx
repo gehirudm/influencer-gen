@@ -298,100 +298,45 @@ export default function ImageGeneratorPage() {
                             {charactersLoading && (
                                 <Text size="sm" c="dimmed">Loading characters...</Text>
                             )}
-                            <ScrollArea 
-                                type="auto"
-                                offsetScrollbars
-                                styles={{
-                                    scrollbar: {
-                                        '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
-                                            backgroundColor: '#4a7aba',
-                                        },
-                                        '&:hover [data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
-                                            backgroundColor: '#5a8aca',
-                                        }
-                                    }
-                                }}
-                            >
-                                <Group gap="xs" wrap="nowrap" pb="xs">
-                                    {/* Create Your Own Character Card */}
+                            <SimpleGrid cols={{ base: 2, sm: 3, md: 5 }} spacing="xs">
+                                {allCharacters.map((character) => (
                                     <Card
+                                        key={character.id}
                                         p="sm"
                                         style={{
-                                            backgroundColor: '#2a2a2a',
-                                            border: '2px dashed #4a7aba',
+                                            backgroundColor: selectedCharacter === character.id ? '#3a5a8a' : '#333',
+                                            border: selectedCharacter === character.id ? '2px solid #4a7aba' : '1px solid #555',
                                             cursor: 'pointer',
-                                            minWidth: 'calc((100% - 32px) / 5)',
-                                            maxWidth: 'calc((100% - 32px) / 5)',
                                         }}
-                                        onClick={() => router.push('/dashboard/characters')}
+                                        onClick={() => setSelectedCharacter(character.id)}
                                     >
                                         <Stack gap="xs">
                                             <Box
                                                 style={{
                                                     width: '100%',
                                                     aspectRatio: '3/4',
-                                                    backgroundColor: '#1a1a1a',
+                                                    backgroundColor: '#2a2a2a',
                                                     borderRadius: '4px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    border: '1px solid #444',
+                                                    overflow: 'hidden',
                                                 }}
                                             >
-                                                <Stack align="center" gap="xs">
-                                                    <Text size="3rem" c="#4a7aba">+</Text>
-                                                    <Text size="xs" c="#4a7aba" fw={600} ta="center">
-                                                        Create Your Own
-                                                    </Text>
-                                                </Stack>
+                                                <img 
+                                                    src={character.image} 
+                                                    alt={character.name}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover'
+                                                    }}
+                                                />
                                             </Box>
-                                            <Text size="xs" fw={600} c="white" ta="center">
-                                                Custom Character
+                                            <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
+                                                {character.name} ({character.age})
                                             </Text>
                                         </Stack>
                                     </Card>
-                                    
-                                    {allCharacters.map((character) => (
-                                        <Card
-                                            key={character.id}
-                                            p="sm"
-                                            style={{
-                                                backgroundColor: selectedCharacter === character.id ? '#3a5a8a' : '#333',
-                                                border: selectedCharacter === character.id ? '2px solid #4a7aba' : '1px solid #555',
-                                                cursor: 'pointer',
-                                                minWidth: 'calc((100% - 32px) / 5)',
-                                                maxWidth: 'calc((100% - 32px) / 5)',
-                                            }}
-                                            onClick={() => setSelectedCharacter(character.id)}
-                                        >
-                                            <Stack gap="xs">
-                                                <Box
-                                                    style={{
-                                                        width: '100%',
-                                                        aspectRatio: '3/4',
-                                                        backgroundColor: '#2a2a2a',
-                                                        borderRadius: '4px',
-                                                        overflow: 'hidden',
-                                                    }}
-                                                >
-                                                    <img 
-                                                        src={character.image} 
-                                                        alt={character.name}
-                                                        style={{
-                                                            width: '100%',
-                                                            height: '100%',
-                                                            objectFit: 'cover'
-                                                        }}
-                                                    />
-                                                </Box>
-                                                <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
-                                                    {character.name} ({character.age})
-                                                </Text>
-                                            </Stack>
-                                        </Card>
-                                    ))}
-                                </Group>
-                            </ScrollArea>
+                                ))}
+                            </SimpleGrid>
                         </Card>
 
                         {/* Reference Image Selection */}
@@ -426,12 +371,8 @@ export default function ImageGeneratorPage() {
                                                     style={{
                                                         width: '100%',
                                                         height: '100%',
-                                                        objectFit: 'cover',
-                                                        filter: selectedReference === ref.id ? 'none' : 'grayscale(100%)',
-                                                        transition: 'filter 0.2s ease, transform 0.3s ease',
+                                                        objectFit: 'cover'
                                                     }}
-                                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.08)'}
-                                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                                 />
                                             </Box>
                                             <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
