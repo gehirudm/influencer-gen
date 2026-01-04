@@ -120,7 +120,7 @@ export default function UndressPage() {
                                                 {...props}
                                                 style={{
                                                     width: '100%',
-                                                    height: '180px',
+                                                    height: '250px',
                                                     backgroundColor: '#1a1a1a',
                                                     borderRadius: '8px',
                                                     display: 'flex',
@@ -165,7 +165,7 @@ export default function UndressPage() {
                                         ].map((mode) => {
                                             const Icon = mode.icon;
                                             return (
-                                                <Grid.Col span={3} key={mode.value}>
+                                                <Grid.Col span={6} key={mode.value}>
                                                     <Card
                                                         p="md"
                                                         onClick={() => setSelectedMode(mode.value)}

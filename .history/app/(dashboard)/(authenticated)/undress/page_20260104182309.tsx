@@ -19,7 +19,7 @@ import { notifications } from '@mantine/notifications';
 import { useForm } from '@mantine/form';
 import { useRouter } from 'next/navigation';
 import { useUserJobs } from '@/hooks/useUserJobs';
-import { IconPhoto, IconUpload, IconShirt, IconEye, IconSwimming, IconHanger } from '@tabler/icons-react';
+import { IconPhoto, IconUpload } from '@tabler/icons-react';
 
 // Add CSS for pulse animation
 if (typeof document !== 'undefined') {
@@ -50,7 +50,6 @@ export default function UndressPage() {
     const [uploadedImage, setUploadedImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [imageBlur, setImageBlur] = useState(0);
-    const [selectedMode, setSelectedMode] = useState('Undress');
 
     const handleImageUpload = (file: File | null) => {
         if (file) {
@@ -106,100 +105,75 @@ export default function UndressPage() {
                 {/* Left Column - Input Data */}
                 <Grid.Col span={{ base: 12, md: 8 }} style={{ height: 'calc(100vh - 120px)' }}>
                     <Card p="lg" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                        {/* Scrollable Content */}
-                        <Box style={{ flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
-                            <Stack gap="md">
-                                <Title size="h3" c="white">Undress Image</Title>
+                        <Stack gap="md" style={{ flex: 1 }}>
+                            <Title size="h3" c="white">Undress Image</Title>
 
-                                {/* Image Upload */}
-                                <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
-                                    <Text size="sm" fw={500} mb="sm" c="white">Upload Image</Text>
-                                    <FileButton onChange={handleImageUpload} accept="image/png,image/jpeg,image/webp">
-                                        {(props) => (
-                                            <Box
-                                                {...props}
-                                                style={{
-                                                    width: '100%',
-                                                    height: '180px',
-                                                    backgroundColor: '#1a1a1a',
-                                                    borderRadius: '8px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    border: '2px dashed #555',
-                                                    cursor: 'pointer',
-                                                    overflow: 'hidden',
-                                                }}
-                                            >
-                                                {imagePreview ? (
-                                                    <img 
-                                                        src={imagePreview} 
-                                                        alt="Uploaded" 
-                                                        style={{ 
-                                                            width: '100%', 
-                                                            height: '100%', 
-                                                            objectFit: 'contain' 
-                                                        }} 
-                                                    />
-                                                ) : (
-                                                    <Stack align="center" gap="sm">
-                                                        <IconUpload size={48} color="#4a7aba" />
-                                                        <Text c="#4a7aba" size="md" fw={500}>Click to Upload Image</Text>
-                                                        <Text c="dimmed" size="xs">PNG, JPG, or WEBP</Text>
-                                                    </Stack>
-                                                )}
-                                            </Box>
-                                        )}
-                                    </FileButton>
-                                </Card>
+                            {/* Image Upload */}
+                            <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
+                                <Text size="sm" fw={500} mb="sm" c="white">Upload Image</Text>
+                                <FileButton onChange={handleImageUpload} accept="image/png,image/jpeg,image/webp">
+                                    {(props) => (
+                                        <Box
+                                            {...props}
+                                            style={{
+                                                width: '100%',
+                                                height: '250px',
+                                                backgroundColor: '#1a1a1a',
+                                                borderRadius: '8px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                border: '2px dashed #555',
+                                                cursor: 'pointer',
+                                                overflow: 'hidden',
+                                            }}
+                                        >
+                                            {imagePreview ? (
+                                                <img 
+                                                    src={imagePreview} 
+                                                    alt="Uploaded" 
+                                                    style={{ 
+                                                        width: '100%', 
+                                                        height: '100%', 
+                                                        objectFit: 'contain' 
+                                                    }} 
+                                                />
+                                            ) : (
+                                                <Stack align="center" gap="sm">
+                                                    <IconUpload size={48} color="#4a7aba" />
+                                                    <Text c="#4a7aba" size="md" fw={500}>Click to Upload Image</Text>
+                                                    <Text c="dimmed" size="xs">PNG, JPG, or WEBP</Text>
+                                                </Stack>
+                                            )}
+                                        </Box>
+                                    )}
+                                </FileButton>
+                            </Card>
 
-                                {/* Mode Selection */}
-                                <Box>
-                                    <Text size="sm" fw={500} mb="sm" c="white">Mode</Text>
-                                    <Grid gutter="xs">
-                                        {[
-                                            { value: 'Undress', label: 'Undress', icon: IconShirt },
-                                            { value: 'X-ray', label: 'X-ray', icon: IconEye },
-                                            { value: 'Bikini', label: 'Bikini', icon: IconSwimming },
-                                            { value: 'Lingerie', label: 'Lingerie', icon: IconHanger },
-                                        ].map((mode) => {
-                                            const Icon = mode.icon;
-                                            return (
-                                                <Grid.Col span={3} key={mode.value}>
-                                                    <Card
-                                                        p="md"
-                                                        onClick={() => setSelectedMode(mode.value)}
-                                                        style={{
-                                                            backgroundColor: selectedMode === mode.value ? '#3a7aba' : '#2a2a2a',
-                                                            border: selectedMode === mode.value ? '2px solid #4a8aca' : '1px solid #444',
-                                                            cursor: 'pointer',
-                                                            transition: 'all 0.2s',
-                                                        }}
-                                                    >
-                                                        <Stack align="center" gap="xs">
-                                                            <Icon size={32} color={selectedMode === mode.value ? 'white' : '#4a7aba'} />
-                                                            <Text size="sm" fw={500} c={selectedMode === mode.value ? 'white' : 'dimmed'}>
-                                                                {mode.label}
-                                                            </Text>
-                                                        </Stack>
-                                                    </Card>
-                                                </Grid.Col>
-                                            );
-                                        })}
-                                    </Grid>
-                                </Box>
+                            {/* Mode Selection */}
+                            <Select
+                                label="Mode"
+                                placeholder="Select mode"
+                                data={[
+                                    { value: 'Undress', label: 'Undress' },
+                                    { value: 'X-ray', label: 'X-ray' },
+                                    { value: 'Bikini', label: 'Bikini' },
+                                    { value: 'Lingerie', label: 'Lingerie' },
+                                    { value: 'Shibari', label: 'Shibari' },
+                                ]}
+                                {...form.getInputProps('mode')}
+                            />
 
-                                {/* Custom Settings */}
-                                <Accordion variant="contained">
-                                    <Accordion.Item value="custom-settings">
-                                        <Accordion.Control>Custom Settings</Accordion.Control>
-                                        <Accordion.Panel>
-                                            <Text size="sm" c="dimmed">Custom settings will be available here</Text>
-                                        </Accordion.Panel>
-                                    </Accordion.Item>
-                                </Accordion>
-                            </Stack>
-                        </Box>
+                            {/* Custom Settings */}
+                            <Accordion variant="contained">
+                                <Accordion.Item value="custom-settings">
+                                    <Accordion.Control>Custom Settings</Accordion.Control>
+                                    <Accordion.Panel>
+                                        <Text size="sm" c="dimmed">Custom settings will be available here</Text>
+                                    </Accordion.Panel>
+                                </Accordion.Item>
+                            </Accordion>
+                        </Stack>
 
                         {/* Undress Button - Sticky at bottom */}
                         <Button
@@ -208,7 +182,6 @@ export default function UndressPage() {
                             disabled={loading || !uploadedImage}
                             onClick={handleUndress}
                             mt="md"
-                            style={{ flexShrink: 0 }}
                         >
                             {loading ? 'Processing...' : 'Undress (Costs Tokens)'}
                         </Button>
