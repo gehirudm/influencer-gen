@@ -69,20 +69,6 @@ export default function ImageGeneratorPage() {
     const [selectedReference, setSelectedReference] = useState<string | null>(null);
     const [imageBlur, setImageBlur] = useState(0);
     const refScrollRef = useRef<HTMLDivElement>(null);
-    const charScrollRef = useRef<HTMLDivElement>(null);
-
-    // Scroll functions for characters
-    const scrollCharLeft = () => {
-        if (charScrollRef.current) {
-            charScrollRef.current.scrollBy({ left: -400, behavior: 'smooth' });
-        }
-    };
-
-    const scrollCharRight = () => {
-        if (charScrollRef.current) {
-            charScrollRef.current.scrollBy({ left: 400, behavior: 'smooth' });
-        }
-    };
 
     // Scroll functions for reference images
     const scrollRefLeft = () => {
@@ -340,30 +326,21 @@ export default function ImageGeneratorPage() {
                             {charactersLoading && (
                                 <Text size="sm" c="dimmed">Loading characters...</Text>
                             )}
-                            <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                {/* Left Arrow */}
-                                <Box
-                                    onClick={scrollCharLeft}
-                                    style={{
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    <IconChevronLeft size={28} color="#4a7aba" />
-                                </Box>
-                                
-                                {/* Cards Container */}
-                                <Box
-                                    ref={charScrollRef}
-                                    style={{
-                                        overflow: 'hidden',
-                                        flex: 1,
-                                    }}
-                                >
-                                <Group gap="xs" wrap="nowrap">
+                            <ScrollArea 
+                                type="auto"
+                                offsetScrollbars
+                                styles={{
+                                    scrollbar: {
+                                        '&[data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
+                                            backgroundColor: '#4a7aba',
+                                        },
+                                        '&:hover [data-orientation="horizontal"] .mantine-ScrollArea-thumb': {
+                                            backgroundColor: '#5a8aca',
+                                        }
+                                    }
+                                }}
+                            >
+                                <Group gap="xs" wrap="nowrap" pb="xs">
                                     {/* Create Your Own Character Card */}
                                     <Card
                                         p="sm"
@@ -442,41 +419,31 @@ export default function ImageGeneratorPage() {
                                         </Card>
                                     ))}
                                 </Group>
-                                </Box>
-                                
-                                {/* Right Arrow */}
-                                <Box
-                                    onClick={scrollCharRight}
-                                    style={{
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    <IconChevronRight size={28} color="#4a7aba" />
-                                </Box>
-                            </Box>
+                            </ScrollArea>
                         </Card>
 
                         {/* Reference Image Selection */}
                         <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
                             <Text size="sm" fw={500} mb="sm" c="white">Reference Image Style</Text>
                             <Text size="xs" c="dimmed" mb="sm">Choose a visual style for your generation</Text>
-                            <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 {/* Left Arrow */}
                                 <Box
                                     onClick={scrollRefLeft}
                                     style={{
                                         cursor: 'pointer',
+                                        backgroundColor: '#1a1a1a',
+                                        borderRadius: '50%',
+                                        width: '40px',
+                                        height: '40px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
+                                        border: '1px solid #4a7aba',
                                         flexShrink: 0,
                                     }}
                                 >
-                                    <IconChevronLeft size={28} color="#4a7aba" />
+                                    <IconChevronLeft size={24} color="#4a7aba" />
                                 </Box>
                                 
                                 {/* Cards Container */}
@@ -551,22 +518,7 @@ export default function ImageGeneratorPage() {
                                     </Card>
                                 ))}
                                 </Group>
-                                </Box>
-                                
-                                {/* Right Arrow */}
-                                <Box
-                                    onClick={scrollRefRight}
-                                    style={{
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    <IconChevronRight size={28} color="#4a7aba" />
-                                </Box>
-                            </Box>
+                            </ScrollArea>
                         </Card>
 
                         {/* Image Prompt */}
