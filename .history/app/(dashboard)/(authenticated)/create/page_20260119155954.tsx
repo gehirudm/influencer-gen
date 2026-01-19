@@ -659,16 +659,16 @@ export default function ImageGeneratorPage() {
             </Grid.Col>
 
                 {/* Right Column - Output */}
-                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: '100vh', padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
-                    <Stack gap="md" style={{ flex: 1, overflow: 'hidden' }}>
+                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: '100vh', padding: '0.75rem' }}>
+                    <Stack gap="md" pb="md">
                         <Title size="h3" c="white">Generated Images</Title>
 
                         {/* Current/Latest Image */}
-                        <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444', flex: 1, minHeight: 0 }}>
+                        <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
                             <Box
                                 style={{
                                     width: '100%',
-                                    height: '100%',
+                                    aspectRatio: '3/4',
                                     backgroundColor: '#1a1a1a',
                                     borderRadius: '8px',
                                     display: 'flex',
@@ -709,35 +709,33 @@ export default function ImageGeneratorPage() {
                         {/* Previous Images */}
                         {previousJobs.length > 0 && (
                             <>
-                                <Text size="sm" fw={500} c="white" mb={2}>Previously Generated Images</Text>
-                                <Box style={{ border: '1px solid #333', borderRadius: '6px', padding: '8px', backgroundColor: '#0a0a0a', flexShrink: 0 }}>
-                                    <ScrollArea type="scroll" offsetScrollbars scrollbarSize={8}>
-                                        <Group gap="xs" wrap="nowrap">
-                                            {previousJobs.map((job, index) => (
-                                                <Box
-                                                    key={job.id}
-                                                    style={{
-                                                        minWidth: '80px',
-                                                        maxWidth: '80px',
-                                                        height: '80px',
-                                                        backgroundColor: '#1a1a1a',
-                                                        borderRadius: '6px',
-                                                        overflow: 'hidden',
-                                                        border: '1px solid #333',
-                                                        cursor: 'pointer',
-                                                    }}
-                                                >
-                                                    <Image
-                                                        src={job.imageUrls[0].privateUrl}
-                                                        alt={`Generated image ${index + 2}`}
-                                                        fit="cover"
-                                                        style={{ width: '100%', height: '100%' }}
-                                                    />
-                                                </Box>
-                                            ))}
-                                        </Group>
-                                    </ScrollArea>
-                                </Box>
+                                <Text size="sm" fw={500} c="white" mb="xs">Previously Generated Images</Text>
+                                <ScrollArea type="auto" offsetScrollbars>
+                                    <Group gap="xs" wrap="nowrap">
+                                        {previousJobs.map((job, index) => (
+                                            <Box
+                                                key={job.id}
+                                                style={{
+                                                    minWidth: '80px',
+                                                    maxWidth: '80px',
+                                                    height: '80px',
+                                                    backgroundColor: '#1a1a1a',
+                                                    borderRadius: '6px',
+                                                    overflow: 'hidden',
+                                                    border: '1px solid #333',
+                                                    cursor: 'pointer',
+                                                }}
+                                            >
+                                                <Image
+                                                    src={job.imageUrls[0].privateUrl}
+                                                    alt={`Generated image ${index + 2}`}
+                                                    fit="cover"
+                                                    style={{ width: '100%', height: '100%' }}
+                                                />
+                                            </Box>
+                                        ))}
+                                    </Group>
+                                </ScrollArea>
                             </>
                         )}
                     </Stack>

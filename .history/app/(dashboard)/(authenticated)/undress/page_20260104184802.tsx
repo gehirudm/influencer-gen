@@ -102,17 +102,18 @@ export default function UndressPage() {
     const previousJobs = completedJobs.slice(1);
 
     return (
-        <Box style={{ height: '100%', width: '100%' }}>
-            <Grid gutter="md" style={{ margin: 0, height: '100%' }}>
+        <Container size="xl" py={{ base: 'md', md: 'xl' }}>
+            <Grid gutter="md">
                 {/* Left Column - Input Data */}
-                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: '100vh', display: 'flex', flexDirection: 'column', padding: '0.75rem' }}>
+                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: 'calc(100vh - 120px)' }}>
+                    <Card p="lg" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', height: '100%', display: 'flex', flexDirection: 'column' }}>
                         {/* Scrollable Content */}
                         <Box style={{ flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
                             <Stack gap="md">
                                 <Title size="h3" c="white">Undress Image</Title>
 
                                 {/* Image Upload */}
-                                <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
+                                <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
                                     <Text size="sm" fw={500} mb="sm" c="white">Upload Image</Text>
                                     <FileButton onChange={handleImageUpload} accept="image/png,image/jpeg,image/webp">
                                         {(props) => (
@@ -156,7 +157,7 @@ export default function UndressPage() {
                                 {/* Mode Selection */}
                                 <Box>
                                     <Text size="sm" fw={500} mb="sm" c="white">Mode</Text>
-                                    <Group gap="md">
+                                    <Group gap="xs">
                                         {[
                                             { value: 'Undress', label: 'Undress', icon: IconShirt },
                                             { value: 'X-ray', label: 'X-ray', icon: IconEye },
@@ -170,11 +171,11 @@ export default function UndressPage() {
                                                     p="xs"
                                                     onClick={() => setSelectedMode(mode.value)}
                                                     style={{
-                                                        backgroundColor: selectedMode === mode.value ? '#3a7aba' : '#1a1a1a',
-                                                        border: selectedMode === mode.value ? '2px solid #4a8aca' : '1px solid #333',
+                                                        backgroundColor: selectedMode === mode.value ? '#3a7aba' : '#2a2a2a',
+                                                        border: selectedMode === mode.value ? '2px solid #4a8aca' : '1px solid #444',
                                                         cursor: 'pointer',
                                                         transition: 'all 0.2s',
-                                                        width: '90px',
+                                                        minWidth: 'fit-content',
                                                     }}
                                                 >
                                                     <Stack align="center" gap={4}>
@@ -212,19 +213,21 @@ export default function UndressPage() {
                         >
                             {loading ? 'Processing...' : 'Undress (Costs Tokens)'}
                         </Button>
+                    </Card>
                 </Grid.Col>
 
                 {/* Right Column - Output */}
-                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: '100vh', padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
-                        <Stack gap="md" style={{ flex: 1, overflow: 'hidden' }}>
+                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: 'calc(100vh - 120px)' }}>
+                    <Card p="lg" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                        <Stack gap="md" pb="md">
                             <Title size="h3" c="white">Result</Title>
 
                             {/* Current/Latest Image */}
-                            <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444', flex: 1, minHeight: 0 }}>
+                            <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
                                 <Box
                                     style={{
                                         width: '100%',
-                                        height: '100%',
+                                        aspectRatio: '3/4',
                                         backgroundColor: '#1a1a1a',
                                         borderRadius: '8px',
                                         display: 'flex',
@@ -265,40 +268,30 @@ export default function UndressPage() {
                             {/* Previous Results */}
                             {previousJobs.length > 0 && (
                                 <>
-                                    <Text size="sm" fw={500} c="white" mb={2}>Previously Generated Images</Text>
-                                    <Box style={{ border: '1px solid #333', borderRadius: '6px', padding: '8px', backgroundColor: '#0a0a0a', flexShrink: 0 }}>
-                                        <ScrollArea type="scroll" offsetScrollbars scrollbarSize={8}>
-                                            <Group gap="xs" wrap="nowrap">
-                                                {previousJobs.map((job, index) => (
-                                                    <Box
-                                                        key={job.id}
-                                                        style={{
-                                                            minWidth: '80px',
-                                                            maxWidth: '80px',
-                                                            height: '80px',
-                                                            backgroundColor: '#1a1a1a',
-                                                            borderRadius: '6px',
-                                                            overflow: 'hidden',
-                                                            border: '1px solid #333',
-                                                            cursor: 'pointer',
-                                                        }}
-                                                    >
-                                                        <Image
-                                                            src={job.imageUrls[0].privateUrl}
-                                                            alt={`Result ${index + 2}`}
-                                                            fit="cover"
-                                                            style={{ width: '100%', height: '100%' }}
-                                                        />
-                                                    </Box>
-                                                ))}
-                                            </Group>
-                                        </ScrollArea>
-                                    </Box>
+                                    <Title size="h4" c="white" mt="md">Previous Results</Title>
+                                    <Stack gap="md" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                                        {previousJobs.map((job, index) => (
+                                            <Card key={job.id} p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
+                                                <Image
+                                                    src={job.imageUrls[0].privateUrl}
+                                                    alt={`Result ${index + 2}`}
+                                                    fit="contain"
+                                                    style={{ width: '100%', maxHeight: 400 }}
+                                                />
+                                                {job.metadata?.prompt && (
+                                                    <Text size="sm" c="dimmed" mt="sm" lineClamp={2}>
+                                                        {job.metadata.prompt}
+                                                    </Text>
+                                                )}
+                                            </Card>
+                                        ))}
+                                    </Stack>
                                 </>
                             )}
                         </Stack>
+                    </Card>
                 </Grid.Col>
             </Grid>
-        </Box>
+        </Container>
     );
 }

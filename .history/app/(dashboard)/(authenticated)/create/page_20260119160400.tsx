@@ -710,7 +710,7 @@ export default function ImageGeneratorPage() {
                         {previousJobs.length > 0 && (
                             <>
                                 <Text size="sm" fw={500} c="white" mb={2}>Previously Generated Images</Text>
-                                <Box style={{ border: '1px solid #333', borderRadius: '6px', padding: '8px', backgroundColor: '#0a0a0a', flexShrink: 0 }}>
+                                <Box style={{ border: '1px solid #333', borderRadius: '6px', padding: '8px', backgroundColor: '#0a0a0a' }}>
                                     <ScrollArea type="scroll" offsetScrollbars scrollbarSize={8}>
                                         <Group gap="xs" wrap="nowrap">
                                             {previousJobs.map((job, index) => (
