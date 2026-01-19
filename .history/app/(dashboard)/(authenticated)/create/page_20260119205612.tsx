@@ -519,6 +519,7 @@ export default function ImageGeneratorPage() {
                                                         width: '100%',
                                                         height: '100%',
                                                         objectFit: 'cover',
+                                                        filter: ref.premium ? 'grayscale(100%)' : 'none',
                                                         transition: 'filter 0.2s ease, transform 0.3s ease',
                                                     }}
                                                     onMouseEnter={(e) => !ref.premium && (e.currentTarget.style.transform = 'scale(1.08)')}
