@@ -58,8 +58,6 @@ export default function UndressPage() {
     const [showExample, setShowExample] = useState(false);
     const [exampleProgress, setExampleProgress] = useState(0);
     const [exampleLoop, setExampleLoop] = useState(0);
-    const [exampleOpacity, setExampleOpacity] = useState(0);
-    const [scanDirection, setScanDirection] = useState<'down' | 'up'>('down');
 
     const handleImageUpload = (file: File | null) => {
         if (file) {
@@ -106,21 +104,10 @@ export default function UndressPage() {
 
     // Example animation effect
     useEffect(() => {
-        // Wait 5 seconds after page load, then fade in over 1.5 seconds
+        // Wait 5 seconds after page load
         const initialTimer = setTimeout(() => {
             setShowExample(true);
-            // Fade in over 1.5 seconds
-            let fadeProgress = 0;
-            const fadeInterval = setInterval(() => {
-                fadeProgress += 0.05;
-                setExampleOpacity(Math.min(fadeProgress, 1));
-                if (fadeProgress >= 1) {
-                    clearInterval(fadeInterval);
-                    // Start animation after fade in
-                    setExampleLoop(1);
-                    setScanDirection('down');
-                }
-            }, 75);
+            setExampleLoop(1);
         }, 5000);
 
         return () => clearTimeout(initialTimer);
@@ -128,62 +115,38 @@ export default function UndressPage() {
 
     useEffect(() => {
         if (exampleLoop > 0 && exampleLoop <= 2) {
-            // Animate progress over 3 seconds
-            const duration = 3000;
+            // Animate progress from 0 to 100 over 2 seconds
+            const duration = 2000;
             const steps = 60;
             const stepDuration = duration / steps;
             let currentStep = 0;
 
             const interval = setInterval(() => {
                 currentStep++;
-                const progress = (currentStep / steps) * 100;
-                
-                if (scanDirection === 'down') {
-                    setExampleProgress(progress);
-                } else {
-                    setExampleProgress(100 - progress);
-                }
+                setExampleProgress((currentStep / steps) * 100);
 
                 if (currentStep >= steps) {
                     clearInterval(interval);
-                    
-                    if (scanDirection === 'down') {
-                        // Switch to up direction
-                        setTimeout(() => {
-                            setScanDirection('up');
-                        }, 300);
-                    } else {
-                        // Completed up direction
+                    // Wait a bit before next loop or fade out
+                    setTimeout(() => {
                         if (exampleLoop < 2) {
-                            // Start next loop
-                            setTimeout(() => {
-                                setScanDirection('down');
-                                setExampleLoop(exampleLoop + 1);
-                            }, 300);
+                            setExampleProgress(0);
+                            setExampleLoop(exampleLoop + 1);
                         } else {
-                            // Fade out over 1.5 seconds after second loop
+                            // Fade out after second loop
                             setTimeout(() => {
-                                let fadeProgress = 1;
-                                const fadeInterval = setInterval(() => {
-                                    fadeProgress -= 0.05;
-                                    setExampleOpacity(Math.max(fadeProgress, 0));
-                                    if (fadeProgress <= 0) {
-                                        clearInterval(fadeInterval);
-                                        setShowExample(false);
-                                        setExampleProgress(0);
-                                        setExampleLoop(0);
-                                        setScanDirection('down');
-                                    }
-                                }, 75);
-                            }, 500);
+                                setShowExample(false);
+                                setExampleProgress(0);
+                                setExampleLoop(0);
+                            }, 1000);
                         }
-                    }
+                    }, 500);
                 }
             }, stepDuration);
 
             return () => clearInterval(interval);
         }
-    }, [exampleLoop, scanDirection]);
+    }, [exampleLoop]);
 
     // Get completed jobs with images
     const completedJobs = userJobs.filter(job => job.status === 'completed' && job.imageUrls && job.imageUrls.length > 0);
@@ -496,7 +459,7 @@ export default function UndressPage() {
                                         </Stack>
                                     ) : !latestJob ? (
                                         showExample ? (
-                                            <Box style={{ position: 'relative', width: '100%', height: '100%', opacity: exampleOpacity, transition: 'none' }}>
+                                            <Box style={{ position: 'relative', width: '100%', height: '100%', opacity: exampleLoop === 0 ? 0 : 1, transition: 'opacity 1s ease-in-out' }}>
                                                 {/* Base image */}
                                                 <img
                                                     src="/undress/example.webp"

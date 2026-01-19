@@ -106,10 +106,10 @@ export default function UndressPage() {
 
     // Example animation effect
     useEffect(() => {
-        // Wait 5 seconds after page load, then fade in over 1.5 seconds
+        // Wait 5 seconds after page load, then fade in over 3 seconds
         const initialTimer = setTimeout(() => {
             setShowExample(true);
-            // Fade in over 1.5 seconds
+            // Fade in over 3 seconds
             let fadeProgress = 0;
             const fadeInterval = setInterval(() => {
                 fadeProgress += 0.05;
@@ -120,7 +120,7 @@ export default function UndressPage() {
                     setExampleLoop(1);
                     setScanDirection('down');
                 }
-            }, 75);
+            }, 150);
         }, 5000);
 
         return () => clearTimeout(initialTimer);
@@ -161,7 +161,7 @@ export default function UndressPage() {
                                 setExampleLoop(exampleLoop + 1);
                             }, 300);
                         } else {
-                            // Fade out over 1.5 seconds after second loop
+                            // Fade out over 3 seconds after second loop
                             setTimeout(() => {
                                 let fadeProgress = 1;
                                 const fadeInterval = setInterval(() => {
@@ -174,7 +174,7 @@ export default function UndressPage() {
                                         setExampleLoop(0);
                                         setScanDirection('down');
                                     }
-                                }, 75);
+                                }, 150);
                             }, 500);
                         }
                     }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
     Grid, 
     Card, 
@@ -20,7 +20,7 @@ import { notifications } from '@mantine/notifications';
 import { useForm } from '@mantine/form';
 import { useRouter } from 'next/navigation';
 import { useUserJobs } from '@/hooks/useUserJobs';
-import { IconPhoto, IconUpload, IconShirt, IconEye, IconSwimming, IconHanger, IconLink, IconCrown } from '@tabler/icons-react';
+import { IconPhoto, IconUpload, IconShirt, IconEye, IconSwimming, IconHanger, IconLink } from '@tabler/icons-react';
 
 // Add CSS for pulse animation
 if (typeof document !== 'undefined') {
@@ -55,11 +55,6 @@ export default function UndressPage() {
     const [breastSize, setBreastSize] = useState<string | null>(null);
     const [pussyHaircut, setPussyHaircut] = useState<string | null>(null);
     const [bodyType, setBodyType] = useState<string | null>(null);
-    const [showExample, setShowExample] = useState(false);
-    const [exampleProgress, setExampleProgress] = useState(0);
-    const [exampleLoop, setExampleLoop] = useState(0);
-    const [exampleOpacity, setExampleOpacity] = useState(0);
-    const [scanDirection, setScanDirection] = useState<'down' | 'up'>('down');
 
     const handleImageUpload = (file: File | null) => {
         if (file) {
@@ -103,87 +98,6 @@ export default function UndressPage() {
             }, 8000);
         }, 1000);
     };
-
-    // Example animation effect
-    useEffect(() => {
-        // Wait 5 seconds after page load, then fade in over 1.5 seconds
-        const initialTimer = setTimeout(() => {
-            setShowExample(true);
-            // Fade in over 1.5 seconds
-            let fadeProgress = 0;
-            const fadeInterval = setInterval(() => {
-                fadeProgress += 0.05;
-                setExampleOpacity(Math.min(fadeProgress, 1));
-                if (fadeProgress >= 1) {
-                    clearInterval(fadeInterval);
-                    // Start animation after fade in
-                    setExampleLoop(1);
-                    setScanDirection('down');
-                }
-            }, 75);
-        }, 5000);
-
-        return () => clearTimeout(initialTimer);
-    }, []);
-
-    useEffect(() => {
-        if (exampleLoop > 0 && exampleLoop <= 2) {
-            // Animate progress over 3 seconds
-            const duration = 3000;
-            const steps = 60;
-            const stepDuration = duration / steps;
-            let currentStep = 0;
-
-            const interval = setInterval(() => {
-                currentStep++;
-                const progress = (currentStep / steps) * 100;
-                
-                if (scanDirection === 'down') {
-                    setExampleProgress(progress);
-                } else {
-                    setExampleProgress(100 - progress);
-                }
-
-                if (currentStep >= steps) {
-                    clearInterval(interval);
-                    
-                    if (scanDirection === 'down') {
-                        // Switch to up direction
-                        setTimeout(() => {
-                            setScanDirection('up');
-                        }, 300);
-                    } else {
-                        // Completed up direction
-                        if (exampleLoop < 2) {
-                            // Start next loop
-                            setTimeout(() => {
-                                setScanDirection('down');
-                                setExampleLoop(exampleLoop + 1);
-                            }, 300);
-                        } else {
-                            // Fade out over 1.5 seconds after second loop
-                            setTimeout(() => {
-                                let fadeProgress = 1;
-                                const fadeInterval = setInterval(() => {
-                                    fadeProgress -= 0.05;
-                                    setExampleOpacity(Math.max(fadeProgress, 0));
-                                    if (fadeProgress <= 0) {
-                                        clearInterval(fadeInterval);
-                                        setShowExample(false);
-                                        setExampleProgress(0);
-                                        setExampleLoop(0);
-                                        setScanDirection('down');
-                                    }
-                                }, 75);
-                            }, 500);
-                        }
-                    }
-                }
-            }, stepDuration);
-
-            return () => clearInterval(interval);
-        }
-    }, [exampleLoop, scanDirection]);
 
     // Get completed jobs with images
     const completedJobs = userJobs.filter(job => job.status === 'completed' && job.imageUrls && job.imageUrls.length > 0);
@@ -299,15 +213,15 @@ export default function UndressPage() {
                                                     <Text size="sm" fw={500} mb="sm" c="white">Breast Size (optional)</Text>
                                                     <Group gap="md">
                                                         {[
-                                                            { value: 'small', label: 'Small', image: '/undress/breast size/Small.webp' },
-                                                            { value: 'medium', label: 'Medium', image: '/undress/breast size/Medium.webp' },
-                                                            { value: 'large', label: 'Large', image: '/undress/breast size/Large.webp' },
-                                                            { value: 'huge', label: 'Huge', image: '/undress/breast size/Huge.webp' },
+                                                            { value: 'small', label: 'Small' },
+                                                            { value: 'medium', label: 'Medium' },
+                                                            { value: 'large', label: 'Large' },
+                                                            { value: 'huge', label: 'Huge' },
                                                         ].map((option) => {
                                                             return (
                                                                 <Stack key={option.value} align="center" gap={4}>
                                                                     <Box
-                                                                        onClick={() => setBreastSize(breastSize === option.value ? null : option.value)}
+                                                                        onClick={() => setBreastSize(option.value)}
                                                                         style={{
                                                                             backgroundColor: '#1a1a1a',
                                                                             border: breastSize === option.value ? '3px solid #4a8aca' : '1px solid #333',
@@ -317,18 +231,12 @@ export default function UndressPage() {
                                                                             height: '60px',
                                                                             overflow: 'hidden',
                                                                             borderRadius: '12px',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
                                                                         }}
                                                                     >
-                                                                        <img
-                                                                            src={option.image}
-                                                                            alt={option.label}
-                                                                            style={{
-                                                                                width: '100%',
-                                                                                height: '100%',
-                                                                                objectFit: 'cover',
-                                                                                display: 'block',
-                                                                            }}
-                                                                        />
+                                                                        <Text size="xs" c="dimmed">{option.label}</Text>
                                                                     </Box>
                                                                     <Text size="xs" fw={500} c={breastSize === option.value ? 'white' : 'dimmed'}>
                                                                         {option.label}
@@ -344,14 +252,14 @@ export default function UndressPage() {
                                                     <Text size="sm" fw={500} mb="sm" c="white">Pussy Haircut (optional)</Text>
                                                     <Group gap="md">
                                                         {[
-                                                            { value: 'shaved', label: 'Shaved', image: '/undress/pussy haircut/Shaved.webp' },
-                                                            { value: 'trimmed', label: 'Trimmed', image: '/undress/pussy haircut/Haired.webp' },
-                                                            { value: 'bush', label: 'Bush', image: '/undress/pussy haircut/Bush.webp' },
+                                                            { value: 'shaved', label: 'Shaved' },
+                                                            { value: 'trimmed', label: 'Trimmed' },
+                                                            { value: 'bush', label: 'Bush' },
                                                         ].map((option) => {
                                                             return (
                                                                 <Stack key={option.value} align="center" gap={4}>
                                                                     <Box
-                                                                        onClick={() => setPussyHaircut(pussyHaircut === option.value ? null : option.value)}
+                                                                        onClick={() => setPussyHaircut(option.value)}
                                                                         style={{
                                                                             backgroundColor: '#1a1a1a',
                                                                             border: pussyHaircut === option.value ? '3px solid #4a8aca' : '1px solid #333',
@@ -361,18 +269,12 @@ export default function UndressPage() {
                                                                             height: '60px',
                                                                             overflow: 'hidden',
                                                                             borderRadius: '12px',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
                                                                         }}
                                                                     >
-                                                                        <img
-                                                                            src={option.image}
-                                                                            alt={option.label}
-                                                                            style={{
-                                                                                width: '100%',
-                                                                                height: '100%',
-                                                                                objectFit: 'cover',
-                                                                                display: 'block',
-                                                                            }}
-                                                                        />
+                                                                        <Text size="xs" c="dimmed">{option.label}</Text>
                                                                     </Box>
                                                                     <Text size="xs" fw={500} c={pussyHaircut === option.value ? 'white' : 'dimmed'}>
                                                                         {option.label}
@@ -388,14 +290,14 @@ export default function UndressPage() {
                                                     <Text size="sm" fw={500} mb="sm" c="white">Body Type (optional)</Text>
                                                     <Group gap="md">
                                                         {[
-                                                            { value: 'slim', label: 'Slim', image: '/undress/body type/Slim.webp' },
-                                                            { value: 'athletic', label: 'Athletic', image: '/undress/body type/Athletic.webp' },
-                                                            { value: 'curvy', label: 'Curvy', image: '/undress/body type/Curvy.webp' },
+                                                            { value: 'slim', label: 'Slim' },
+                                                            { value: 'athletic', label: 'Athletic' },
+                                                            { value: 'curvy', label: 'Curvy' },
                                                         ].map((option) => {
                                                             return (
                                                                 <Stack key={option.value} align="center" gap={4}>
                                                                     <Box
-                                                                        onClick={() => setBodyType(bodyType === option.value ? null : option.value)}
+                                                                        onClick={() => setBodyType(option.value)}
                                                                         style={{
                                                                             backgroundColor: '#1a1a1a',
                                                                             border: bodyType === option.value ? '3px solid #4a8aca' : '1px solid #333',
@@ -405,18 +307,12 @@ export default function UndressPage() {
                                                                             height: '60px',
                                                                             overflow: 'hidden',
                                                                             borderRadius: '12px',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
                                                                         }}
                                                                     >
-                                                                        <img
-                                                                            src={option.image}
-                                                                            alt={option.label}
-                                                                            style={{
-                                                                                width: '100%',
-                                                                                height: '100%',
-                                                                                objectFit: 'cover',
-                                                                                display: 'block',
-                                                                            }}
-                                                                        />
+                                                                        <Text size="xs" c="dimmed">{option.label}</Text>
                                                                     </Box>
                                                                     <Text size="xs" fw={500} c={bodyType === option.value ? 'white' : 'dimmed'}>
                                                                         {option.label}
@@ -462,7 +358,6 @@ export default function UndressPage() {
                             onClick={handleUndress}
                             mt="md"
                             style={{ flexShrink: 0 }}
-                            leftSection={<IconCrown size={20} color="#FFD700" />}
                         >
                             {loading ? 'Processing...' : 'Undress (Costs Tokens)'}
                         </Button>
@@ -495,56 +390,11 @@ export default function UndressPage() {
                                             <Text c="dimmed" size="sm">This may take a few moments</Text>
                                         </Stack>
                                     ) : !latestJob ? (
-                                        showExample ? (
-                                            <Box style={{ position: 'relative', width: '100%', height: '100%', opacity: exampleOpacity, transition: 'none' }}>
-                                                {/* Base image */}
-                                                <img
-                                                    src="/undress/example.webp"
-                                                    alt="Example"
-                                                    style={{
-                                                        position: 'absolute',
-                                                        top: 0,
-                                                        left: 0,
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        objectFit: 'contain',
-                                                    }}
-                                                />
-                                                {/* Transformed image with clip */}
-                                                <img
-                                                    src="/undress/example-undressed.webp"
-                                                    alt="Example undressed"
-                                                    style={{
-                                                        position: 'absolute',
-                                                        top: 0,
-                                                        left: 0,
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        objectFit: 'contain',
-                                                        clipPath: `inset(0 0 ${100 - exampleProgress}% 0)`,
-                                                    }}
-                                                />
-                                                {/* Glowing scan line */}
-                                                <Box
-                                                    style={{
-                                                        position: 'absolute',
-                                                        top: `${exampleProgress}%`,
-                                                        left: 0,
-                                                        width: '100%',
-                                                        height: '4px',
-                                                        background: 'linear-gradient(to bottom, transparent, #4a8aca, #4a8aca, transparent)',
-                                                        boxShadow: '0 0 20px 5px rgba(74, 138, 202, 0.8)',
-                                                        transform: 'translateY(-50%)',
-                                                    }}
-                                                />
-                                            </Box>
-                                        ) : (
-                                            <Stack align="center" gap="sm">
-                                                <IconPhoto size={64} color="#666" />
-                                                <Text c="dimmed" size="lg">No results yet</Text>
-                                                <Text c="dimmed" size="sm">Your result will appear here</Text>
-                                            </Stack>
-                                        )
+                                        <Stack align="center" gap="sm">
+                                            <IconPhoto size={64} color="#666" />
+                                            <Text c="dimmed" size="lg">No results yet</Text>
+                                            <Text c="dimmed" size="sm">Your result will appear here</Text>
+                                        </Stack>
                                     ) : (
                                         <Image
                                             src={latestJob.imageUrls[0].privateUrl}

@@ -161,7 +161,7 @@ export default function UndressPage() {
                                 setExampleLoop(exampleLoop + 1);
                             }, 300);
                         } else {
-                            // Fade out over 1.5 seconds after second loop
+                            // Fade out over 3 seconds after second loop
                             setTimeout(() => {
                                 let fadeProgress = 1;
                                 const fadeInterval = setInterval(() => {
@@ -174,7 +174,7 @@ export default function UndressPage() {
                                         setExampleLoop(0);
                                         setScanDirection('down');
                                     }
-                                }, 75);
+                                }, 150);
                             }, 500);
                         }
                     }
