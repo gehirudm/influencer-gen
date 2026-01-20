@@ -34,12 +34,10 @@ const pricingPlans: {
       features: [
         { name: 'Simple image generation', explanation: "Generate realistic images easily without the need of complex prompts with a pre-defined set of features handcrafted for optimal image generation.", available: true },
         { name: 'Advanced image generation', explanation: "Full control over image generation parameters including negative prompts, dimensions, and other advanced settings.", available: true },
-        { name: 'Character creation', explanation: "Create and customize your own characters with detailed appearance settings.", available: true },
-        { name: 'Img2Img generation', explanation: "Transform existing images using AI by providing a base image and modifying it with prompts.", available: true },
-        { name: '2 hyper realistic models', explanation: "Access to two high-quality AI models optimized for photorealistic image generation.", available: true },
         { name: 'No watermark on images', explanation: "Download and use images without any watermarks or branding.", available: false },
         { name: 'AI Undress', explanation: "Generate tasteful artistic nude content with our specialized model.", available: false },
-        { name: 'Character training with Character Engine', explanation: "Train AI to mimic your character's personality and speech patterns for interactive conversations.", available: false },
+        { name: 'Character creation', explanation: "Create and customize your own characters with detailed appearance settings.", available: false },
+        { name: 'LoRa character training', explanation: "Train a custom LoRa model for your character for consistent high-quality generations.", available: false },
         { name: 'Image Generation with Character Engine', explanation: "Generate images that match your character's specific appearance and style consistently.", available: false },
       ],
       button: 'Current plan',
@@ -54,12 +52,10 @@ const pricingPlans: {
       images: 'Create up to 750 images',
       features: [
         { name: 'All image generation features', explanation: "Full access all image generation features available.", available: true },
-        { name: 'Character creation', explanation: "Create and customize your own characters with detailed appearance settings and save them for future use.", available: true },
-        { name: 'Img2Img generation', explanation: "Transform existing images using AI by providing a base image and modifying it with prompts for precise results.", available: true },
-        { name: '2 hyper realistic models', explanation: "Access to two premium AI models specifically tuned for photorealistic image generation with exceptional quality.", available: true },
         { name: 'No watermark on images', explanation: "All generated images are delivered without watermarks for professional use and sharing.", available: true },
         { name: 'AI Undress', explanation: "Upload an image and generate a nude version of that image. You can tweak the characteristics to your choice", available: true },
-        { name: 'Character training with Character Engine', explanation: "Train AI to learn your character, resulting in much higher quality similarity in ", available: true },
+        { name: 'Character creation', explanation: "Create and customize your own characters with detailed appearance settings and save them for future use.", available: true },
+        { name: '1 LoRa character training included', explanation: "Train one custom LoRa model for your character, enabling consistent high-quality image generations.", available: true },
         { name: 'Image Generation with Character Engine', explanation: "Generate consistent images of your trained characters with perfect appearance matching across multiple generations.", available: true },
       ],
       button: 'Purchase',
@@ -74,37 +70,16 @@ const pricingPlans: {
       images: 'Create up to 3000 images',
       features: [
         { name: 'All image generation features', explanation: "Full access all image generation features available.", available: true },
-        { name: 'Character creation', explanation: "Create unlimited characters with our most detailed customization options and advanced appearance settings.", available: true },
-        { name: 'Img2Img generation', explanation: "Transform existing images with our most powerful AI models, offering precise control over the transformation process.", available: true },
-        { name: '2 hyper realistic models', explanation: "Access to our highest quality AI models with enhanced photorealism and superior detail rendering.", available: true },
         { name: 'No watermark on images', explanation: "All generated images are delivered without watermarks and at maximum available resolution.", available: true },
         { name: 'AI Undress', explanation: "Upload an image and generate a nude version of that image. You can tweak the characteristics to your choice", available: true },
-        { name: 'Character training with Character Engine', explanation: "Train multiple AI characters with our most sophisticated learning algorithms for incredibly realistic conversations.", available: true },
+        { name: 'Character creation', explanation: "Create unlimited characters with our most detailed customization options and advanced appearance settings.", available: true },
+        { name: '2 LoRa character trainings included', explanation: "Train two custom LoRa models for your characters, enabling consistent high-quality image generations.", available: true },
         { name: 'Image Generation with Character Engine', explanation: "Generate the highest quality consistent images of your trained characters with perfect appearance matching and enhanced details.", available: true },
       ],
       button: 'Purchase',
       highlight: true,
       popular: true,
     },
-    // {
-    //   name: 'Master',
-    //   price: '$59',
-    //   tagline: 'One time fee',
-    //   tokens: '24000 tokens',
-    //   images: 'Create up to 6000 images',
-    //   features: [
-    //     { name: 'AI Image generator', available: true },
-    //     { name: 'Character creation', available: true },
-    //     { name: 'Img2Img generation', available: true },
-    //     { name: '5 hyper realistic models', available: true },
-    //     { name: 'No watermark on images', available: true },
-    //     { name: 'Upscale images to Hi-Res', available: true },
-    //     { name: 'Face swap video', available: true },
-    //   ],
-    //   button: 'Purchase',
-    //   highlight: false,
-    //   bestValue: true,
-    // },
   ];
 
 function PricingPageMessageBox() {
@@ -321,6 +296,42 @@ const PricingPage = () => {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Coming Soon Section */}
+      <div className="mt-16 text-center">
+        <div className="inline-block bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-full px-6 py-2 mb-8">
+          🎬 Video Generation Coming Soon
+        </div>
+      </div>
+
+      {/* LoRa Training Section */}
+      <div className="mt-12 max-w-4xl mx-auto">
+        <div className="rounded-2xl p-8 border border-gray-800" style={{
+          background: 'linear-gradient(80.42deg, rgba(0, 0, 0, 0.16) 25.25%, rgba(83, 84, 108, 0.16) 98.05%)',
+        }}>
+          <h2 className="text-3xl font-bold text-center mb-6">LoRa Character Training</h2>
+          <p className="text-gray-300 text-center mb-8">
+            Train custom AI models for your characters with our professional LoRa training service
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-4">
+              <div className="text-4xl font-bold text-indigo-400 mb-2">$60</div>
+              <div className="text-gray-300">Per single LoRa character training</div>
+            </div>
+            
+            <div className="text-center p-4">
+              <div className="text-2xl mb-2">💰</div>
+              <div className="text-gray-300">Sell your trained LoRa models and earn revenue</div>
+            </div>
+            
+            <div className="text-center p-4">
+              <div className="text-2xl mb-2">📦</div>
+              <div className="text-gray-300">Bulk buy training credits with exclusive discounts</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
