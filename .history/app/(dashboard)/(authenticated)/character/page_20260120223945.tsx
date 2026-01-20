@@ -75,7 +75,7 @@ export default function CharacterCreationPage() {
                         Your Characters
                     </Title>
 
-                    <Card p={{ base: 'md', md: 'lg' }} style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
+                    <Card p={{ base: 'md', md: 'lg' }} style={{ backgroundColor: '#2a2a2a', border: 'none' }}>
                         <Group gap="md" justify='center'>
                             {characters.length === 0 && !loading && (
                                 <Stack align="center" py="xl" gap="sm">
@@ -108,7 +108,7 @@ export default function CharacterCreationPage() {
                         Premade Characters
                     </Title>
 
-                    <Card p={{ base: 'md', md: 'lg' }} style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
+                    <Card p={{ base: 'md', md: 'lg' }} style={{ border: 'none' }}>
                         <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 5 }} spacing="md">
                             {premadeCharacters.map((character) => (
                                 <Card key={character.id} p="md" style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}>
