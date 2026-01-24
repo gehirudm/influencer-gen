@@ -193,47 +193,15 @@ export const useCharacters = () => {
 
             // Now create the character document with all data including image IDs and URLs
             const characterRef = doc(db, 'characters', characterId);
-            const characterDoc: any = {
+            await setDoc(characterRef, {
                 userId: user.uid,
                 name: characterData.name,
-                description: characterData.description || '',
-                characteristics: ["age", "hair", "bodyType", "ethnicity", "gender"].map((attr) => ({ 
-                    name: attr, 
-                    value: characterData[attr as keyof typeof characterData] as string || '' 
-                })),
+                description: characterData.description,
+                characteristics: ["age", "hair", "bodyType", "ethnicity", "gender"].map((attr) => ({ [attr]: characterData[attr as keyof typeof characterData] })),
                 imageIds,
                 imageUrls,
-                createdAt: serverTimestamp(),
-            };
-
-            // Add wizard-specific fields
-            if (characterData.gender) {
-                characterDoc.gender = characterData.gender;
-            }
-            if (characterData.ageRange) {
-                characterDoc.ageRange = characterData.ageRange;
-            }
-            if (characterData.bodyType) {
-                characterDoc.bodyType = characterData.bodyType;
-            }
-            if (baseImageId) {
-                characterDoc.baseImageId = baseImageId;
-            }
-            if (baseImageUrl) {
-                characterDoc.baseImageUrl = baseImageUrl;
-            }
-            if (characterData.personality) {
-                characterDoc.personality = characterData.personality;
-            }
-            if (characterData.style) {
-                characterDoc.style = characterData.style;
-            }
-            if (characterData.isDraft !== undefined) {
-                characterDoc.isDraft = characterData.isDraft;
-            }
-            characterDoc.lastModified = serverTimestamp();
-
-            await setDoc(characterRef, characterDoc);
+                createdAt: serverTimestamp()
+            });
 
             return characterId;
         } catch (err) {

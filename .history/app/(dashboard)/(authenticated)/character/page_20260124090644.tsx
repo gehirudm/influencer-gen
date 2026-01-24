@@ -90,7 +90,7 @@ export default function CharacterCreationPage() {
                                         variant="filled" 
                                         size="md" 
                                         mt="md"
-                                        onClick={() => router.push('/character/create')}
+                                        onClick={() => router.push('/dashboard/character/create')}
                                     >
                                         Create New Character
                                     </Button>

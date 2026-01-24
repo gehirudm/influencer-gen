@@ -166,74 +166,17 @@ export const useCharacters = () => {
                 }
             }
 
-            // Handle base image separately (for wizard flow)
-            let baseImageId: string | undefined;
-            let baseImageUrl: string | undefined;
-            if (characterData.baseImage) {
-                const imageId = crypto.randomUUID();
-                const fileExtension = getFileExtension(characterData.baseImage.name, characterData.baseImage.type);
-                const imageRef = ref(
-                    storage,
-                    `character-images/${user.uid}/${characterId}/base-${imageId}.${fileExtension}`
-                );
-
-                await uploadBytes(imageRef, characterData.baseImage, {
-                    contentType: characterData.baseImage.type,
-                    customMetadata: {
-                        'originalName': characterData.baseImage.name,
-                        'uploadedAt': new Date().toISOString(),
-                        'isBaseImage': 'true',
-                    }
-                });
-
-                baseImageId = `base-${imageId}.${fileExtension}`;
-                const urls = await getCharacterImageUrls(characterId, [baseImageId]);
-                baseImageUrl = urls[0];
-            }
-
             // Now create the character document with all data including image IDs and URLs
             const characterRef = doc(db, 'characters', characterId);
-            const characterDoc: any = {
+            await setDoc(characterRef, {
                 userId: user.uid,
                 name: characterData.name,
-                description: characterData.description || '',
-                characteristics: ["age", "hair", "bodyType", "ethnicity", "gender"].map((attr) => ({ 
-                    name: attr, 
-                    value: characterData[attr as keyof typeof characterData] as string || '' 
-                })),
+                description: characterData.description,
+                characteristics: ["age", "hair", "bodyType", "ethnicity", "gender"].map((attr) => ({ [attr]: characterData[attr as keyof typeof characterData] })),
                 imageIds,
                 imageUrls,
-                createdAt: serverTimestamp(),
-            };
-
-            // Add wizard-specific fields
-            if (characterData.gender) {
-                characterDoc.gender = characterData.gender;
-            }
-            if (characterData.ageRange) {
-                characterDoc.ageRange = characterData.ageRange;
-            }
-            if (characterData.bodyType) {
-                characterDoc.bodyType = characterData.bodyType;
-            }
-            if (baseImageId) {
-                characterDoc.baseImageId = baseImageId;
-            }
-            if (baseImageUrl) {
-                characterDoc.baseImageUrl = baseImageUrl;
-            }
-            if (characterData.personality) {
-                characterDoc.personality = characterData.personality;
-            }
-            if (characterData.style) {
-                characterDoc.style = characterData.style;
-            }
-            if (characterData.isDraft !== undefined) {
-                characterDoc.isDraft = characterData.isDraft;
-            }
-            characterDoc.lastModified = serverTimestamp();
-
-            await setDoc(characterRef, characterDoc);
+                createdAt: serverTimestamp()
+            });
 
             return characterId;
         } catch (err) {

@@ -84,14 +84,9 @@ export default function CharacterCreationPage() {
                                     <IconWoman size={48} color="gray" />
                                     <Text ta="center" c="dimmed" size="lg">You don't have any characters yet</Text>
                                     <Text ta="center" c="dimmed" size="sm">
-                                        Create a new character to get started
+                                        Choose a premade character below to get started
                                     </Text>
-                                    <Button 
-                                        variant="filled" 
-                                        size="md" 
-                                        mt="md"
-                                        onClick={() => router.push('/character/create')}
-                                    >
+                                    <Button variant="filled" size="md" mt="md">
                                         Create New Character
                                     </Button>
                                 </Stack>
