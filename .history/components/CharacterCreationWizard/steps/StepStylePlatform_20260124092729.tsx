@@ -177,6 +177,33 @@ export function StepStylePlatform({ data, onUpdate }: StepStylePlatformProps) {
                     </Group>
                 )}
             </div>
+
+            {/* Summary */}
+            <Box style={{ backgroundColor: '#1a1a1a', padding: '12px', borderRadius: '8px' }}>
+                <Text size="sm" fw={500} mb="xs">
+                    Content Profile:
+                </Text>
+                <Stack gap={4}>
+                    <Text size="sm" c="dimmed">
+                        <Text component="span" fw={500}>
+                            Platforms:
+                        </Text>{' '}
+                        {style.platforms.length > 0 ? style.platforms.join(', ') : 'Not specified'}
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                        <Text component="span" fw={500}>
+                            Style:
+                        </Text>{' '}
+                        {style.clothingStyle || 'Not specified'}
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                        <Text component="span" fw={500}>
+                            Poses:
+                        </Text>{' '}
+                        {style.poses.length > 0 ? style.poses.join(', ') : 'Not specified'}
+                    </Text>
+                </Stack>
+            </Box>
         </Stack>
     );
 }

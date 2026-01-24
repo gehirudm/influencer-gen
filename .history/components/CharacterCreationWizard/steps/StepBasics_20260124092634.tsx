@@ -105,6 +105,17 @@ export function StepBasics({ data, onUpdate }: StepBasicsProps) {
                 onChange={(e) => onUpdate({ description: e.currentTarget.value })}
                 description="Optional: Add more context about your character"
             />
+
+            <div>
+                <Group gap="xs" mb="sm">
+                    <Badge color="red" size="sm">
+                        Required
+                    </Badge>
+                    <Text size="sm" c="dimmed">
+                        Fill in all fields to continue to the next step
+                    </Text>
+                </Group>
+            </div>
         </Stack>
     );
 }

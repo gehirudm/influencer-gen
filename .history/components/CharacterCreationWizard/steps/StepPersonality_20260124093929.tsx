@@ -39,7 +39,7 @@ export function StepPersonality({ data, onUpdate }: StepPersonalityProps) {
     };
 
     return (
-        <Stack gap="lg" style={{ width: '100%', overflow: 'hidden' }}>
+        <Stack gap="md" style={{ width: '100%', overflow: 'hidden' }}>
             <div>
                 <Group justify="space-between" align="flex-start" mb="xs">
                     <div>
@@ -63,99 +63,93 @@ export function StepPersonality({ data, onUpdate }: StepPersonalityProps) {
             </Box>
 
             {/* Confidence Slider */}
-            <Box style={{ width: '100%', paddingRight: '16px', paddingBottom: '8px' }}>
-                <Group gap="sm" mb="md" wrap="nowrap">
-                    <ThemeIcon color="blue" variant="light" size="lg" radius="md" style={{ flexShrink: 0 }}>
+            <Box style={{ width: '100%', paddingRight: '8px' }}>
+                <Group gap="sm" mb="xs">
+                    <ThemeIcon color="blue" variant="light" size="lg" radius="md">
                         <IconMoodSmile size={18} />
                     </ThemeIcon>
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ flex: 1 }}>
                         <Text size="sm" fw={500}>
                             Confidence Level
                         </Text>
-                        <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            Shy & Reserved ↔ Confident & Bold
+                        <Text size="xs" c="dimmed">
+                            {getSliderLabel(personality.confidence, 'Shy & Reserved', 'Confident & Bold')}
                         </Text>
                     </div>
                 </Group>
-                <Box px="xs">
-                    <Slider
-                        value={personality.confidence}
-                        onChange={(value) => handleSliderChange('confidence', value)}
-                        min={0}
-                        max={100}
-                        step={5}
-                        marks={[
-                            { value: 0, label: 'Shy' },
-                            { value: 50, label: 'Balanced' },
-                            { value: 100, label: 'Bold' },
-                        ]}
-                        color="blue"
-                    />
-                </Box>
+                <Slider
+                    value={personality.confidence}
+                    onChange={(value) => handleSliderChange('confidence', value)}
+                    min={0}
+                    max={100}
+                    step={5}
+                    marks={[
+                        { value: 0, label: 'Shy' },
+                        { value: 50, label: 'Balanced' },
+                        { value: 100, label: 'Bold' },
+                    ]}
+                    color="blue"
+                />
             </Box>
 
             {/* Seduction Slider */}
-            <Box style={{ width: '100%', paddingRight: '16px', paddingBottom: '8px' }}>
-                <Group gap="sm" mb="md" wrap="nowrap">
-                    <ThemeIcon color="pink" variant="light" size="lg" radius="md" style={{ flexShrink: 0 }}>
+            <Box style={{ width: '100%', paddingRight: '8px' }}>
+                <Group gap="sm" mb="xs">
+                    <ThemeIcon color="pink" variant="light" size="lg" radius="md">
                         <IconHeart size={18} />
                     </ThemeIcon>
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ flex: 1 }}>
                         <Text size="sm" fw={500}>
                             Appeal Style
                         </Text>
-                        <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            Cute & Innocent ↔ Seductive & Alluring
+                        <Text size="xs" c="dimmed">
+                            {getSliderLabel(personality.seduction, 'Cute & Innocent', 'Seductive & Alluring')}
                         </Text>
                     </div>
                 </Group>
-                <Box px="xs">
-                    <Slider
-                        value={personality.seduction}
-                        onChange={(value) => handleSliderChange('seduction', value)}
-                        min={0}
-                        max={100}
-                        step={5}
-                        marks={[
-                            { value: 0, label: 'Cute' },
-                            { value: 50, label: 'Balanced' },
-                            { value: 100, label: 'Seductive' },
-                        ]}
-                        color="pink"
-                    />
-                </Box>
+                <Slider
+                    value={personality.seduction}
+                    onChange={(value) => handleSliderChange('seduction', value)}
+                    min={0}
+                    max={100}
+                    step={5}
+                    marks={[
+                        { value: 0, label: 'Cute' },
+                        { value: 50, label: 'Balanced' },
+                        { value: 100, label: 'Seductive' },
+                    ]}
+                    color="pink"
+                />
             </Box>
 
             {/* Dominance Slider */}
-            <Box style={{ width: '100%', paddingRight: '16px', paddingBottom: '8px' }}>
-                <Group gap="sm" mb="md" wrap="nowrap">
-                    <ThemeIcon color="grape" variant="light" size="lg" radius="md" style={{ flexShrink: 0 }}>
+            <Box style={{ width: '100%', paddingRight: '8px' }}>
+                <Group gap="sm" mb="xs">
+                    <ThemeIcon color="grape" variant="light" size="lg" radius="md">
                         <IconCrown size={18} />
                     </ThemeIcon>
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ flex: 1 }}>
                         <Text size="sm" fw={500}>
                             Personality Dynamic
                         </Text>
-                        <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            Soft & Gentle ↔ Dominant & Commanding
+                        <Text size="xs" c="dimmed">
+                            {getSliderLabel(personality.dominance, 'Soft & Gentle', 'Dominant & Commanding')}
                         </Text>
                     </div>
                 </Group>
-                <Box px="xs">
-                    <Slider
-                        value={personality.dominance}
-                        onChange={(value) => handleSliderChange('dominance', value)}
-                        min={0}
-                        max={100}
-                        step={5}
-                        marks={[
-                            { value: 0, label: 'Soft' },
-                            { value: 50, label: 'Balanced' },
-                            { value: 100, label: 'Dominant' },
-                        ]}
-                        color="grape"
-                    />
-                </Box>
+                <Slider
+                    value={personality.dominance}
+                    onChange={(value) => handleSliderChange('dominance', value)}
+                    min={0}
+                    max={100}
+                    step={5}
+                    marks={[
+                        { value: 0, label: 'Soft' },
+                        { value: 50, label: 'Balanced' },
+                        { value: 100, label: 'Dominant' },
+                    ]}
+                    color="grape"
+                />
             </Box>
 
             {/* Summary */}

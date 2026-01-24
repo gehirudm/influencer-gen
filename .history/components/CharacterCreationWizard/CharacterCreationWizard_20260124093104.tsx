@@ -310,9 +310,6 @@ export function CharacterCreationWizard({ opened, onClose }: CharacterCreationWi
                         style={{
                             borderTop: '1px solid var(--mantine-color-dark-4)',
                             backgroundColor: 'var(--mantine-color-dark-7)',
-                            position: 'sticky',
-                            bottom: 0,
-                            zIndex: 10,
                         }}
                     >
                         <Group justify="space-between">

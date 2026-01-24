@@ -100,26 +100,30 @@ export default function CharacterCreationPage() {
                                     }}
                                     onClick={() => setWizardOpened(true)}
                                 >
-                                    <Box
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            backgroundColor: '#1a1a1a',
-                                            borderRadius: '4px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            border: '1px solid #444',
-                                            minHeight: '280px',
-                                        }}
-                                    >
-                                        <Stack align="center" gap="xs">
-                                            <Text size="3rem" c="#4a7aba">+</Text>
-                                            <Text size="sm" c="#4a7aba" fw={600} ta="center">
-                                                Create a new character
-                                            </Text>
-                                        </Stack>
-                                    </Box>
+                                    <Stack gap="xs">
+                                        <Box
+                                            style={{
+                                                width: '100%',
+                                                aspectRatio: '3/4',
+                                                backgroundColor: '#1a1a1a',
+                                                borderRadius: '4px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                border: '1px solid #444',
+                                            }}
+                                        >
+                                            <Stack align="center" gap="xs">
+                                                <Text size="3rem" c="#4a7aba">+</Text>
+                                                <Text size="xs" c="#4a7aba" fw={600} ta="center">
+                                                    Create Your Own
+                                                </Text>
+                                            </Stack>
+                                        </Box>
+                                        <Text size="xs" fw={600} c="white" ta="center">
+                                            Custom Character
+                                        </Text>
+                                    </Stack>
                                 </Card>
 
                                 {/* User Characters */}
@@ -182,7 +186,7 @@ export default function CharacterCreationPage() {
                                                 </Badge>
                                             </Group>
                                         </Box>
-                                        <Text size="sm" c="white" ta="center">
+                                        <Text size="lg" c="white" ta="center">
                                             <Text component="span" fw={600}>{character.name}</Text>
                                             <Text component="span" fw={400}> ({character.age})</Text>
                                         </Text>

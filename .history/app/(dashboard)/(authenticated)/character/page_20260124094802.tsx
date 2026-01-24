@@ -92,34 +92,37 @@ export default function CharacterCreationPage() {
                             <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 5 }} spacing="md">
                                 {/* Create New Character Card */}
                                 <Card 
-                                    p="sm" 
+                                    p="md" 
                                     style={{ 
                                         backgroundColor: '#2a2a2a', 
-                                        border: '2px dashed #4a7aba', 
+                                        border: '2px dashed #555', 
                                         cursor: 'pointer',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        minHeight: '350px',
                                     }}
                                     onClick={() => setWizardOpened(true)}
                                 >
-                                    <Box
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            backgroundColor: '#1a1a1a',
-                                            borderRadius: '4px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            border: '1px solid #444',
-                                            minHeight: '280px',
-                                        }}
-                                    >
-                                        <Stack align="center" gap="xs">
-                                            <Text size="3rem" c="#4a7aba">+</Text>
-                                            <Text size="sm" c="#4a7aba" fw={600} ta="center">
-                                                Create a new character
-                                            </Text>
-                                        </Stack>
-                                    </Box>
+                                    <Stack align="center" gap="md">
+                                        <Box
+                                            style={{
+                                                width: '80px',
+                                                height: '80px',
+                                                borderRadius: '50%',
+                                                backgroundColor: '#3a3a3a',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                            }}
+                                        >
+                                            <IconWoman size={40} color="#888" />
+                                        </Box>
+                                        <Text size="lg" fw={600} c="dimmed" ta="center">
+                                            Create New Character
+                                        </Text>
+                                    </Stack>
                                 </Card>
 
                                 {/* User Characters */}
@@ -182,10 +185,17 @@ export default function CharacterCreationPage() {
                                                 </Badge>
                                             </Group>
                                         </Box>
-                                        <Text size="sm" c="white" ta="center">
+                                        <Text size="lg" c="white" ta="center">
                                             <Text component="span" fw={600}>{character.name}</Text>
                                             <Text component="span" fw={400}> ({character.age})</Text>
                                         </Text>
+                                        <Group gap="xs" justify="center" style={{ flexWrap: 'wrap' }}>
+                                            {character.tags.map((tag, index) => (
+                                                <Badge key={index} variant="light" size="sm">
+                                                    {tag}
+                                                </Badge>
+                                            ))}
+                                        </Group>
                                     </Stack>
                                 </Card>
                             ))}

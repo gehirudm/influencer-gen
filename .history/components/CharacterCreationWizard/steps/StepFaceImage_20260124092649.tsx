@@ -183,6 +183,20 @@ export function StepFaceImage({ data, onUpdate }: StepFaceImageProps) {
                 </Dropzone>
             )}
 
+            {/* Requirements */}
+            <Stack gap="xs" style={{ backgroundColor: '#1a1a1a', padding: '12px', borderRadius: '8px' }}>
+                <Text size="sm" fw={600}>
+                    Recommended for Best Results:
+                </Text>
+                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '14px' }}>
+                    <li>Clear, frontal face view</li>
+                    <li>Good lighting (avoid shadows on face)</li>
+                    <li>Eyes open and visible</li>
+                    <li>Neutral or natural expression</li>
+                    <li>Image size: at least 512x512 pixels</li>
+                </ul>
+            </Stack>
+
             {data.baseImage && (
                 <Text size="sm" c="green" fw={500}>
                     ✓ Face image selected

@@ -276,6 +276,23 @@ export function CharacterCreationWizard({ opened, onClose }: CharacterCreationWi
                             overflow: 'auto',
                             minHeight: 0,
                         }}
+                        sx={{
+                            '&::-webkit-scrollbar': {
+                                width: '6px',
+                            },
+                            '&::-webkit-scrollbar-track': {
+                                background: 'transparent',
+                            },
+                            '&::-webkit-scrollbar-thumb': {
+                                background: 'rgba(255, 255, 255, 0.2)',
+                                borderRadius: '10px',
+                            },
+                            '&::-webkit-scrollbar-thumb:hover': {
+                                background: 'rgba(255, 255, 255, 0.3)',
+                            },
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: 'rgba(255, 255, 255, 0.2) transparent',
+                        }}
                     >
                         {currentStep === 0 && (
                             <StepBasics

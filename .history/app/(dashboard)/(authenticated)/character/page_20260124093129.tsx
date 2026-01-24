@@ -70,13 +70,9 @@ export default function CharacterCreationPage() {
     ];
 
 
+
     return (
         <Container size="xl" py={{ base: 'md', md: 'xl' }}>
-            <CharacterCreationWizard 
-                opened={wizardOpened} 
-                onClose={() => setWizardOpened(false)} 
-            />
-            
             <Stack gap="xl">
                 {/* Your Characters Section */}
                 <Card p={{ base: 'md', md: 'lg' }} withBorder={false}>
@@ -85,52 +81,34 @@ export default function CharacterCreationPage() {
                     </Title>
 
                     <Card p={{ base: 'md', md: 'lg' }} style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-                        {loading && (
-                            <Text ta="center" c="dimmed" py="xl">Loading your characters...</Text>
-                        )}
-                        {!loading && (
-                            <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 5 }} spacing="md">
-                                {/* Create New Character Card */}
-                                <Card 
-                                    p="sm" 
-                                    style={{ 
-                                        backgroundColor: '#2a2a2a', 
-                                        border: '2px dashed #4a7aba', 
-                                        cursor: 'pointer',
-                                    }}
-                                    onClick={() => setWizardOpened(true)}
-                                >
-                                    <Box
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            backgroundColor: '#1a1a1a',
-                                            borderRadius: '4px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            border: '1px solid #444',
-                                            minHeight: '280px',
-                                        }}
+                        <Group gap="md" justify='center'>
+                            {characters.length === 0 && !loading && (
+                                <Stack align="center" py="xl" gap="sm">
+                                    <IconWoman size={48} color="gray" />
+                                    <Text ta="center" c="dimmed" size="lg">You don't have any characters yet</Text>
+                                    <Text ta="center" c="dimmed" size="sm">
+                                        Create a new character to get started
+                                    </Text>
+                                    <Button 
+                                        variant="filled" 
+                                        size="md" 
+                                        mt="md"
+                                        onClick={() => router.push('/character/create')}
                                     >
-                                        <Stack align="center" gap="xs">
-                                            <Text size="3rem" c="#4a7aba">+</Text>
-                                            <Text size="sm" c="#4a7aba" fw={600} ta="center">
-                                                Create a new character
-                                            </Text>
-                                        </Stack>
-                                    </Box>
-                                </Card>
-
-                                {/* User Characters */}
-                                {characters.map((character) => (
-                                    <CharacterCard
-                                        key={character.id}
-                                        character={character}
-                                    />
-                                ))}
-                            </SimpleGrid>
-                        )}
+                                        Create New Character
+                                    </Button>
+                                </Stack>
+                            )}
+                            {loading && (
+                                <Text ta="center" c="dimmed" py="xl">Loading your characters...</Text>
+                            )}
+                            {characters.map((character) => (
+                                <CharacterCard
+                                    key={character.id}
+                                    character={character}
+                                />
+                            ))}
+                        </Group>
                     </Card>
                 </Card>
 
@@ -182,10 +160,17 @@ export default function CharacterCreationPage() {
                                                 </Badge>
                                             </Group>
                                         </Box>
-                                        <Text size="sm" c="white" ta="center">
+                                        <Text size="lg" c="white" ta="center">
                                             <Text component="span" fw={600}>{character.name}</Text>
                                             <Text component="span" fw={400}> ({character.age})</Text>
                                         </Text>
+                                        <Group gap="xs" justify="center" style={{ flexWrap: 'wrap' }}>
+                                            {character.tags.map((tag, index) => (
+                                                <Badge key={index} variant="light" size="sm">
+                                                    {tag}
+                                                </Badge>
+                                            ))}
+                                        </Group>
                                     </Stack>
                                 </Card>
                             ))}

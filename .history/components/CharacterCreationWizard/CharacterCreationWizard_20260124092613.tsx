@@ -14,7 +14,6 @@ import {
     Center,
     Loader,
     Box,
-    Modal,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
@@ -54,12 +53,7 @@ export interface CharacterWizardData {
 const TOTAL_STEPS = 4;
 const OPTIONAL_STEPS = [2, 3]; // Steps 3 and 4 are optional (0-indexed)
 
-interface CharacterCreationWizardProps {
-    opened: boolean;
-    onClose: () => void;
-}
-
-export function CharacterCreationWizard({ opened, onClose }: CharacterCreationWizardProps) {
+export function CharacterCreationWizard() {
     const router = useRouter();
     const { createCharacter } = useCharacters();
 
@@ -209,16 +203,10 @@ export function CharacterCreationWizard({ opened, onClose }: CharacterCreationWi
                     autoClose: 3000,
                 });
 
-                // Close modal and reset form
-                onClose();
-                setCurrentStep(0);
-                setFormData({
-                    name: '',
-                    gender: 'FEMALE',
-                    ageRange: '',
-                    bodyType: '',
-                    description: '',
-                });
+                // Redirect to character page
+                setTimeout(() => {
+                    router.push('/character');
+                }, 1000);
             }
         } catch (error) {
             console.error('Error creating character:', error);
@@ -238,43 +226,26 @@ export function CharacterCreationWizard({ opened, onClose }: CharacterCreationWi
     const isOptionalStep = OPTIONAL_STEPS.includes(currentStep);
 
     return (
-        <Modal
-            opened={opened}
-            onClose={onClose}
-            size="xl"
-            title="Create New Character"
-            centered
-            overlayProps={{
-                backgroundOpacity: 0.55,
-                blur: 3,
-            }}
-            styles={{
-                body: {
-                    padding: 0,
-                },
-                content: {
-                    maxHeight: '90vh',
-                },
-            }}
-        >
-            <Box style={{ height: '85vh', display: 'flex', flexDirection: 'column' }}>
-                <Stack gap="md" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Container size="lg" py="xl">
+            <Box style={{ maxWidth: '900px', margin: '0 auto' }}>
+                <Stack gap="md">
                     {/* Header */}
-                    <Box px="lg" pt="md">
+                    <div>
                         <Text size="sm" c="dimmed" mb="sm">
                             Step {currentStep + 1} of {TOTAL_STEPS}
                             {isOptionalStep && <span> — Optional</span>}
                         </Text>
-                        <Progress value={progressPercent} color="blue" />
-                    </Box>
+                        <Progress value={progressPercent} mb="md" color="blue" />
+                    </div>
 
                     {/* Scrollable Content Area */}
-                    <Box 
-                        px="lg"
+                    <Card 
+                        p="lg" 
+                        withBorder
                         style={{
-                            flex: 1,
+                            maxHeight: 'calc(100vh - 300px)',
+                            minHeight: '400px',
                             overflow: 'auto',
-                            minHeight: 0,
                         }}
                     >
                         {currentStep === 0 && (
@@ -301,51 +272,59 @@ export function CharacterCreationWizard({ opened, onClose }: CharacterCreationWi
                                 onUpdate={updateFormData}
                             />
                         )}
-                    </Box>
+                    </Card>
 
                     {/* Sticky Navigation */}
-                    <Box 
-                        px="lg"
-                        py="md"
+                    <Card 
+                        p="md" 
+                        withBorder
                         style={{
-                            borderTop: '1px solid var(--mantine-color-dark-4)',
-                            backgroundColor: 'var(--mantine-color-dark-7)',
                             position: 'sticky',
                             bottom: 0,
-                            zIndex: 10,
+                            zIndex: 100,
+                            backgroundColor: 'var(--mantine-color-dark-7)',
                         }}
                     >
-                        <Group justify="space-between">
-                            <Button
-                                variant="default"
-                                onClick={handlePrevious}
-                                disabled={currentStep === 0 || isSubmitting}
-                            >
-                                Previous
-                            </Button>
+                        <Stack gap="xs">
+                            <Group justify="space-between">
+                                <Button
+                                    variant="default"
+                                    onClick={handlePrevious}
+                                    disabled={currentStep === 0 || isSubmitting}
+                                >
+                                    Previous
+                                </Button>
 
-                            <Group gap="xs">
-                                {isOptionalStep && (
+                                <Group gap="xs">
+                                    {isOptionalStep && (
+                                        <Button
+                                            variant="light"
+                                            onClick={handleSkip}
+                                            disabled={isSubmitting}
+                                        >
+                                            {isLastStep ? 'Finish' : 'Skip'}
+                                        </Button>
+                                    )}
                                     <Button
-                                        variant="light"
-                                        onClick={handleSkip}
+                                        onClick={isLastStep ? handleSubmit : handleNext}
+                                        loading={isSubmitting}
                                         disabled={isSubmitting}
                                     >
-                                        {isLastStep ? 'Finish' : 'Skip'}
+                                        {isLastStep ? 'Create Character' : 'Next'}
                                     </Button>
-                                )}
-                                <Button
-                                    onClick={isLastStep ? handleSubmit : handleNext}
-                                    loading={isSubmitting}
-                                    disabled={isSubmitting}
-                                >
-                                    {isLastStep ? 'Create Character' : 'Next'}
-                                </Button>
+                                </Group>
                             </Group>
-                        </Group>
-                    </Box>
+
+                            {/* Auto-save indicator */}
+                            <Center>
+                                <Text size="xs" c="dimmed">
+                                    ✓ Draft auto-saved
+                                </Text>
+                            </Center>
+                        </Stack>
+                    </Card>
                 </Stack>
             </Box>
-        </Modal>
+        </Container>
     );
 }
