@@ -1,0 +1,102 @@
+.card {
+  height: 320px;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.content {
+  position: absolute;
+  inset: 0;
+  padding: var(--mantine-spacing-md);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.title {
+  color: var(--mantine-color-white);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.tagBadge {
+  backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.footer {
+  width: 100%;
+}
+
+.tierBadge {
+  position: absolute;
+  top: var(--mantine-spacing-md);
+  right: var(--mantine-spacing-md);
+  z-index: 2;
+}
+
+.overlay {
+  background-color: transparent;
+  background-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.5) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+}
+
+/* Modal Styles */
+.modalContent {
+  position: relative;
+  min-height: 600px;
+}
+
+.closeButton {
+  position: absolute;
+  top: var(--mantine-spacing-md);
+  right: var(--mantine-spacing-md);
+  z-index: 100;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+}
+
+.closeButton:hover {
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.modalImage {
+  width: 45%;
+  min-height: 600px;
+  background-color: var(--mantine-color-gray-1);
+}
+
+.modalDetails {
+  width: 55%;
+  padding: var(--mantine-spacing-xl);
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    min-height: auto;
+  }
+
+  .modalImage {
+    width: 100%;
+    min-height: 400px;
+  }
+
+  .modalDetails {
+    width: 100%;
+    max-height: none;
+  }
+}
