@@ -432,193 +432,175 @@ export default function ProfilePage() {
 	}
 
 	if (loading) return (
-		<Box style={{ padding: '0.75rem', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+		<Group h="80vh" align='center' justify='center'>
 			<Loader size="lg" />
-		</Box>
+		</Group>
 	)
 
 	return (
-		<Box style={{ padding: '0.75rem', height: '100%' }}>
-			<Stack gap="md">
-				<Title size="h3" c="white">Account Settings</Title>
+		<Container size="xl" py="xl" className={classes.container}>
+			<Title order={1} ta="center" mb="xl" className={classes.title}>Account</Title>
 
-				{/* Profile Information */}
-				<Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-					<Title size="h4" c="white" mb="md">Profile Information</Title>
-					
-					<Stack gap="md">
-						{/* Name */}
-						<Group justify="space-between" align="center">
-							<Box style={{ flex: 1 }}>
-								<Text size="sm" fw={500} c="white">Name</Text>
-								<Text size="sm" c="dimmed">{userData?.displayName || 'Not set'}</Text>
-							</Box>
-							<ActionIcon variant="subtle" color="blue" onClick={() => setNameModalOpen(true)}>
-								<IconEdit size={18} />
-							</ActionIcon>
-						</Group>
+			<Grid gutter="xl">
+				{/* Left Column */}
+				<Grid.Col span={{ base: 12, md: 6 }}>
+					{/* Profile Section */}
+					<Paper radius="lg" className={classes.paper}>
+						<Title order={2} mb="xl" className={classes.sectionTitle}>Profile</Title>
 
-						<Divider color="#333" />
-
-						{/* ID */}
-						<Box>
-							<Text size="sm" fw={500} c="white">ID</Text>
-							<Text size="sm" c="dimmed" style={{ wordBreak: 'break-all' }}>{user?.uid}</Text>
-						</Box>
-
-						<Divider color="#333" />
-
-						{/* Email */}
-						<Group justify="space-between" align="center">
-							<Box style={{ flex: 1 }}>
-								<Text size="sm" fw={500} c="white">Email</Text>
-								<Group gap="xs">
-									<Text size="sm" c="dimmed">{userData?.email}</Text>
+						<Box mb="md">
+							<Group justify="flex-start" gap="md">
+								<Text fw={500} className={classes.label}>Email :</Text>
+								<Text>{userData?.email}</Text>
+								<Group align='center' justify='center' gap="sm">
 									{!user?.emailVerified && (
 										<Tooltip label="Your email is not verified">
-											<ActionIcon variant="subtle" color="red" size="sm" onClick={handleVerifyEmail}>
-												<IconAlertTriangle size={14} />
+											<ActionIcon variant="subtle" color="red" radius="xl" onClick={handleVerifyEmail}>
+												<IconAlertTriangle size={18} />
 											</ActionIcon>
 										</Tooltip>
 									)}
+									<ActionIcon variant="subtle" color="blue" radius="xl" onClick={() => setEmailModalOpen(true)}>
+										<IconEdit size={18} />
+									</ActionIcon>
 								</Group>
-							</Box>
-							<ActionIcon variant="subtle" color="blue" onClick={() => setEmailModalOpen(true)}>
-								<IconEdit size={18} />
-							</ActionIcon>
-						</Group>
+							</Group>
+						</Box>
 
-						<Divider color="#333" />
+						<Box mb="md">
+							<Group justify="flex-start" gap="md">
+								<Text fw={500} className={classes.label}>Name :</Text>
+								<Text>{userData?.displayName}</Text>
+								<ActionIcon variant="subtle" color="blue" radius="xl" onClick={() => setNameModalOpen(true)}>
+									<IconEdit size={18} />
+								</ActionIcon>
+							</Group>
+						</Box>
 
-						{/* Password */}
-						<Group justify="space-between" align="center">
-							<Box style={{ flex: 1 }}>
-								<Text size="sm" fw={500} c="white">Password</Text>
-								<Text size="sm" c="dimmed">••••••••</Text>
-							</Box>
-							<Button variant="subtle" size="xs" onClick={handleChangePassword}>
-								Change
+						<Box mb="xl">
+							<Group justify="flex-start" gap="md">
+								<Text fw={500} className={classes.label}>Current Tier :</Text>
+								<Text>{systemData?.subscription_tier}</Text>
+							</Group>
+						</Box>
+
+						<Button
+							fullWidth
+							color="violet"
+							radius="xl"
+							onClick={handleSignOut}
+							className={classes.signOutButton}
+						>
+							Sign Out
+						</Button>
+					</Paper>
+
+					{/* Delete Account Section */}
+					<Paper radius="lg" className={classes.paper} mt="xl">
+						<Title order={2} mb="md" className={classes.sectionTitle}>Delete Account</Title>
+
+						<Text mb="md" className={classes.warningText}>
+							By deleting your account, your token balance will be set to zero, any
+							remaining tokens will be lost and all images associated with your account
+							will be removed.
+						</Text>
+
+						<Text mb="xl" className={classes.warningText}>
+							This action is permanent and cannot be reversed!
+						</Text>
+
+						<Button
+							fullWidth
+							color="red"
+							radius="xl"
+							onClick={e => setDeleteModalOpen(true)}
+							className={classes.deleteButton}
+						>
+							Delete Account
+						</Button>
+					</Paper>
+				</Grid.Col>
+
+				{/* Right Column */}
+				<Grid.Col span={{ base: 12, md: 6 }}>
+					{/* Token Balance Section */}
+					<Paper radius="lg" className={classes.paper}>
+						<Title order={2} mb="xl" className={classes.sectionTitle}>Token Balance</Title>
+
+						<Box mb="xl">
+							<Group justify="flex-start" gap="md">
+								<Text fw={500} className={classes.label}>Tokens Remaining :</Text>
+								<Text>{systemData?.tokens}</Text>
+							</Group>
+						</Box>
+
+						<Anchor href='/pricing'>
+							<Button
+								fullWidth
+								color="violet"
+								radius="xl"
+								className={classes.buyTokensButton}
+							>
+								Buy Tokens
+							</Button>
+						</Anchor>
+					</Paper>
+
+					{/* Promo Code Section */}
+					<Paper radius="lg" className={classes.paper} mt="xl">
+						<Title order={2} mb="xl" className={classes.sectionTitle}>Promo Code</Title>
+
+						{!user?.emailVerified ? (
+							<Alert icon={<IconAlertCircle size={16} />} title="Email Verification Required" color="orange" mb="md">
+								Please verify your email address to use promo codes.
+								<Anchor component="button" ml={5} onClick={handleVerifyEmail}>
+									Send verification email
+								</Anchor>
+							</Alert>
+						) : null}
+
+						<Group grow>
+							<TextInput
+								placeholder="Code"
+								value={promoCode}
+								onChange={(event) => setPromoCode(event.currentTarget.value)}
+								radius="md"
+								className={classes.promoInput}
+								disabled={!user?.emailVerified}
+							/>
+							<Button
+								color="orange"
+								radius="xl"
+								onClick={handlePromoCodeSubmit}
+								loading={applyingPromoCode}
+								className={classes.submitButton}
+								disabled={!user?.emailVerified}
+							>
+								Submit
 							</Button>
 						</Group>
-					</Stack>
-				</Card>
+					</Paper>
 
-				{/* Token Balance */}
-				<Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-					<Title size="h4" c="white" mb="md">Token Balance</Title>
-					
-					<Group justify="space-between" align="center" mb="md">
-						<Box>
-							<Text size="sm" fw={500} c="white">Tokens Remaining</Text>
-							<Text size="xl" fw={700} c="white">{systemData?.tokens || 0}</Text>
-						</Box>
-						<Button color="violet" onClick={() => router.push('/pricing')}>
-							Buy Tokens
-						</Button>
-					</Group>
-				</Card>
+					{/* Change Password Section */}
+					<Paper radius="lg" className={classes.paper} mt="xl">
+						<Title order={2} mb="xl" className={classes.sectionTitle}>Change Password</Title>
 
-				{/* Promo Code */}
-				<Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-					<Title size="h4" c="white" mb="md">Promo Code</Title>
-					
-					{!user?.emailVerified ? (
-						<Alert icon={<IconAlertCircle size={16} />} title="Email Verification Required" color="orange" mb="md">
-							Please verify your email address to use promo codes.
-							<Anchor component="button" ml={5} onClick={handleVerifyEmail}>
-								Send verification email
-							</Anchor>
-						</Alert>
-					) : null}
+						<Text mb="xl">
+							Reset your password by clicking the button below.
+						</Text>
 
-					<Group gap="sm">
-						<TextInput
-							placeholder="Enter promo code"
-							value={promoCode}
-							onChange={(event) => setPromoCode(event.currentTarget.value)}
-							style={{ flex: 1 }}
-							disabled={!user?.emailVerified}
-						/>
 						<Button
+							fullWidth
 							color="orange"
-							onClick={handlePromoCodeSubmit}
-							loading={applyingPromoCode}
-							disabled={!user?.emailVerified}
+							radius="xl"
+							onClick={handleChangePassword}
+							className={classes.changePasswordButton}
 						>
-							Apply
+							Change Password
 						</Button>
-					</Group>
-				</Card>
-
-				{/* Notifications */}
-				<Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-					<Group justify="space-between" align="center">
-						<Box>
-							<Text size="sm" fw={500} c="white">Notifications</Text>
-							<Text size="xs" c="dimmed">Receive updates and alerts</Text>
-						</Box>
-						<Switch
-							checked={notificationsEnabled}
-							onChange={(event) => setNotificationsEnabled(event.currentTarget.checked)}
-						/>
-					</Group>
-				</Card>
-
-				{/* Language */}
-				<Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-					<Title size="h4" c="white" mb="md">Language</Title>
-					<Select
-						value={language}
-						onChange={(value) => setLanguage(value || 'english')}
-						data={[
-							{ value: 'english', label: 'English (Only)' }
-						]}
-						disabled
-					/>
-				</Card>
-
-				{/* Policies and Agreements */}
-				<Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-					<Title size="h4" c="white" mb="md">Policies and Agreements</Title>
-					<Text size="sm" c="dimmed" mb="md">
-						Login means default agreement to terms of services and privacy policy.
-					</Text>
-					<Group gap="sm">
-						<Anchor href="/about/tos" target="_blank" size="sm">
-							Terms of Service
-						</Anchor>
-						<Text size="sm" c="dimmed">•</Text>
-						<Anchor href="/about/privacy-policy" target="_blank" size="sm">
-							Privacy Policy
-						</Anchor>
-					</Group>
-				</Card>
-
-				{/* Delete Account */}
-				<Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-					<Title size="h4" c="red" mb="md">Delete Account</Title>
-					<Text size="sm" c="dimmed" mb="md">
-						By deleting your account, your token balance will be set to zero, any remaining tokens will be lost and all images associated with your account will be removed. This action is permanent and cannot be reversed!
-					</Text>
-					<Button
-						color="red"
-						onClick={() => setDeleteModalOpen(true)}
-					>
-						Delete Account
-					</Button>
-				</Card>
-
-				{/* Sign Out */}
-				<Button
-					fullWidth
-					size="lg"
-					variant="light"
-					leftSection={<IconLogout size={20} />}
-					onClick={handleSignOut}
-				>
-					Sign Out
-				</Button>
-			</Stack>
+					</Paper>
+				</Grid.Col>
+			</Grid>
 
 			{/* Delete Account Confirmation Modal */}
 			<Modal
@@ -742,6 +724,6 @@ export default function ProfilePage() {
 					</Group>
 				</form>
 			</Modal>
-		</Box>
+		</Container>
 	);
 }

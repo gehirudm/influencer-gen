@@ -742,6 +742,6 @@ export default function ProfilePage() {
 					</Group>
 				</form>
 			</Modal>
-		</Box>
+		</Container>
 	);
 }
