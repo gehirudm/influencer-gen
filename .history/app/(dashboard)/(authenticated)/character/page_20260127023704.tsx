@@ -193,6 +193,6 @@ export default function CharacterCreationPage() {
                     </Card>
                 </Card>
             </Stack>
-        </Box>
+        </Container>
     );
 }
