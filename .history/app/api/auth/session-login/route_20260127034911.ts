@@ -74,15 +74,6 @@ async function ensureUserDocumentExists(decoded: DecodedIdToken): Promise<string
     const userRef = db.collection('users').doc(userId);
     const userDoc = await userRef.get();
 
-    // Check if user already has a welcome notification
-    const welcomeNotificationQuery = await db.collection('inbox_notifications')
-        .where('userId', '==', userId)
-        .where('type', '==', 'welcome')
-        .limit(1)
-        .get();
-
-    const hasWelcomeNotification = !welcomeNotificationQuery.empty;
-
     if (!userDoc.exists) {
         const userData = {
             createdAt: new Date().toISOString(),
@@ -101,17 +92,15 @@ async function ensureUserDocumentExists(decoded: DecodedIdToken): Promise<string
 
         console.log(`User document created for user ID: ${userId}`);
         
-        return "auth/landing";
-    }
-
-    // Send welcome notification on first login if not already sent
-    if (!hasWelcomeNotification) {
+        // Send welcome notification for new users
         try {
             await createWelcomeNotification(userId);
             console.log(`Welcome notification sent to user ID: ${userId}`);
         } catch (error) {
             console.error('Failed to send welcome notification:', error);
         }
+
+        return "auth/landing";
     }
 
     return "/discover";
