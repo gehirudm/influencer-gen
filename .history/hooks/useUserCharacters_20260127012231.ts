@@ -42,7 +42,7 @@ export interface CharacterFormData {
     images?: File[];
     
     // Wizard-specific fields
-    ageRange?: string; // Keep for backward compatibility
+    ageRange?: string;
     personality?: {
         confidence: number;
         seduction: number;
@@ -84,46 +84,15 @@ export const useCharacters = () => {
         );
 
         const unsubscribe = onSnapshot(q,
-            async (querySnapshot) => {
+            (querySnapshot) => {
                 const charactersList: WithId<UserCharacter>[] = [];
-                const storage = getStorage(app);
 
-                for (const doc of querySnapshot.docs) {
+                querySnapshot.docs.forEach((doc) => {
                     const characterData = doc.data() as WithId<UserCharacter>;
                     characterData.id = doc.id;
 
-                    // If baseImageUrl is missing but baseImageId exists, fetch it from storage
-                    if (!characterData.baseImageUrl && characterData.baseImageId) {
-                        try {
-                            const imageRef = ref(
-                                storage,
-                                `character-images/${user.uid}/${doc.id}/${characterData.baseImageId}`
-                            );
-                            characterData.baseImageUrl = await getDownloadURL(imageRef);
-                        } catch (error) {
-                            console.warn('Failed to get base image URL from storage:', error);
-                        }
-                    }
-
-                    // If imageUrls are missing but imageIds exist, fetch them from storage
-                    if ((!characterData.imageUrls || characterData.imageUrls.length === 0) && 
-                        characterData.imageIds && characterData.imageIds.length > 0) {
-                        try {
-                            const urlPromises = characterData.imageIds.map(async (imageId: string) => {
-                                const imageRef = ref(
-                                    storage,
-                                    `character-images/${user.uid}/${doc.id}/${imageId}`
-                                );
-                                return await getDownloadURL(imageRef);
-                            });
-                            characterData.imageUrls = await Promise.all(urlPromises);
-                        } catch (error) {
-                            console.warn('Failed to get image URLs from storage:', error);
-                        }
-                    }
-
                     charactersList.push(characterData);
-                }
+                });
 
                 setCharacters(charactersList);
                 setLoading(false);
@@ -250,9 +219,6 @@ export const useCharacters = () => {
             // Add wizard-specific fields
             if (characterData.gender) {
                 characterDoc.gender = characterData.gender;
-            }
-            if (characterData.age) {
-                characterDoc.age = characterData.age;
             }
             if (characterData.ageRange) {
                 characterDoc.ageRange = characterData.ageRange;

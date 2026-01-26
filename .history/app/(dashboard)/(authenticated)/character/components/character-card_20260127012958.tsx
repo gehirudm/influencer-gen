@@ -137,8 +137,8 @@ export function CharacterCard({ character }: CharacterCardProps) {
             
             <Text size="sm" c="white" ta="center" mb="sm">
                 <Text component="span" fw={600}>{character.name}</Text>
-                {character.age && (
-                    <Text component="span" fw={400}> ({character.age})</Text>
+                {character.ageRange && (
+                    <Text component="span" fw={400}> ({character.ageRange})</Text>
                 )}
             </Text>
             

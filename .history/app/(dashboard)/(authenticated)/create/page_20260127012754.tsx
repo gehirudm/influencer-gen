@@ -168,7 +168,7 @@ export default function ImageGeneratorPage() {
     const mappedUserCharacters = characters.map(char => ({
         ...char,
         image: char.baseImageUrl || (char.imageUrls && char.imageUrls.length > 0 ? char.imageUrls[0] : '/placeholder.png'),
-        age: char.age || char.ageRange || 'N/A'
+        age: char.ageRange || char.age || 'N/A'
     }));
 
     const allCharacters = [...mappedUserCharacters, ...premadeCharacters];

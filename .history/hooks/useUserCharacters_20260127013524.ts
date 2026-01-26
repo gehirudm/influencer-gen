@@ -251,9 +251,6 @@ export const useCharacters = () => {
             if (characterData.gender) {
                 characterDoc.gender = characterData.gender;
             }
-            if (characterData.age) {
-                characterDoc.age = characterData.age;
-            }
             if (characterData.ageRange) {
                 characterDoc.ageRange = characterData.ageRange;
             }

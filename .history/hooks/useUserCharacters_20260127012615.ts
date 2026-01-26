@@ -42,7 +42,7 @@ export interface CharacterFormData {
     images?: File[];
     
     // Wizard-specific fields
-    ageRange?: string; // Keep for backward compatibility
+    ageRange?: string;
     personality?: {
         confidence: number;
         seduction: number;
@@ -250,9 +250,6 @@ export const useCharacters = () => {
             // Add wizard-specific fields
             if (characterData.gender) {
                 characterDoc.gender = characterData.gender;
-            }
-            if (characterData.age) {
-                characterDoc.age = characterData.age;
             }
             if (characterData.ageRange) {
                 characterDoc.ageRange = characterData.ageRange;

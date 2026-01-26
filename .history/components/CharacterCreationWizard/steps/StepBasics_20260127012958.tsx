@@ -76,6 +76,7 @@ export function StepBasics({ data, onUpdate }: StepBasicsProps) {
                     max={99}
                     value={data.age}
                     onChange={(value) => onUpdate({ age: value })}
+                    description="Must be 18 or older"
                 />
             </SimpleGrid>
 
