@@ -76,9 +76,6 @@ export async function POST(request: NextRequest) {
     // Update the order status to completed
     await updateOrderStatus(db, webhookData.order_id, 'completed', webhookData);
 
-    // Send purchase notification
-    await createPurchaseNotification(userId, subscriptionDetails.name, subscriptionDetails.tokens);
-
     console.log(`Successfully processed payment for order ${webhookData.order_id}. Added ${subscriptionDetails.tokens} tokens to user ${userId}`);
 
     return NextResponse.json({

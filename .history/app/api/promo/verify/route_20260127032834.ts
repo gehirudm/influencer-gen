@@ -138,11 +138,6 @@ export async function POST(request: NextRequest) {
       };
     });
     
-    // Send credits notification after successful redemption
-    if (result.success) {
-      await createCreditsNotification(userId, result.tokenAmount, 'promo code');
-    }
-    
     return NextResponse.json(result);
     
   } catch (error: any) {

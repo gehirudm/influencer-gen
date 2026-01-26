@@ -17,7 +17,7 @@ import classes from './Navbar.module.css';
 import collapsedClasses from './NavbarCollapsed.module.css';
 import { UserButton } from '../UserButton';
 import { useMediaQuery } from '@mantine/hooks';
-import { useInboxNotifications } from '@/hooks/useInboxNotifications';
+import { useUserNotifications } from '@/hooks/useUserNotifications';
 
 const data = [
     { link: '/assets', label: 'Assets', icon: IconPhoto },
@@ -36,7 +36,7 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const isSmallScreen = useMediaQuery('(max-width: 56.25em)');
-    const { unreadCount } = useInboxNotifications();
+    const { unreadCount } = useUserNotifications();
 
     // Set collapsed state based on screen size only on initial render and when screen size changes
     useEffect(() => {
@@ -83,7 +83,7 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
                             <item.icon className={classes.linkIcon} stroke={1.5} />
                             <span>{item.label}</span>
                             {item.label === 'Inbox' && unreadCount > 0 && (
-                                <Badge size="sm" circle style={{ marginLeft: 'auto' }}>
+                                <Badge size="xs" circle color="red" style={{ marginLeft: 'auto' }}>
                                     {unreadCount}
                                 </Badge>
                             )}
@@ -107,18 +107,16 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
     );
 
     // Collapsed navbar view (NavbarLink component inlined for simplicity)
-    const NavbarLink = ({ icon: Icon, label, active, onClick, showBadge }: { icon: any, label: string, active?: boolean, onClick?: () => void, showBadge?: boolean }) => {
+    const NavbarLink = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => {
         return (
             <Tooltip label={label} position="right" transitionProps={{ duration: 0 }}>
-                <Indicator disabled={!showBadge} color="red" size={10} processing>
-                    <UnstyledButton
-                        onClick={onClick}
-                        className={collapsedClasses.link}
-                        data-active={active || undefined}
-                    >
-                        <Icon size={20} stroke={1.5} />
-                    </UnstyledButton>
-                </Indicator>
+                <UnstyledButton
+                    onClick={onClick}
+                    className={collapsedClasses.link}
+                    data-active={active || undefined}
+                >
+                    <Icon size={20} stroke={1.5} />
+                </UnstyledButton>
             </Tooltip>
         );
     };
@@ -142,16 +140,23 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
                 <div className={collapsedClasses.navbarMain}>
                     <Stack justify="center" gap={0}>
                         {data.map((link, index) => (
-                            <NavbarLink
-                                {...link}
-                                key={link.label}
-                                active={link.label === active || undefined}
-                                showBadge={link.label === 'Inbox' && unreadCount > 0}
-                                onClick={() => {
-                                    setActive(link.label);
-                                    router.push(link.link);
-                                }}
-                            />
+                            <Indicator 
+                                key={link.label} 
+                                disabled={link.label !== 'Inbox' || unreadCount === 0}
+                                label={unreadCount}
+                                size={16}
+                                color="red"
+                                offset={7}
+                            >
+                                <NavbarLink
+                                    {...link}
+                                    active={link.label === active || undefined}
+                                    onClick={() => {
+                                        setActive(link.label);
+                                        router.push(link.link);
+                                    }}
+                                />
+                            </Indicator>
                         ))}
                     </Stack>
                 </div>

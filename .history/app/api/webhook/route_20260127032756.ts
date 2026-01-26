@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage, Storage } from 'firebase-admin/storage';
 import { getPlaiceholder } from "plaiceholder";
 import { randomUUID } from 'crypto';
-import { createFirstImageNotification, hasNotificationType, createLowTokensWarning } from '@/app/actions/notifications/notifications';
+import { createFirstImageNotification, hasNotificationType, createLowTokensNotification } from '@/app/actions/notifications/notifications';
 
 async function getJobData(db: FirebaseFirestore.Firestore, jobId: string) {
     const jobRef = db.collection('jobs').doc(jobId);
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
             const userSystemDoc = await db.collection('users').doc(userId).collection('private').doc('system').get();
             const systemData = userSystemDoc.data();
             if (systemData && systemData.tokens < 10 && systemData.tokens > 0) {
-                await createLowTokensWarning(userId, systemData.tokens);
+                await createLowTokensNotification(userId, systemData.tokens);
             }
         } else if (status === 'FAILED') {
             // Handle failed job status

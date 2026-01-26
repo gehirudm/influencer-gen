@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage, Storage } from 'firebase-admin/storage';
 import { getPlaiceholder } from "plaiceholder";
 import { randomUUID } from 'crypto';
-import { createFirstImageNotification, hasNotificationType, createLowTokensWarning } from '@/app/actions/notifications/notifications';
+import { createFirstImageNotification, hasNotificationType, createLowTokensNotification } from '@/app/actions/notifications/notifications';
 
 async function getJobData(db: FirebaseFirestore.Firestore, jobId: string) {
     const jobRef = db.collection('jobs').doc(jobId);
@@ -158,19 +158,6 @@ export async function POST(request: NextRequest) {
         if (status === 'COMPLETED' && output && output.image_ids) {
             updateData.imageIds = output.image_ids;
             updateData.imageUrls = await Promise.all(output.image_ids.map((imageId: string) => createImageDocumentFromId(db, storage, imageId, userId, id, output.parameters)));
-            
-            // Check if this is the user's first image and send notification
-            const hasFirstImage = await hasNotificationType(userId, 'first_image');
-            if (!hasFirstImage) {
-                await createFirstImageNotification(userId);
-            }
-
-            // Check token balance and send low tokens warning if needed
-            const userSystemDoc = await db.collection('users').doc(userId).collection('private').doc('system').get();
-            const systemData = userSystemDoc.data();
-            if (systemData && systemData.tokens < 10 && systemData.tokens > 0) {
-                await createLowTokensWarning(userId, systemData.tokens);
-            }
         } else if (status === 'FAILED') {
             // Handle failed job status
             console.error(`Job ${id} failed with error:`, output);

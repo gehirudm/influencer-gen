@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
             const userSystemDoc = await db.collection('users').doc(userId).collection('private').doc('system').get();
             const systemData = userSystemDoc.data();
             if (systemData && systemData.tokens < 10 && systemData.tokens > 0) {
-                await createLowTokensWarning(userId, systemData.tokens);
+                await createLowTokensNotification(userId, systemData.tokens);
             }
         } else if (status === 'FAILED') {
             // Handle failed job status
