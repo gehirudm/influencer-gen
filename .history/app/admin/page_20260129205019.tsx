@@ -192,7 +192,7 @@ export default function AdminDashboardPage() {
                             padding="md"
                             radius="md"
                             style={{
-                                backgroundColor: '#0a0a0a',
+                                backgroundColor: '#2a2a2a',
                                 border: '1px solid #333',
                                 cursor: 'pointer',
                             }}
@@ -214,7 +214,7 @@ export default function AdminDashboardPage() {
                             padding="md"
                             radius="md"
                             style={{
-                                backgroundColor: '#0a0a0a',
+                                backgroundColor: '#2a2a2a',
                                 border: '1px solid #333',
                                 cursor: 'pointer',
                             }}
@@ -236,7 +236,7 @@ export default function AdminDashboardPage() {
                             padding="md"
                             radius="md"
                             style={{
-                                backgroundColor: '#0a0a0a',
+                                backgroundColor: '#2a2a2a',
                                 border: '1px solid #333',
                                 cursor: 'pointer',
                             }}
@@ -258,7 +258,7 @@ export default function AdminDashboardPage() {
                             padding="md"
                             radius="md"
                             style={{
-                                backgroundColor: '#0a0a0a',
+                                backgroundColor: '#2a2a2a',
                                 border: '1px solid #333',
                                 cursor: 'pointer',
                             }}
