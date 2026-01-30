@@ -199,31 +199,26 @@ export default function AnnouncementHistoryPage() {
 								>
 									<Stack gap="sm">
 										<Group justify="space-between" align="flex-start">
-											<Text size="md" fw={600} c="white">
-												{announcement.title}
-											</Text>
-											<Group gap="xs">
-												<Badge variant="light" color="blue">
-													{announcement.recipientCount} recipient{announcement.recipientCount !== 1 ? 's' : ''}
-												</Badge>
-												<Tooltip label="Delete announcement">
-													<ActionIcon
-														variant="subtle"
-														color="red"
-														size="sm"
-														onClick={() => handleDelete(announcement.id)}
-														loading={processingIds.has(announcement.id)}
-														disabled={processingIds.has(announcement.id)}
-													>
-														<IconTrash size={16} />
-													</ActionIcon>
-												</Tooltip>
-											</Group>
-										</Group>
-
-										<Text size="sm" c="dimmed">
-											{announcement.message}
+										<Text size="md" fw={600} c="white">
+											{announcement.title}
 										</Text>
+										<Group gap="xs">
+											<Badge variant="light" color="blue">
+												{announcement.recipientCount} recipient{announcement.recipientCount !== 1 ? 's' : ''}
+											</Badge>
+											<Tooltip label="Delete announcement">
+												<ActionIcon
+													variant="subtle"
+													color="red"
+													size="sm"
+													onClick={() => handleDelete(announcement.id)}
+													loading={processingIds.has(announcement.id)}
+													disabled={processingIds.has(announcement.id)}
+												>
+													<IconTrash size={16} />
+												</ActionIcon>
+											</Tooltip>
+										</Group>
 
 										{announcement.link && (
 											<Text size="xs" c="blue">
@@ -233,7 +228,7 @@ export default function AnnouncementHistoryPage() {
 
 										<Divider />
 
-										<Group justify="space-between" align="center">
+									<Group justify="space-between" align="center">
 										<Group gap="xs">
 											<Text size="xs" c="dimmed">
 												Target: <strong>{announcement.targetType}</strong>
