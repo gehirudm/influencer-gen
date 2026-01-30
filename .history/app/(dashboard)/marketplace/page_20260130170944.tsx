@@ -318,21 +318,10 @@ export default function MarketplacePage() {
         onClose={handleCloseModal}
         size="xl"
         padding={0}
-        withCloseButton={false}
         centered
       >
         {selectedCharacter && (
           <div className={classes.modalContent}>
-            {/* Close Button */}
-            <ActionIcon
-              className={classes.closeButton}
-              onClick={handleCloseModal}
-              variant="subtle"
-              color="gray"
-            >
-              <IconX size={20} />
-            </ActionIcon>
-
             <Group align="flex-start" gap={0} wrap="nowrap" style={{ height: '600px' }}>
               {/* Left: Image */}
               <Box style={{ width: '50%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' }}>

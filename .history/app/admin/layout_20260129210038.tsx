@@ -22,7 +22,6 @@ import {
     IconSparkles,
     IconArrowLeft,
     IconSwitchHorizontal,
-    IconShoppingCart,
 } from '@tabler/icons-react';
 import classes from './admin.module.css';
 import collapsedClasses from './adminCollapsed.module.css';
@@ -54,7 +53,7 @@ const navItems = [
     {
         label: 'Marketplace',
         href: '/admin/marketplace',
-        icon: IconShoppingCart,
+        icon: IconUsers,
     },
 ];
 

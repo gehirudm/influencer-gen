@@ -197,56 +197,6 @@ export default function CharacterCreationPage() {
                                         character={character}
                                     />
                                 ))}
-
-                                {/* Marketplace Purchased Characters */}
-                                {marketplaceCharacters.map((character) => (
-                                    <Card key={character.id} p="md" style={{ backgroundColor: '#3a3a3a', border: '1px solid #555' }}>
-                                        <Stack gap="sm">
-                                            <Box
-                                                style={{
-                                                    width: '100%',
-                                                    aspectRatio: '3/4',
-                                                    backgroundColor: '#2a2a2a',
-                                                    borderRadius: '8px',
-                                                    overflow: 'hidden',
-                                                    position: 'relative'
-                                                }}
-                                            >
-                                                <img 
-                                                    src={character.characterImage} 
-                                                    alt={character.characterName}
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        objectFit: 'cover'
-                                                    }}
-                                                />
-                                                <Group 
-                                                    gap="xs" 
-                                                    style={{
-                                                        position: 'absolute',
-                                                        top: '8px',
-                                                        left: '8px',
-                                                        right: '8px',
-                                                        justifyContent: 'space-between'
-                                                    }}
-                                                >
-                                                    <Badge 
-                                                        variant="filled" 
-                                                        color={character.purchaseType === 'full_claim' ? 'violet' : 'blue'} 
-                                                        size="sm"
-                                                        leftSection={character.purchaseType === 'full_claim' ? <IconLock size={12} /> : <IconUsers size={12} />}
-                                                    >
-                                                        {character.purchaseType === 'full_claim' ? 'Exclusive' : 'Licensed'}
-                                                    </Badge>
-                                                </Group>
-                                            </Box>
-                                            <Text size="md" c="white" ta="center" fw={600}>
-                                                {character.characterName}
-                                            </Text>
-                                        </Stack>
-                                    </Card>
-                                ))}
                             </SimpleGrid>
                         )}
                     </Card>

@@ -22,7 +22,7 @@ import {
   Center,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconUsers, IconX, IconLock, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import { IconUsers, IconX, IconLock } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import classes from './marketplace.module.css';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
@@ -141,7 +141,6 @@ export default function MarketplacePage() {
   const [purchasing, setPurchasing] = useState(false);
   const [sortFilter, setSortFilter] = useState('All');
   const [selectedCharacter, setSelectedCharacter] = useState<MarketplaceCharacter | null>(null);
-  const [galleryExpanded, setGalleryExpanded] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
   const db = getFirestore(app);
   const router = useRouter();
@@ -186,14 +185,12 @@ export default function MarketplacePage() {
 
   const handleCardClick = (character: MarketplaceCharacter) => {
     setSelectedCharacter(character);
-    setGalleryExpanded(false);
     open();
   };
 
   const handleCloseModal = () => {
     close();
     setSelectedCharacter(null);
-    setGalleryExpanded(false);
   };
 
   const handlePurchase = async (purchaseType: 'license' | 'full_claim') => {
@@ -334,14 +331,38 @@ export default function MarketplacePage() {
             </ActionIcon>
 
             <Group align="flex-start" gap={0} wrap="nowrap" style={{ height: '600px' }}>
-              {/* Left: Image */}
-              <Box style={{ width: '50%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' }}>
-                <Image
-                  src={selectedCharacter.image}
-                  alt={selectedCharacter.name}
-                  fit="contain"
-                  style={{ maxHeight: '100%', maxWidth: '100%' }}
-                />
+              {/* Left: Images */}
+              <Box style={{ width: '50%', height: '100%', overflowY: 'auto', backgroundColor: '#000', padding: '1rem' }}>
+                <Stack gap="md">
+                  {/* Main Cover Image */}
+                  <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
+                    <Image
+                      src={selectedCharacter.image}
+                      alt={selectedCharacter.name}
+                      fit="contain"
+                      style={{ maxHeight: '400px', maxWidth: '100%' }}
+                    />
+                  </Box>
+                  
+                  {/* Gallery Images */}
+                  {selectedCharacter.galleryImages && selectedCharacter.galleryImages.length > 0 && (
+                    <Stack gap="xs">
+                      <Text size="sm" fw={600} c="white" pl="xs">Gallery</Text>
+                      <SimpleGrid cols={2} spacing="xs">
+                        {selectedCharacter.galleryImages.map((img, idx) => (
+                          <Image
+                            key={idx}
+                            src={img}
+                            alt={`Gallery ${idx + 1}`}
+                            height={150}
+                            fit="cover"
+                            radius="sm"
+                          />
+                        ))}
+                      </SimpleGrid>
+                    </Stack>
+                  )}
+                </Stack>
               </Box>
 
               {/* Right: Details */}
@@ -395,31 +416,21 @@ export default function MarketplacePage() {
                     <>
                       <Divider />
                       <div>
-                        <Group 
-                          justify="space-between" 
-                          mb="xs" 
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => setGalleryExpanded(!galleryExpanded)}
-                        >
-                          <Text size="sm" fw={600}>
-                            Gallery ({selectedCharacter.galleryImages.length})
-                          </Text>
-                          {galleryExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
-                        </Group>
-                        {galleryExpanded && (
-                          <SimpleGrid cols={2} spacing="xs">
-                            {selectedCharacter.galleryImages.map((img, idx) => (
-                              <Image
-                                key={idx}
-                                src={img}
-                                alt={`Gallery ${idx + 1}`}
-                                height={100}
-                                fit="cover"
-                                radius="sm"
-                              />
-                            ))}
-                          </SimpleGrid>
-                        )}
+                        <Text size="sm" fw={600} mb="xs">
+                          Gallery
+                        </Text>
+                        <SimpleGrid cols={2} spacing="xs">
+                          {selectedCharacter.galleryImages.map((img, idx) => (
+                            <Image
+                              key={idx}
+                              src={img}
+                              alt={`Gallery ${idx + 1}`}
+                              height={100}
+                              fit="cover"
+                              radius="sm"
+                            />
+                          ))}
+                        </SimpleGrid>
                       </div>
                     </>
                   )}

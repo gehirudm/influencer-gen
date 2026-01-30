@@ -22,7 +22,7 @@ import {
   Center,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconUsers, IconX, IconLock, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import { IconUsers, IconX, IconLock } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import classes from './marketplace.module.css';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
@@ -50,87 +50,66 @@ interface MarketplaceCharacter {
 function MarketplaceCharacterCard({ character, onClick }: { character: MarketplaceCharacter; onClick: () => void }) {
   return (
     <Card 
-      p="md" 
-      style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}
+      radius="md" 
+      className={classes.card} 
+      style={{ backgroundImage: `url(${character.image})` }}
       onClick={onClick}
     >
-      <Stack gap="sm">
-        <Box
-          style={{
-            width: '100%',
-            aspectRatio: '3/4',
-            backgroundColor: '#2a2a2a',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            position: 'relative'
-          }}
+      <Overlay className={classes.overlay} opacity={0.55} zIndex={0} />
+      
+      {/* Fully Claimed Badge */}
+      {character.fullyClaimed && (
+        <Badge 
+          className={classes.tierBadge}
+          style={{ top: 10, right: 10, left: 'auto' }}
+          color="red"
+          variant="filled"
+          size="sm"
+          leftSection={<IconLock size={12} />}
         >
-          <img 
-            src={character.image} 
-            alt={character.name}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
-          />
-          <Group 
-            gap="xs" 
-            style={{
-              position: 'absolute',
-              top: '8px',
-              left: '8px',
-              right: '8px',
-              justifyContent: 'space-between',
-              flexWrap: 'nowrap'
-            }}
-          >
-            <Group gap="xs">
-              {character.fullyClaimed && (
-                <Badge variant="filled" color="red" size="sm" leftSection={<IconLock size={12} />}>
-                  SOLD
-                </Badge>
-              )}
-            </Group>
-            <Badge variant="filled" color={character.tier === 'Signature' ? 'violet' : 'blue'} size="sm">
-              {character.tier}
-            </Badge>
-          </Group>
-          <Box
-            style={{
-              position: 'absolute',
-              bottom: '8px',
-              left: '8px',
-              right: '8px'
-            }}
-          >
-            <Group gap={6} justify="space-between">
-              <Group gap={4}>
-                <IconUsers size={14} color="white" />
-                <Text size="xs" c="white" fw={500}>
-                  {character.licensesSold}/{character.maxLicenses}
-                </Text>
-              </Group>
-              <Text size="xs" c="white" fw={600}>
-                {character.fullyClaimed ? 'SOLD' : `${character.licensePrice}`}
-              </Text>
-            </Group>
-          </Box>
-        </Box>
+          SOLD
+        </Badge>
+      )}
+      
+      {/* Tier Badge */}
+      <Badge 
+        className={classes.tierBadge} 
+        color={character.tier === 'Signature' ? 'violet' : 'blue'}
+        variant="filled"
+        size="sm"
+      >
+        {character.tier}
+      </Badge>
+
+      <div className={classes.content}>
         <div>
-          <Text size="md" c="white" ta="center">
-            <Text component="span" fw={600}>{character.name}</Text>
-            <Text component="span" fw={400}> ({character.age})</Text>
+          <Text size="lg" fw={700} className={classes.title}>
+            {character.name}, {character.age}
           </Text>
-          <Group gap={4} mt={4} justify="center">
+          
+          <Group gap={4} mt={4}>
             {character.tags.slice(0, 3).map((tag, index) => (
-              <Badge key={index} size="xs" variant="light" color="gray">
+              <Badge key={index} size="xs" variant="light" color="gray" className={classes.tagBadge}>
                 {tag}
               </Badge>
             ))}
           </Group>
         </div>
-      </Stack>
+
+        <div className={classes.footer}>
+          <Group justify="space-between" align="center">
+            <Group gap={6}>
+              <IconUsers size={14} color="white" />
+              <Text size="xs" c="white" fw={500}>
+                {character.licensesSold}/{character.maxLicenses}
+              </Text>
+            </Group>
+            <Text size="sm" c="white" fw={600}>
+              {character.fullyClaimed ? 'SOLD OUT' : `${character.licensePrice} tokens`}
+            </Text>
+          </Group>
+        </div>
+      </div>
     </Card>
   );
 }
@@ -141,11 +120,10 @@ export default function MarketplacePage() {
   const [purchasing, setPurchasing] = useState(false);
   const [sortFilter, setSortFilter] = useState('All');
   const [selectedCharacter, setSelectedCharacter] = useState<MarketplaceCharacter | null>(null);
-  const [galleryExpanded, setGalleryExpanded] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
   const db = getFirestore(app);
   const router = useRouter();
-  const { userData, systemData } = useUserData();
+  const { userData } = useUserData();
 
   // Load characters from Firestore with real-time updates
   useEffect(() => {
@@ -186,21 +164,19 @@ export default function MarketplacePage() {
 
   const handleCardClick = (character: MarketplaceCharacter) => {
     setSelectedCharacter(character);
-    setGalleryExpanded(false);
     open();
   };
 
   const handleCloseModal = () => {
     close();
     setSelectedCharacter(null);
-    setGalleryExpanded(false);
   };
 
   const handlePurchase = async (purchaseType: 'license' | 'full_claim') => {
     if (!selectedCharacter) return;
 
     const cost = purchaseType === 'full_claim' ? selectedCharacter.fullClaimPrice : selectedCharacter.licensePrice;
-    const currentTokens = systemData?.tokens || 0;
+    const currentTokens = userData?.tokens || 0;
 
     if (currentTokens < cost) {
       notifications.show({
@@ -239,7 +215,7 @@ export default function MarketplacePage() {
 
       close();
       setTimeout(() => {
-        router.push('/character');
+        router.push('/characters');
       }, 1000);
 
     } catch (error: any) {
@@ -333,19 +309,19 @@ export default function MarketplacePage() {
               <IconX size={20} />
             </ActionIcon>
 
-            <Group align="flex-start" gap={0} wrap="nowrap" style={{ height: '600px' }}>
+            <Group align="flex-start" gap={0} wrap="nowrap">
               {/* Left: Image */}
-              <Box style={{ width: '50%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' }}>
+              <Box className={classes.modalImage}>
                 <Image
                   src={selectedCharacter.image}
                   alt={selectedCharacter.name}
-                  fit="contain"
-                  style={{ maxHeight: '100%', maxWidth: '100%' }}
+                  fit="cover"
+                  h="100%"
                 />
               </Box>
 
               {/* Right: Details */}
-              <Box style={{ width: '50%', padding: '2rem', overflowY: 'auto', height: '100%' }}>
+              <Box className={classes.modalDetails}>
                 <Stack gap="md">
                   <div>
                     <Group justify="space-between" align="flex-start" mb="xs">
@@ -395,31 +371,21 @@ export default function MarketplacePage() {
                     <>
                       <Divider />
                       <div>
-                        <Group 
-                          justify="space-between" 
-                          mb="xs" 
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => setGalleryExpanded(!galleryExpanded)}
-                        >
-                          <Text size="sm" fw={600}>
-                            Gallery ({selectedCharacter.galleryImages.length})
-                          </Text>
-                          {galleryExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
-                        </Group>
-                        {galleryExpanded && (
-                          <SimpleGrid cols={2} spacing="xs">
-                            {selectedCharacter.galleryImages.map((img, idx) => (
-                              <Image
-                                key={idx}
-                                src={img}
-                                alt={`Gallery ${idx + 1}`}
-                                height={100}
-                                fit="cover"
-                                radius="sm"
-                              />
-                            ))}
-                          </SimpleGrid>
-                        )}
+                        <Text size="sm" fw={600} mb="xs">
+                          Gallery
+                        </Text>
+                        <SimpleGrid cols={2} spacing="xs">
+                          {selectedCharacter.galleryImages.map((img, idx) => (
+                            <Image
+                              key={idx}
+                              src={img}
+                              alt={`Gallery ${idx + 1}`}
+                              height={100}
+                              fit="cover"
+                              radius="sm"
+                            />
+                          ))}
+                        </SimpleGrid>
                       </div>
                     </>
                   )}
@@ -487,10 +453,10 @@ export default function MarketplacePage() {
                       </Button>
                     </div>
 
-                    {systemData && (
+                    {userData && (
                       <Box mt="sm" p="sm" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
                         <Text size="sm" c="dimmed" ta="center">
-                          Your Balance: <Text component="span" fw={600} c="white">{systemData.tokens || 0} tokens</Text>
+                          Your Balance: <Text component="span" fw={600} c="white">{userData.tokens || 0} tokens</Text>
                         </Text>
                       </Box>
                     )}

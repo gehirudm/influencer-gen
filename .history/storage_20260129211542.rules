@@ -1,0 +1,48 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null &&
+             firestore.get(/databases/(default)/documents/users/$(request.auth.uid)/private/system).data.isAdmin == true;
+    }
+
+    // Avatar - fixed file name
+    match /avatars/{userId}/{fileName} {
+      allow read: if fileName == "avatar.jpg" || fileName == "avatar.png";
+      allow write: if request.auth != null && request.auth.uid == userId && fileName == "avatar.jpg";
+    }
+
+    // Generated images - public or owner
+    match /generated-images/{userId}/{imageId} {
+      allow read: if isPublicImage(imageId) || request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    match /job-meta-images/{userId}/{jobId}/{fileName} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Character images - private to user
+    match /character-images/{userId}/{characterId}/{imageId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Post images - public to anyone
+    match /post-images/{userId}/{postId}/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // LoRA images - Admin can write, anyone can read public LoRAs
+    match /lora-images/{loraId}/{folder}/{imageId} {
+      allow read: if true;  // LoRA images are public for display
+      allow write: if isAdmin();  // Only admins can upload
+    }
+
+    function isPublicImage(imageId) {
+      return firestore.get(/databases/(default)/documents/images/$(imageId)).data.isPublic == true;
+    }
+  }
+}

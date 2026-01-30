@@ -186,14 +186,12 @@ export default function MarketplacePage() {
 
   const handleCardClick = (character: MarketplaceCharacter) => {
     setSelectedCharacter(character);
-    setGalleryExpanded(false);
     open();
   };
 
   const handleCloseModal = () => {
     close();
     setSelectedCharacter(null);
-    setGalleryExpanded(false);
   };
 
   const handlePurchase = async (purchaseType: 'license' | 'full_claim') => {

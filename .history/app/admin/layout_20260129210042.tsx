@@ -54,7 +54,7 @@ const navItems = [
     {
         label: 'Marketplace',
         href: '/admin/marketplace',
-        icon: IconShoppingCart,
+        icon: IconUsers,
     },
 ];
 

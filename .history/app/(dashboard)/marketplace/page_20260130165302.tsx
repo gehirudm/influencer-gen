@@ -22,7 +22,7 @@ import {
   Center,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconUsers, IconX, IconLock, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import { IconUsers, IconX, IconLock } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import classes from './marketplace.module.css';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
@@ -118,7 +118,7 @@ function MarketplaceCharacterCard({ character, onClick }: { character: Marketpla
           </Box>
         </Box>
         <div>
-          <Text size="md" c="white" ta="center">
+          <Text size="sm" c="white" ta="center">
             <Text component="span" fw={600}>{character.name}</Text>
             <Text component="span" fw={400}> ({character.age})</Text>
           </Text>
@@ -141,7 +141,6 @@ export default function MarketplacePage() {
   const [purchasing, setPurchasing] = useState(false);
   const [sortFilter, setSortFilter] = useState('All');
   const [selectedCharacter, setSelectedCharacter] = useState<MarketplaceCharacter | null>(null);
-  const [galleryExpanded, setGalleryExpanded] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
   const db = getFirestore(app);
   const router = useRouter();
@@ -186,14 +185,12 @@ export default function MarketplacePage() {
 
   const handleCardClick = (character: MarketplaceCharacter) => {
     setSelectedCharacter(character);
-    setGalleryExpanded(false);
     open();
   };
 
   const handleCloseModal = () => {
     close();
     setSelectedCharacter(null);
-    setGalleryExpanded(false);
   };
 
   const handlePurchase = async (purchaseType: 'license' | 'full_claim') => {
@@ -239,7 +236,7 @@ export default function MarketplacePage() {
 
       close();
       setTimeout(() => {
-        router.push('/character');
+        router.push('/characters');
       }, 1000);
 
     } catch (error: any) {
@@ -395,31 +392,21 @@ export default function MarketplacePage() {
                     <>
                       <Divider />
                       <div>
-                        <Group 
-                          justify="space-between" 
-                          mb="xs" 
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => setGalleryExpanded(!galleryExpanded)}
-                        >
-                          <Text size="sm" fw={600}>
-                            Gallery ({selectedCharacter.galleryImages.length})
-                          </Text>
-                          {galleryExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
-                        </Group>
-                        {galleryExpanded && (
-                          <SimpleGrid cols={2} spacing="xs">
-                            {selectedCharacter.galleryImages.map((img, idx) => (
-                              <Image
-                                key={idx}
-                                src={img}
-                                alt={`Gallery ${idx + 1}`}
-                                height={100}
-                                fit="cover"
-                                radius="sm"
-                              />
-                            ))}
-                          </SimpleGrid>
-                        )}
+                        <Text size="sm" fw={600} mb="xs">
+                          Gallery
+                        </Text>
+                        <SimpleGrid cols={2} spacing="xs">
+                          {selectedCharacter.galleryImages.map((img, idx) => (
+                            <Image
+                              key={idx}
+                              src={img}
+                              alt={`Gallery ${idx + 1}`}
+                              height={100}
+                              fit="cover"
+                              radius="sm"
+                            />
+                          ))}
+                        </SimpleGrid>
                       </div>
                     </>
                   )}
