@@ -11,8 +11,6 @@ import {
     Title,
     SimpleGrid,
     Badge,
-    ActionIcon,
-    Modal,
 } from '@mantine/core';
 import { IconWoman, IconLock, IconUsers, IconTrash, IconPhotoSpark } from '@tabler/icons-react';
 import { useCharacters } from '@/hooks/useUserCharacters';
@@ -20,9 +18,11 @@ import { CharacterCard } from './components/character-card';
 import { useRouter } from 'next/navigation';
 import { useCharacterContext } from '@/contexts/character-context';
 import { notifications } from '@mantine/notifications';
-import { deleteDoc, doc, getFirestore, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { ActionIcon, Modal } from '@mantine/core';
+import { deleteDoc, doc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 import { CharacterCreationWizard } from '@/components/CharacterCreationWizard/CharacterCreationWizard';
+import { getFirestore, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import app from '@/lib/firebase';
 
@@ -349,63 +349,6 @@ export default function CharacterCreationPage() {
                     </Card>
                 </Card>
             </Stack>
-
-            {/* Delete Confirmation Modal */}
-            <Modal
-                opened={deleteModalOpen}
-                onClose={() => {
-                    setDeleteModalOpen(false);
-                    setCharacterToDelete(null);
-                }}
-                title="Delete Character"
-                centered
-                size="sm"
-            >
-                <Text size="sm" mb="lg">
-                    Are you sure you want to delete "{characterToDelete?.characterName}"? This action cannot be undone.
-                </Text>
-                <Group justify="flex-end">
-                    <Button variant="default" onClick={() => {
-                        setDeleteModalOpen(false);
-                        setCharacterToDelete(null);
-                    }}>
-                        Cancel
-                    </Button>
-                    <Button
-                        color="red"
-                        onClick={async () => {
-                            if (!characterToDelete || !userId) return;
-                            
-                            setDeletingCharacterId(characterToDelete.id);
-                            setDeleteModalOpen(false);
-                            
-                            try {
-                                const db = getFirestore(app);
-                                await deleteDoc(doc(db, 'users', userId, 'characters', characterToDelete.id));
-                                
-                                notifications.show({
-                                    title: 'Success',
-                                    message: 'Character deleted successfully!',
-                                    color: 'green',
-                                });
-                            } catch (error) {
-                                console.error('Error deleting character:', error);
-                                notifications.show({
-                                    title: 'Error',
-                                    message: 'Failed to delete character. Please try again.',
-                                    color: 'red',
-                                });
-                            } finally {
-                                setDeletingCharacterId(null);
-                                setCharacterToDelete(null);
-                            }
-                        }}
-                        loading={deletingCharacterId !== null}
-                    >
-                        Delete
-                    </Button>
-                </Group>
-            </Modal>
         </Box>
     );
 }

@@ -494,7 +494,6 @@ export default function ImageGeneratorPage() {
                                                         backgroundColor: '#2a2a2a',
                                                         borderRadius: '4px',
                                                         overflow: 'hidden',
-                                                        position: 'relative',
                                                     }}
                                                 >
                                                     <img 
@@ -506,21 +505,6 @@ export default function ImageGeneratorPage() {
                                                             objectFit: 'cover'
                                                         }}
                                                     />
-                                                    {character.isMarketplace && (
-                                                        <Badge 
-                                                            variant="filled" 
-                                                            color={character.purchaseType === 'full_claim' ? 'violet' : 'blue'} 
-                                                            size="xs"
-                                                            leftSection={character.purchaseType === 'full_claim' ? <IconLock size={10} /> : <IconUsers size={10} />}
-                                                            style={{
-                                                                position: 'absolute',
-                                                                top: '4px',
-                                                                left: '4px',
-                                                            }}
-                                                        >
-                                                            {character.purchaseType === 'full_claim' ? 'Exclusive' : 'Licensed'}
-                                                        </Badge>
-                                                    )}
                                                 </Box>
                                                 <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
                                                     {character.name} ({character.age})

@@ -11,8 +11,6 @@ import {
     Title,
     SimpleGrid,
     Badge,
-    ActionIcon,
-    Modal,
 } from '@mantine/core';
 import { IconWoman, IconLock, IconUsers, IconTrash, IconPhotoSpark } from '@tabler/icons-react';
 import { useCharacters } from '@/hooks/useUserCharacters';
@@ -20,9 +18,11 @@ import { CharacterCard } from './components/character-card';
 import { useRouter } from 'next/navigation';
 import { useCharacterContext } from '@/contexts/character-context';
 import { notifications } from '@mantine/notifications';
-import { deleteDoc, doc, getFirestore, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { ActionIcon, Modal } from '@mantine/core';
+import { deleteDoc, doc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 import { CharacterCreationWizard } from '@/components/CharacterCreationWizard/CharacterCreationWizard';
+import { getFirestore, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import app from '@/lib/firebase';
 

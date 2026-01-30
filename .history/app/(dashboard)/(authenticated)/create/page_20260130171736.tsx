@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
     Grid, 
     Card, 
@@ -26,7 +26,10 @@ import { useRouter } from 'next/navigation';
 import { aspectRatios } from '@/components/ImageGenerationForm/ImageGenerationForm';
 import { useCharacters } from '@/hooks/useUserCharacters';
 import { useUserJobs } from '@/hooks/useUserJobs';
-import { IconPhoto } from '@tabler/icons-react';
+import { IconPhoto, IconCrown, IconChevronLeft, IconChevronRight, IconLock, IconUsers } from '@tabler/icons-react';
+import { getFirestore, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import app from '@/lib/firebase';
 
 // Add CSS for pulse animation
 if (typeof document !== 'undefined') {
@@ -68,6 +71,36 @@ export default function ImageGeneratorPage() {
     const [selectedCharacter, setSelectedCharacter] = useState<string | null>('premade-1');
     const [selectedReference, setSelectedReference] = useState<string | null>(null);
     const [imageBlur, setImageBlur] = useState(0);
+    const [marketplaceCharacters, setMarketplaceCharacters] = useState<any[]>([]);
+    const [userId, setUserId] = useState<string | null>(null);
+    const refScrollRef = useRef<HTMLDivElement>(null);
+    const charScrollRef = useRef<HTMLDivElement>(null);
+
+    // Scroll functions for characters
+    const scrollCharLeft = () => {
+        if (charScrollRef.current) {
+            charScrollRef.current.scrollBy({ left: -400, behavior: 'smooth' });
+        }
+    };
+
+    const scrollCharRight = () => {
+        if (charScrollRef.current) {
+            charScrollRef.current.scrollBy({ left: 400, behavior: 'smooth' });
+        }
+    };
+
+    // Scroll functions for reference images
+    const scrollRefLeft = () => {
+        if (refScrollRef.current) {
+            refScrollRef.current.scrollBy({ left: -400, behavior: 'smooth' });
+        }
+    };
+
+    const scrollRefRight = () => {
+        if (refScrollRef.current) {
+            refScrollRef.current.scrollBy({ left: 400, behavior: 'smooth' });
+        }
+    };
 
     // Premade character placeholders
     const premadeCharacters = [
@@ -110,19 +143,40 @@ export default function ImageGeneratorPage() {
 
     // Reference image placeholders
     const referenceImages = [
-        { id: 'ref-1', name: 'Bathroom Mirror Selfie', image: '/character/premade characters/reference images/bathroom mirror selfie/0.webp', folder: 'bathroom mirror selfie' },
-        { id: 'ref-2', name: 'Spiderman cosplay', image: '/character/premade characters/reference images/spiderman cosplay/0.webp', folder: 'spiderman cosplay' },
-        { id: 'ref-3', name: 'Balcony at sunset', image: '/character/premade characters/reference images/balcony at sunset/0.webp', folder: 'balcony at sunset' },
-        { id: 'ref-4', name: 'Yellow bikini', image: '/character/premade characters/reference images/leaning forward/0.webp', folder: 'Yellow bikini' },
-        { id: 'ref-5', name: 'Kneeling', image: '/character/premade characters/reference images/kneeling/0.webp', folder: 'kneeling' },
-        { id: 'ref-6', name: 'Lingerie', image: '/character/premade characters/reference images/lingerie/0.webp', folder: 'lingerie' },
-        { id: 'ref-7', name: 'School-style', image: '/character/premade characters/reference images/school-style/0.webp', folder: 'school-style' },
-        { id: 'ref-8', name: 'Blowing a kiss', image: '/character/premade characters/reference images/blowing a kiss/0.webp', folder: 'blowing a kiss' },
-        { id: 'ref-9', name: 'Gym fitness pose', image: '/character/premade characters/reference images/gym fitness pose/0.webp', folder: 'gym fitness pose' },
-        { id: 'ref-10', name: 'Picnic lifestyle', image: '/character/premade characters/reference images/picnic lifestyle/0.webp', folder: 'picnic lifestyle' },
+        { id: 'ref-1', name: 'Bathroom Mirror Selfie', image: '/character/premade characters/reference images/bathroom mirror selfie/0.webp', folder: 'bathroom mirror selfie', premium: false },
+        { id: 'ref-2', name: 'Spiderman cosplay', image: '/character/premade characters/reference images/spiderman cosplay/0.webp', folder: 'spiderman cosplay', premium: false },
+        { id: 'ref-3', name: 'Balcony at sunset', image: '/character/premade characters/reference images/balcony at sunset/0.webp', folder: 'balcony at sunset', premium: false },
+        { id: 'ref-4', name: 'Yellow bikini', image: '/character/premade characters/reference images/Yellow bikini/0.webp', folder: 'Yellow bikini', premium: false },
+        { id: 'ref-5', name: 'Kneeling', image: '/character/premade characters/reference images/kneeling/0.webp', folder: 'kneeling', premium: false },
+        { id: 'ref-6', name: 'Naked in bathtub', image: '/character/premade characters/reference images/Naked in bathtub/0.webp', folder: 'naked in bathtub', premium: false },
+        { id: 'ref-7', name: 'School-style', image: '/character/premade characters/reference images/school-style/0.webp', folder: 'school-style', premium: false },
+        { id: 'ref-8', name: 'Blowing a kiss', image: '/character/premade characters/reference images/blowing a kiss/0.webp', folder: 'blowing a kiss', premium: false },
+        { id: 'ref-9', name: 'Gym fitness pose', image: '/character/premade characters/reference images/gym fitness pose/0.webp', folder: 'gym fitness pose', premium: false },
+        { id: 'ref-10', name: 'Picnic lifestyle', image: '/character/premade characters/reference images/picnic lifestyle/0.webp', folder: 'picnic lifestyle', premium: false },
+        { id: 'ref-11', name: 'Cop Girl Cosplay 2', image: '/character/premade characters/reference images/Premium-reference-img/cop girl cosplay 2.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-12', name: 'Countertop Arch Pose', image: '/character/premade characters/reference images/Premium-reference-img/Countertop Arch Pose.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-13', name: 'Holding Chest', image: '/character/premade characters/reference images/Premium-reference-img/holding chest.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-14', name: 'Kneeling Couch Lean', image: '/character/premade characters/reference images/Premium-reference-img/Kneeling Couch Lean.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-15', name: 'Leaning Forward', image: '/character/premade characters/reference images/Premium-reference-img/leaning forward.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-16', name: 'Lying on Beach', image: '/character/premade characters/reference images/Premium-reference-img/lying on beach.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-17', name: 'Naked Tongue Out', image: '/character/premade characters/reference images/Premium-reference-img/naked tongue out.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-18', name: 'Pregnant Pose', image: '/character/premade characters/reference images/Premium-reference-img/pregnant pose.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-19', name: 'Santa Outfit', image: '/character/premade characters/reference images/Premium-reference-img/santa outfit.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-20', name: 'Showing Feet', image: '/character/premade characters/reference images/Premium-reference-img/showing feet.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-21', name: 'Tight Clothes', image: '/character/premade characters/reference images/Premium-reference-img/tight clothes.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-22', name: 'Velma Cosplay', image: '/character/premade characters/reference images/Premium-reference-img/velma cosplay.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-23', name: 'Wearing Hijab', image: '/character/premade characters/reference images/Premium-reference-img/wearing hijab.webp', folder: 'Premium-reference-img', premium: true },
+        { id: 'ref-24', name: 'Yoga', image: '/character/premade characters/reference images/Premium-reference-img/yoga.webp', folder: 'Premium-reference-img', premium: true },
     ];
 
-    const allCharacters = [...characters, ...premadeCharacters];
+    // Map user characters to include an 'image' property for consistent rendering
+    const mappedUserCharacters = characters.map(char => ({
+        ...char,
+        image: char.baseImageUrl || (char.imageUrls && char.imageUrls.length > 0 ? char.imageUrls[0] : '/placeholder.png'),
+        age: char.age || char.ageRange || 'N/A'
+    }));
+
+    const allCharacters = [...mappedUserCharacters, ...premadeCharacters];
 
     // Get dimensions based on selected aspect ratio
     const getDimensions = () => {
@@ -259,11 +313,10 @@ export default function ImageGeneratorPage() {
     const previousJobs = completedJobs.slice(1);
 
     return (
-        <Container size="xl" py={{ base: 'md', md: 'xl' }}>
-            <Grid gutter="md">
+        <Box style={{ height: '100%', width: '100%' }}>
+            <Grid gutter="md" style={{ margin: 0, height: '100%' }}>
                 {/* Left Column - Input Data */}
-                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: 'calc(100vh - 120px)' }}>
-                <Card p="lg" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: '100vh', display: 'flex', flexDirection: 'column', padding: '0.75rem' }}>
                     <ScrollArea 
                         style={{ flex: 1, marginBottom: '1rem' }} 
                         scrollbarSize={10}
@@ -293,67 +346,172 @@ export default function ImageGeneratorPage() {
                         />
 
                         {/* Character Selection */}
-                        <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
+                        <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
                             <Text size="sm" fw={500} mb="sm" c="white">Select a Character</Text>
                             {charactersLoading && (
                                 <Text size="sm" c="dimmed">Loading characters...</Text>
                             )}
-                            <SimpleGrid cols={{ base: 2, sm: 3, md: 5 }} spacing="xs">
-                                {allCharacters.map((character) => (
+                            <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                {/* Left Arrow */}
+                                <Box
+                                    onClick={scrollCharLeft}
+                                    style={{
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    <IconChevronLeft size={28} color="#4a7aba" />
+                                </Box>
+                                
+                                {/* Cards Container */}
+                                <Box
+                                    ref={charScrollRef}
+                                    style={{
+                                        overflow: 'hidden',
+                                        flex: 1,
+                                    }}
+                                >
+                                <Group gap="xs" wrap="nowrap">
+                                    {/* Create Your Own Character Card */}
                                     <Card
-                                        key={character.id}
                                         p="sm"
                                         style={{
-                                            backgroundColor: selectedCharacter === character.id ? '#3a5a8a' : '#333',
-                                            border: selectedCharacter === character.id ? '2px solid #4a7aba' : '1px solid #555',
+                                            backgroundColor: '#2a2a2a',
+                                            border: '2px dashed #4a7aba',
                                             cursor: 'pointer',
+                                            minWidth: 'calc((100% - 32px) / 5)',
+                                            maxWidth: 'calc((100% - 32px) / 5)',
                                         }}
-                                        onClick={() => setSelectedCharacter(character.id)}
+                                        onClick={() => router.push('/dashboard/characters')}
                                     >
                                         <Stack gap="xs">
                                             <Box
                                                 style={{
                                                     width: '100%',
                                                     aspectRatio: '3/4',
-                                                    backgroundColor: '#2a2a2a',
+                                                    backgroundColor: '#1a1a1a',
                                                     borderRadius: '4px',
-                                                    overflow: 'hidden',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    border: '1px solid #444',
                                                 }}
                                             >
-                                                <img 
-                                                    src={character.image} 
-                                                    alt={character.name}
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        objectFit: 'cover'
-                                                    }}
-                                                />
+                                                <Stack align="center" gap="xs">
+                                                    <Text size="3rem" c="#4a7aba">+</Text>
+                                                    <Text size="xs" c="#4a7aba" fw={600} ta="center">
+                                                        Create Your Own
+                                                    </Text>
+                                                </Stack>
                                             </Box>
-                                            <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
-                                                {character.name} ({character.age})
+                                            <Text size="xs" fw={600} c="white" ta="center">
+                                                Custom Character
                                             </Text>
                                         </Stack>
                                     </Card>
-                                ))}
-                            </SimpleGrid>
+                                    
+                                    {allCharacters.map((character) => (
+                                        <Card
+                                            key={character.id}
+                                            p="sm"
+                                            style={{
+                                                backgroundColor: selectedCharacter === character.id ? '#3a5a8a' : '#1a1a1a',
+                                                border: selectedCharacter === character.id ? '2px solid #4a7aba' : '1px solid #333',
+                                                cursor: 'pointer',
+                                                minWidth: 'calc((100% - 32px) / 5)',
+                                                maxWidth: 'calc((100% - 32px) / 5)',
+                                            }}
+                                            onClick={() => setSelectedCharacter(character.id)}
+                                        >
+                                            <Stack gap="xs">
+                                                <Box
+                                                    style={{
+                                                        width: '100%',
+                                                        aspectRatio: '3/4',
+                                                        backgroundColor: '#2a2a2a',
+                                                        borderRadius: '4px',
+                                                        overflow: 'hidden',
+                                                    }}
+                                                >
+                                                    <img 
+                                                        src={character.image} 
+                                                        alt={character.name}
+                                                        style={{
+                                                            width: '100%',
+                                                            height: '100%',
+                                                            objectFit: 'cover'
+                                                        }}
+                                                    />
+                                                </Box>
+                                                <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
+                                                    {character.name} ({character.age})
+                                                </Text>
+                                            </Stack>
+                                        </Card>
+                                    ))}
+                                </Group>
+                                </Box>
+                                
+                                {/* Right Arrow */}
+                                <Box
+                                    onClick={scrollCharRight}
+                                    style={{
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    <IconChevronRight size={28} color="#4a7aba" />
+                                </Box>
+                            </Box>
                         </Card>
 
                         {/* Reference Image Selection */}
-                        <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
+                        <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
                             <Text size="sm" fw={500} mb="sm" c="white">Reference Image Style</Text>
                             <Text size="xs" c="dimmed" mb="sm">Choose a visual style for your generation</Text>
-                            <SimpleGrid cols={{ base: 2, sm: 3, md: 5 }} spacing="xs">
+                            <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                {/* Left Arrow */}
+                                <Box
+                                    onClick={scrollRefLeft}
+                                    style={{
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    <IconChevronLeft size={28} color="#4a7aba" />
+                                </Box>
+                                
+                                {/* Cards Container */}
+                                <Box
+                                    ref={refScrollRef}
+                                    style={{
+                                        overflow: 'hidden',
+                                        flex: 1,
+                                    }}
+                                >
+                                    <Group gap="xs" wrap="nowrap">
                                 {referenceImages.map((ref) => (
                                     <Card
                                         key={ref.id}
                                         p="sm"
                                         style={{
-                                            backgroundColor: selectedReference === ref.id ? '#3a5a8a' : '#333',
-                                            border: selectedReference === ref.id ? '2px solid #4a7aba' : '1px solid #555',
-                                            cursor: 'pointer',
+                                            backgroundColor: selectedReference === ref.id ? '#3a5a8a' : '#1a1a1a',
+                                            border: selectedReference === ref.id ? '2px solid #4a7aba' : '1px solid #333',
+                                            cursor: ref.premium ? 'not-allowed' : 'pointer',
+                                            opacity: ref.premium ? 0.6 : 1,
+                                            minWidth: 'calc((100% - 40px) / 6)',
+                                            maxWidth: 'calc((100% - 40px) / 6)',
                                         }}
-                                        onClick={() => setSelectedReference(ref.id)}
+                                        onClick={() => !ref.premium && setSelectedReference(ref.id)}
                                     >
                                         <Stack gap="xs">
                                             <Box
@@ -363,6 +521,7 @@ export default function ImageGeneratorPage() {
                                                     backgroundColor: '#2a2a2a',
                                                     borderRadius: '4px',
                                                     overflow: 'hidden',
+                                                    position: 'relative',
                                                 }}
                                             >
                                                 <img 
@@ -371,9 +530,29 @@ export default function ImageGeneratorPage() {
                                                     style={{
                                                         width: '100%',
                                                         height: '100%',
-                                                        objectFit: 'cover'
+                                                        objectFit: 'cover',
+                                                        transition: 'filter 0.2s ease, transform 0.3s ease',
                                                     }}
+                                                    onMouseEnter={(e) => !ref.premium && (e.currentTarget.style.transform = 'scale(1.08)')}
+                                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                                 />
+                                                {ref.premium && (
+                                                    <Box
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '8px',
+                                                            right: '8px',
+                                                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                                            padding: '6px',
+                                                            borderRadius: '50%',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                        }}
+                                                    >
+                                                        <IconCrown size={20} color="#FFD700" />
+                                                    </Box>
+                                                )}
                                             </Box>
                                             <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
                                                 {ref.name}
@@ -381,7 +560,23 @@ export default function ImageGeneratorPage() {
                                         </Stack>
                                     </Card>
                                 ))}
-                            </SimpleGrid>
+                                </Group>
+                                </Box>
+                                
+                                {/* Right Arrow */}
+                                <Box
+                                    onClick={scrollRefRight}
+                                    style={{
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    <IconChevronRight size={28} color="#4a7aba" />
+                                </Box>
+                            </Box>
                         </Card>
 
                         {/* Image Prompt */}
@@ -472,21 +667,19 @@ export default function ImageGeneratorPage() {
                     >
                         Generate (Costs Tokens)
                     </Button>
-                </Card>
             </Grid.Col>
 
                 {/* Right Column - Output */}
-                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: 'calc(100vh - 120px)' }}>
-                <Card p="lg" style={{ backgroundColor: '#1a1a1a', border: '1px solid #333', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                    <Stack gap="md" pb="md">
+                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: '100vh', padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
+                    <Stack gap="md" style={{ flex: 1, overflow: 'hidden' }}>
                         <Title size="h3" c="white">Generated Images</Title>
 
                         {/* Current/Latest Image */}
-                        <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
+                        <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444', flex: 1, minHeight: 0 }}>
                             <Box
                                 style={{
                                     width: '100%',
-                                    aspectRatio: '3/4',
+                                    height: '100%',
                                     backgroundColor: '#1a1a1a',
                                     borderRadius: '8px',
                                     display: 'flex',
@@ -527,32 +720,41 @@ export default function ImageGeneratorPage() {
                         {/* Previous Images */}
                         {previousJobs.length > 0 && (
                             <>
-                                <Title size="h4" c="white" mt="md">Previous Images</Title>
-                                <ScrollArea h={500}>
-                                    <Stack gap="md">
-                                        {previousJobs.map((job, index) => (
-                                            <Card key={job.id} p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
-                                                <Image
-                                                    src={job.imageUrls[0].privateUrl}
-                                                    alt={`Generated image ${index + 2}`}
-                                                    fit="contain"
-                                                    style={{ width: '100%', maxHeight: 400 }}
-                                                />
-                                                {job.metadata?.prompt && (
-                                                    <Text size="sm" c="dimmed" mt="sm" lineClamp={2}>
-                                                        {job.metadata.prompt}
-                                                    </Text>
-                                                )}
-                                            </Card>
-                                        ))}
-                                    </Stack>
-                                </ScrollArea>
+                                <Text size="sm" fw={500} c="white" mb={2}>Previously Generated Images</Text>
+                                <Box style={{ border: '1px solid #333', borderRadius: '6px', padding: '8px', backgroundColor: '#0a0a0a', flexShrink: 0 }}>
+                                    <ScrollArea type="scroll" offsetScrollbars scrollbarSize={8}>
+                                        <Group gap="xs" wrap="nowrap">
+                                            {previousJobs.map((job, index) => (
+                                                <Box
+                                                    key={job.id}
+                                                    style={{
+                                                        minWidth: '80px',
+                                                        maxWidth: '80px',
+                                                        height: '80px',
+                                                        backgroundColor: '#1a1a1a',
+                                                        borderRadius: '6px',
+                                                        overflow: 'hidden',
+                                                        border: '1px solid #333',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    <Image
+                                                        src={job.imageUrls[0].privateUrl}
+                                                        alt={`Generated image ${index + 2}`}
+                                                        fit="cover"
+                                                        style={{ width: '100%', height: '100%' }}
+                                                    />
+                                                </Box>
+                                            ))}
+                                        </Group>
+                                    </ScrollArea>
+                                </Box>
                             </>
                         )}
                     </Stack>
-                </Card>
+
                 </Grid.Col>
             </Grid>
-        </Container>
+        </Box>
     );
 }
