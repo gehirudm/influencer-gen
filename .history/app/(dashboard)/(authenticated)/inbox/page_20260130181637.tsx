@@ -309,16 +309,14 @@ export default function InboxPage() {
 						</Stack>
 					</Card>
 				) : (
-					<Stack gap="md">
+					<Stack gap="sm">
 						{sortedAndFilteredNotifications.map((notification) => (
 							<Card
 								key={notification.id}
 								p="md"
 								style={{
-									background: notification.read 
-										? '#111' 
-										: 'linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(0, 0, 0, 0.4) 100%), #0a0a0a',
-									border: '1px solid #333',
+									backgroundColor: notification.read ? '#0a0a0a' : '#111',
+									border: `1px solid ${notification.read ? '#333' : '#444'}`,
 									cursor: 'pointer',
 									opacity: processingIds.has(notification.id) ? 0.6 : 1,
 									transition: 'all 0.2s',
@@ -328,78 +326,70 @@ export default function InboxPage() {
 									e.currentTarget.style.borderColor = '#555';
 								}}
 								onMouseLeave={(e) => {
-									e.currentTarget.style.borderColor = '#333';
+									e.currentTarget.style.borderColor = notification.read ? '#333' : '#444';
 								}}
 							>
-								<Stack gap="sm">
-									<Group justify="space-between" align="flex-start">
-										<Group gap="sm">
+								<Group justify="space-between" align="flex-start" wrap="nowrap">
+									<Group align="flex-start" gap="md" style={{ flex: 1 }}>
+										<Badge
+											size="lg"
+											color={notificationColors[notification.type]}
+											variant="light"
+											style={{ marginTop: 4 }}
+										>
+											{notificationIcons[notification.type]}
+										</Badge>
 
-											<Text size="md" fw={600} c="blue">
-												{notification.title}
+										<Stack gap="xs" style={{ flex: 1 }}>
+											<Group gap="xs">
+												<Text size="md" fw={notification.read ? 400 : 600} c="blue">
+													{notification.title}
+												</Text>
+												{!notification.read && (
+													<Badge size="xs" color="blue" variant="dot">
+														New
+													</Badge>
+												)}
+											</Group>
+											<Text size="sm" c="dimmed" style={{ lineHeight: 1.5 }}>
+												{truncateText(notification.message)}
 											</Text>
-											{!notification.read && (
-												<Badge size="xs" color="blue" variant="dot">
-													New
-												</Badge>
-											)}
-										</Group>
-										<Group gap="xs">
-											{!notification.read && (
-												<Tooltip label="Mark as read">
-													<ActionIcon
-														variant="subtle"
-														color="blue"
-														size="sm"
-														onClick={(e) => {
-															e.stopPropagation();
-															handleNotificationClick(notification);
-														}}
-														disabled={processingIds.has(notification.id)}
-													>
-														<IconCheck size={16} />
-													</ActionIcon>
-												</Tooltip>
-											)}
-											<Tooltip label="Delete">
+											<Text size="xs" c="dimmed">
+												{formatTimestamp(notification.createdAt)}
+											</Text>
+										</Stack>
+									</Group>
+
+									<Group gap="xs">
+										{!notification.read && (
+											<Tooltip label="Mark as read">
 												<ActionIcon
 													variant="subtle"
-													color="red"
+													color="blue"
 													size="sm"
-													onClick={(e) => handleDeleteNotification(notification.id, e)}
+													onClick={(e) => {
+														e.stopPropagation();
+														handleNotificationClick(notification);
+													}}
 													disabled={processingIds.has(notification.id)}
 												>
-													<IconTrash size={16} />
+													<IconCheck size={16} />
 												</ActionIcon>
 											</Tooltip>
-										</Group>
+										)}
+										<Tooltip label="Delete">
+											<ActionIcon
+												variant="subtle"
+												color="red"
+												size="sm"
+												onClick={(e) => handleDeleteNotification(notification.id, e)}
+												disabled={processingIds.has(notification.id)}
+											>
+												<IconTrash size={16} />
+											</ActionIcon>
+										</Tooltip>
 									</Group>
-
-									<Text size="sm" c="dimmed">
-										{truncateText(notification.message)}
-									</Text>
-
-									{notification.link && (
-										<Text size="xs" c="blue">
-											Link: {notification.link}
-										</Text>
-									)}
-
-								<Group justify="space-between" align="center">
-									<Group gap="xs">
-										<Badge 
-											color={notificationColors[notification.type]} 
-											size="sm"
-											variant="light"
-										>
-											{notification.type}
-										</Badge>
-										<Text size="xs" c="dimmed">
-											{formatTimestamp(notification.createdAt)}
-										</Text>
-									</Group>
-									</Group>
-								</Stack>
+								</Group>
 							</Card>
 						))}
 					</Stack>
@@ -423,7 +413,7 @@ export default function InboxPage() {
 							<Text fw={600} c="blue">{selectedNotification?.title}</Text>
 						</Group>
 					}
-					size="xl"
+					size="md"
 					centered
 				>
 					{selectedNotification && (

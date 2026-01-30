@@ -259,7 +259,7 @@ export async function sendNotificationToAll(params: SendNotificationToAllParams)
     }
 
     // Check if user is admin
-    const adminDoc = await adminDb.collection('users').doc(uid).collection('private').doc('system').get();
+    const adminDoc = await adminDb.collection('users').doc(uid).collection('private').doc('private').get();
     const isAdmin = adminDoc.data()?.isAdmin;
     if (!isAdmin) {
       throw new Error('Unauthorized: Admin access required');
@@ -269,11 +269,10 @@ export async function sendNotificationToAll(params: SendNotificationToAllParams)
 
     // Get all users
     const usersSnapshot = await adminDb.collection('users').get();
-    let batch = adminDb.batch();
+    const batch = adminDb.batch();
     let count = 0;
-    let batchCount = 0;
 
-    for (const doc of usersSnapshot.docs) {
+    usersSnapshot.docs.forEach((doc) => {
       const notificationRef = adminDb.collection('inbox_notifications').doc();
       batch.set(notificationRef, {
         userId: doc.id,
@@ -285,20 +284,14 @@ export async function sendNotificationToAll(params: SendNotificationToAllParams)
         createdAt: FieldValue.serverTimestamp(),
       });
       count++;
-      batchCount++;
 
       // Firestore batch limit is 500
-      if (batchCount >= 500) {
-        await batch.commit();
-        batch = adminDb.batch();
-        batchCount = 0;
+      if (count % 500 === 0) {
+        batch.commit();
       }
-    }
+    });
 
-    // Commit remaining items
-    if (batchCount > 0) {
-      await batch.commit();
-    }
+    await batch.commit();
 
     // Save to sent_announcements collection
     await adminDb.collection('sent_announcements').add({
@@ -327,7 +320,7 @@ export async function sendNotificationToSpecific(params: SendNotificationToSpeci
     }
 
     // Check if user is admin
-    const adminDoc = await adminDb.collection('users').doc(uid).collection('private').doc('system').get();
+    const adminDoc = await adminDb.collection('users').doc(uid).collection('private').doc('private').get();
     const isAdmin = adminDoc.data()?.isAdmin;
     if (!isAdmin) {
       throw new Error('Unauthorized: Admin access required');
@@ -402,7 +395,7 @@ export async function sendNotificationToSegment(params: SendNotificationToSegmen
     }
 
     // Check if user is admin
-    const adminDoc = await adminDb.collection('users').doc(uid).collection('private').doc('system').get();
+    const adminDoc = await adminDb.collection('users').doc(uid).collection('private').doc('private').get();
     const isAdmin = adminDoc.data()?.isAdmin;
     if (!isAdmin) {
       throw new Error('Unauthorized: Admin access required');
@@ -504,7 +497,7 @@ export async function getSentAnnouncements() {
     }
 
     // Check if user is admin
-    const adminDoc = await adminDb.collection('users').doc(uid).collection('private').doc('system').get();
+    const adminDoc = await adminDb.collection('users').doc(uid).collection('private').doc('private').get();
     const isAdmin = adminDoc.data()?.isAdmin;
     if (!isAdmin) {
       throw new Error('Unauthorized: Admin access required');
@@ -518,18 +511,9 @@ export async function getSentAnnouncements() {
 
     const announcements: SentAnnouncement[] = [];
     announcementsSnapshot.docs.forEach((doc) => {
-      const data = doc.data();
       announcements.push({
         id: doc.id,
-        type: data.type,
-        title: data.title,
-        message: data.message,
-        link: data.link || undefined,
-        targetType: data.targetType,
-        targetDetails: data.targetDetails,
-        recipientCount: data.recipientCount,
-        sentBy: data.sentBy,
-        sentAt: data.sentAt ? data.sentAt.toDate().toISOString() : null,
+        ...doc.data(),
       } as SentAnnouncement);
     });
 

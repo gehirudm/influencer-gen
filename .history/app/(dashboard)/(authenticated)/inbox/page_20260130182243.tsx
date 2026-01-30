@@ -334,7 +334,12 @@ export default function InboxPage() {
 								<Stack gap="sm">
 									<Group justify="space-between" align="flex-start">
 										<Group gap="sm">
-
+											<Badge 
+												color={notificationColors[notification.type]} 
+												size="lg"
+											>
+												{notification.type}
+											</Badge>
 											<Text size="md" fw={600} c="blue">
 												{notification.title}
 											</Text>
@@ -385,19 +390,10 @@ export default function InboxPage() {
 										</Text>
 									)}
 
-								<Group justify="space-between" align="center">
-									<Group gap="xs">
-										<Badge 
-											color={notificationColors[notification.type]} 
-											size="sm"
-											variant="light"
-										>
-											{notification.type}
-										</Badge>
+									<Group justify="space-between">
 										<Text size="xs" c="dimmed">
 											{formatTimestamp(notification.createdAt)}
 										</Text>
-									</Group>
 									</Group>
 								</Stack>
 							</Card>

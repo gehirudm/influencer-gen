@@ -56,16 +56,6 @@ const navItems = [
         label: 'Outbox',
         href: '/admin/outbox',
         icon: IconSend,
-        subItems: [
-            {
-                label: 'Compose',
-                href: '/admin/outbox',
-            },
-            {
-                label: 'History',
-                href: '/admin/outbox/history',
-            },
-        ],
     },
     {
         label: 'Marketplace',

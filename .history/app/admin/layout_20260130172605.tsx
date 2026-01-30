@@ -23,7 +23,6 @@ import {
     IconArrowLeft,
     IconSwitchHorizontal,
     IconShoppingCart,
-    IconSend,
 } from '@tabler/icons-react';
 import classes from './admin.module.css';
 import collapsedClasses from './adminCollapsed.module.css';
@@ -51,21 +50,6 @@ const navItems = [
         label: 'Promo Codes',
         href: '/admin/promo',
         icon: IconTicket,
-    },
-    {
-        label: 'Outbox',
-        href: '/admin/outbox',
-        icon: IconSend,
-        subItems: [
-            {
-                label: 'Compose',
-                href: '/admin/outbox',
-            },
-            {
-                label: 'History',
-                href: '/admin/outbox/history',
-            },
-        ],
     },
     {
         label: 'Marketplace',
