@@ -2,149 +2,135 @@
 
 import { createInvoiceAndRedirect } from '@/app/actions/payments/payments';
 import { useUserData } from '@/hooks/useUserData';
-import { Group, HoverCard, Stack, Text } from '@mantine/core';
+import { Group, HoverCard, Stack, Text, Badge } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconCheck, IconInfoCircle, IconX } from '@tabler/icons-react';
+import {
+  IconCheck,
+  IconInfoCircle,
+  IconSparkles,
+  IconCoins,
+  IconBolt,
+  IconDiscount2,
+  IconStar,
+  IconBrush,
+  IconCamera,
+  IconWand,
+  IconShieldCheck,
+  IconUsers,
+  IconCrown,
+} from '@tabler/icons-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useState } from 'react';
 
-const pricingPlans: {
-  name: string;
-  planName: string;
-  price: string;
-  tagline: string;
-  tokens: string;
-  images: string;
-  features: ({
-    name: string;
-    explanation?: string;
-    available: boolean;
-  }[]);
-  button: string;
-  highlight: boolean;
-  popular?: boolean;
-}[] = [
-    {
-      name: 'Free',
-      planName: "free",
-      price: '$0',
-      tagline: '',
-      tokens: '50 tokens',
-      images: 'create up to 25 images',
-      features: [
-        { name: 'Simple image generation', explanation: "Generate realistic images easily without the need of complex prompts with a pre-defined set of features handcrafted for optimal image generation.", available: true },
-        { name: 'Advanced image generation', explanation: "Full control over image generation parameters including negative prompts, dimensions, and other advanced settings.", available: true },
-        { name: 'No watermark on images', explanation: "Download and use images without any watermarks or branding.", available: false },
-        { name: 'AI Undress', explanation: "Generate tasteful artistic nude content with our specialized model.", available: false },
-        { name: 'Character creation', explanation: "Create and customize your own characters with detailed appearance settings.", available: false },
-        { name: 'LoRa character training', explanation: "Train a custom LoRa model for your character for consistent high-quality generations.", available: false },
-        { name: 'Image Generation with Character Engine', explanation: "Generate images that match your character's specific appearance and style consistently.", available: false },
-      ],
-      button: 'Current plan',
-      highlight: false,
-    },
-    {
-      name: 'Basic',
-      planName: "Basic Plan",
-      price: '$39.99',
-      tagline: 'One time fee',
-      tokens: '1000 tokens',
-      images: 'Create up to 750 images',
-      features: [
-        { name: 'All image generation features', explanation: "Full access all image generation features available.", available: true },
-        { name: 'No watermark on images', explanation: "All generated images are delivered without watermarks for professional use and sharing.", available: true },
-        { name: 'AI Undress', explanation: "Upload an image and generate a nude version of that image. You can tweak the characteristics to your choice", available: true },
-        { name: 'Character creation', explanation: "Create and customize your own characters with detailed appearance settings and save them for future use.", available: true },
-        { name: '1 LoRa character training included', explanation: "Train one custom LoRa model for your character, enabling consistent high-quality image generations.", available: true },
-        { name: 'Image Generation with Character Engine', explanation: "Generate consistent images of your trained characters with perfect appearance matching across multiple generations.", available: true },
-      ],
-      button: 'Purchase',
-      highlight: false,
-    },
-    {
-      name: 'Premium',
-      planName: "Premium Plan",
-      price: '$64.99',
-      tagline: 'One time fee',
-      tokens: '10000 tokens',
-      images: 'Create up to 3000 images',
-      features: [
-        { name: 'All image generation features', explanation: "Full access all image generation features available.", available: true },
-        { name: 'No watermark on images', explanation: "All generated images are delivered without watermarks and at maximum available resolution.", available: true },
-        { name: 'AI Undress', explanation: "Upload an image and generate a nude version of that image. You can tweak the characteristics to your choice", available: true },
-        { name: 'Character creation', explanation: "Create unlimited characters with our most detailed customization options and advanced appearance settings.", available: true },
-        { name: '2 LoRa character trainings included', explanation: "Train two custom LoRa models for your characters, enabling consistent high-quality image generations.", available: true },
-        { name: 'Image Generation with Character Engine', explanation: "Generate the highest quality consistent images of your trained characters with perfect appearance matching and enhanced details.", available: true },
-      ],
-      button: 'Purchase',
-      highlight: true,
-      popular: true,
-    },
-  ];
+// Plan definitions
+const plans = [
+  {
+    id: 'basic_plan',
+    name: 'Basic',
+    price: '$39.99',
+    tagline: 'One time fee',
+    tokens: '1,000 Tokens',
+    loraTokens: '1 LoRA Token',
+    features: [
+      { name: 'All image generation features', icon: IconCamera, explanation: "Full access to simple, advanced, img2img, and nudify generation modes." },
+      { name: 'AI Undress', icon: IconWand, explanation: "Upload an image and generate a nude version with full customization." },
+      { name: 'Character creation', icon: IconUsers, explanation: "Create and customize your own characters with detailed appearance settings." },
+      { name: '1 LoRA character training', icon: IconSparkles, explanation: "Train one custom LoRA model for consistent high-quality character generations." },
+      { name: 'Character Engine generation', icon: IconBrush, explanation: "Generate images matching your character's specific appearance consistently." },
+    ],
+    highlight: false,
+  },
+  {
+    id: 'premium_plan',
+    name: 'Premium',
+    price: '$64.99',
+    tagline: 'One time fee',
+    tokens: '10,000 Tokens',
+    loraTokens: '2 LoRA Tokens',
+    popular: true,
+    features: [
+      { name: 'All image generation features', icon: IconCamera, explanation: "Full access to all image generation features." },
+      { name: 'AI Undress', icon: IconWand, explanation: "Upload an image and generate a nude version with full customization." },
+      { name: 'Character creation', icon: IconUsers, explanation: "Create unlimited characters with detailed customization." },
+      { name: '2 LoRA character trainings', icon: IconSparkles, explanation: "Train two custom LoRA models for consistent character generations." },
+      { name: 'Character Engine generation', icon: IconBrush, explanation: "Generate the highest quality consistent character images." },
+    ],
+    highlight: true,
+  },
+];
+
+// Token packs
+const tokenPacks = [
+  { id: 'tokens_1000', amount: '1,000', price: '$10', pricePerToken: '$0.010', discount: null },
+  { id: 'tokens_2000', amount: '2,000', price: '$18', pricePerToken: '$0.009', discount: '10% off' },
+  { id: 'tokens_5000', amount: '5,000', price: '$40', pricePerToken: '$0.008', discount: '20% off' },
+  { id: 'tokens_10000', amount: '10,000', price: '$70', pricePerToken: '$0.007', discount: '30% off' },
+];
+
+// LoRA token packs
+const loraTokenPacks = [
+  { id: 'lora_1', amount: '1', price: '$60', perUnit: '$60/token', discount: null },
+  { id: 'lora_2', amount: '2', price: '$108', perUnit: '$54/token', discount: '10% off' },
+  { id: 'lora_3', amount: '3', price: '$144', perUnit: '$48/token', discount: '20% off' },
+  { id: 'lora_5', amount: '5', price: '$210', perUnit: '$42/token', discount: '30% off' },
+];
 
 function PricingPageMessageBox() {
   const searchParams = useSearchParams()
   const paramError = searchParams.get('error');
-  const paramMessage = searchParams.get('message');
 
   const [errorMessage, setErrorMessage] = useState(paramError);
-  const [message, setMessage] = useState(paramMessage);
+
+  if (!errorMessage) return null;
 
   return (
-    <>
-    { errorMessage && (
-      <div className="max-w-3xl mx-auto mb-8 bg-red-900/50 border border-red-500 text-white px-4 py-3 rounded-lg flex items-center justify-between">
-        <div className="flex items-center">
-          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-          <span>{errorMessage}</span>
-        </div>
-        <button
-          onClick={() => setErrorMessage(null)}
-          className="text-white hover:text-gray-200"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+    <div style={{
+      maxWidth: '800px',
+      margin: '0 auto 32px',
+      padding: '12px 16px',
+      borderRadius: '12px',
+      background: 'rgba(239, 68, 68, 0.1)',
+      border: '1px solid rgba(239, 68, 68, 0.3)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      color: '#fca5a5',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <IconInfoCircle size={18} />
+        <span style={{ fontSize: '14px' }}>{errorMessage}</span>
       </div>
-    )}
-    </>
+      <button
+        onClick={() => setErrorMessage(null)}
+        style={{ background: 'none', border: 'none', color: '#fca5a5', cursor: 'pointer', padding: '4px' }}
+      >
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
   );
 }
 
 const PricingPage = () => {
   const router = useRouter();
   const { user, systemData, loading } = useUserData();
-  const [currentPlan, setCurrentPlan] = useState('Free');
-
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingProduct, setProcessingProduct] = useState<string | null>(null);
 
-  // Update current plan based on user data
-  useEffect(() => {
-    if (systemData?.subscription_tier) {
-      if (systemData?.subscription_tier === 'Basic Plan') {
-        setCurrentPlan('Basic');
-      } else if (systemData?.subscription_tier === 'Premium Plan') {
-        setCurrentPlan('Premium');
-      }
-    }
-  }, [user]);
+  const isPaidCustomer = systemData?.isPaidCustomer || false;
 
-  const handleSubscribe = async (planName: string) => {
-    // Check if user is logged in
+  const handlePurchase = async (productId: string) => {
     if (!user && !loading) {
       notifications.show({
         title: 'Authentication Required',
-        message: 'Please sign in to purchase a subscription',
+        message: 'Please sign in to make a purchase',
         color: 'blue',
       });
       router.push('/auth');
       return;
     }
 
-    // If still loading user data, show loading notification
     if (loading) {
       notifications.show({
         title: 'Loading',
@@ -156,14 +142,10 @@ const PricingPage = () => {
 
     try {
       setIsProcessing(true);
-      const tier = pricingPlans.find((p) => p.name === planName)?.planName;
+      setProcessingProduct(productId);
 
-      if (!tier) {
-        throw new Error(`Invalid plan: ${planName}`);
-      }
-
-      // Show processing notification
-      const notificationId = notifications.show({
+      notifications.show({
+        id: 'payment-processing',
         title: 'Processing Payment',
         message: 'Creating your invoice, please wait...',
         loading: true,
@@ -171,24 +153,13 @@ const PricingPage = () => {
         withCloseButton: false,
       });
 
-      // Create form data to pass to the server action
       const formData = new FormData();
-      formData.append('tier', tier);
-
-      // Call the server action which will handle the redirect
+      formData.append('productId', productId);
       await createInvoiceAndRedirect(formData);
-
-      // If we get here without redirecting, close the notification
-      notifications.update({
-        id: notificationId,
-        title: 'Redirecting',
-        message: 'Taking you to the payment page...',
-        loading: true,
-      });
 
     } catch (error: any) {
       setIsProcessing(false);
-      console.error('Payment error:', error);
+      setProcessingProduct(null);
       notifications.show({
         title: 'Error',
         message: error.message || 'Failed to process payment request',
@@ -198,140 +169,431 @@ const PricingPage = () => {
   };
 
   return (
-    <div className="py-16 px-6 lg:px-20 bg-black text-white min-h-screen">
-      <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold mb-6">Pricing</h1>
-        <p className="text-xl max-w-3xl mx-auto">
-          Unlimited creativity at amazing prices. Try FantazyPro for free or purchase a pack for more tokens and features.
+    <div style={{ padding: '64px 24px', background: '#000', color: '#fff', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+        <h1 style={{ fontSize: '48px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.3, padding: '4px 0', background: 'linear-gradient(135deg, #a78bfa, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          Pricing
+        </h1>
+        <p style={{ fontSize: '18px', color: '#9ca3af', maxWidth: '600px', margin: '0 auto' }}>
+          Unlock unlimited creativity. Purchase a plan for full access or buy tokens individually.
         </p>
+
+        {/* User Balance Display */}
+        {user && systemData && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '24px',
+            marginTop: '24px',
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '999px',
+              background: 'rgba(99, 102, 241, 0.15)',
+              border: '1px solid rgba(99, 102, 241, 0.3)',
+            }}>
+              <IconCoins size={16} color="#818cf8" />
+              <span style={{ fontSize: '14px', color: '#c7d2fe' }}>{systemData.tokens.toLocaleString()} Tokens</span>
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '999px',
+              background: 'rgba(168, 85, 247, 0.15)',
+              border: '1px solid rgba(168, 85, 247, 0.3)',
+            }}>
+              <IconSparkles size={16} color="#a78bfa" />
+              <span style={{ fontSize: '14px', color: '#ddd6fe' }}>{systemData.loraTokens} LoRA Tokens</span>
+            </div>
+            {isPaidCustomer && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '999px',
+                background: 'rgba(34, 197, 94, 0.15)',
+                border: '1px solid rgba(34, 197, 94, 0.3)',
+              }}>
+                <IconShieldCheck size={16} color="#4ade80" />
+                <span style={{ fontSize: '14px', color: '#bbf7d0' }}>Paid Customer</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <Suspense>
         <PricingPageMessageBox />
       </Suspense>
 
-      <div className="flex justify-center">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full">
-          {pricingPlans.map((plan) => {
-            const isCurrent = currentPlan === plan.name;
+      {/* ============ SECTION 1: STARTER PLANS ============ */}
+      <div style={{ maxWidth: '900px', margin: '0 auto 80px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <IconCrown size={20} color="#a78bfa" />
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Starter Plans</span>
+          </div>
+          <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px' }}>Get Started with Full Access</h2>
+          <p style={{ color: '#9ca3af' }}>Any purchase unlocks all features — choose the plan that fits your needs</p>
+        </div>
 
-            return (
-              <div
-                key={plan.name}
-                className={`rounded-2xl p-6 flex flex-col h-full ${plan.highlight
-                  ? 'border-2 border-indigo-500'
-                  : 'border border-gray-800'
-                  }`}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+          gap: '24px',
+        }}>
+          {plans.map((plan) => (
+            <div
+              key={plan.id}
+              style={{
+                borderRadius: '16px',
+                padding: '32px',
+                background: 'linear-gradient(160deg, rgba(17, 17, 30, 0.9) 0%, rgba(30, 30, 50, 0.6) 100%)',
+                border: plan.highlight ? '2px solid #6366f1' : '1px solid #333',
+                position: 'relative',
+                transition: 'border-color 0.3s, transform 0.3s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#6366f1';
+                e.currentTarget.style.transform = 'translateY(-4px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = plan.highlight ? '#6366f1' : '#333';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              {plan.popular && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-12px',
+                  right: '24px',
+                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                  color: '#fff',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  padding: '4px 16px',
+                  borderRadius: '999px',
+                }}>
+                  Popular
+                </div>
+              )}
+
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '4px' }}>{plan.name}</h3>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                  <span style={{ fontSize: '40px', fontWeight: 700 }}>{plan.price}</span>
+                  <span style={{ color: '#6b7280', fontSize: '14px' }}>{plan.tagline}</span>
+                </div>
+              </div>
+
+              {/* What you get */}
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                marginBottom: '24px',
+                flexWrap: 'wrap',
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  background: 'rgba(99, 102, 241, 0.15)',
+                  border: '1px solid rgba(99, 102, 241, 0.25)',
+                  fontSize: '13px',
+                  color: '#c7d2fe',
+                }}>
+                  <IconCoins size={14} />
+                  {plan.tokens}
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  background: 'rgba(168, 85, 247, 0.15)',
+                  border: '1px solid rgba(168, 85, 247, 0.25)',
+                  fontSize: '13px',
+                  color: '#ddd6fe',
+                }}>
+                  <IconSparkles size={14} />
+                  {plan.loraTokens}
+                </div>
+              </div>
+
+              <button
+                disabled={isProcessing}
+                onClick={() => handlePurchase(plan.id)}
                 style={{
-                  background: 'linear-gradient(80.42deg, rgba(0, 0, 0, 0.16) 25.25%, rgba(83, 84, 108, 0.16) 98.05%)',
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '12px',
+                  border: plan.highlight ? 'none' : '1px solid rgba(99, 102, 241, 0.4)',
+                  fontWeight: 600,
+                  fontSize: '16px',
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  background: plan.highlight
+                    ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
+                    : 'linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(139, 92, 246, 0.25))',
+                  color: '#fff',
+                  marginBottom: '24px',
+                  transition: 'opacity 0.2s',
+                  opacity: isProcessing ? 0.6 : 1,
                 }}
               >
-                <div className="mb-6">
-                  <Group align='start' justify='space-between'>
-                    <h3 className="text-2xl font-bold">{plan.name}</h3>
-                    {/* {plan.bestValue && (
-                      <div className="text-sm bg-indigo-600 text-white font-medium rounded-full px-4 py-1 inline-block mb-3">
-                        Best Value
-                      </div>
-                    )} */}
-                    {plan.popular && (
-                      <div className="text-sm bg-indigo-600 text-white font-medium rounded-full px-4 py-1 inline-block mb-3">
-                        Popular
-                      </div>
-                    )}
-                  </Group>
-                  <div className="flex items-baseline mt-2">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    {plan.tagline && <span className="ml-2 text-gray-400">{plan.tagline}</span>}
-                  </div>
-                </div>
+                {processingProduct === plan.id ? 'Processing...' : 'Purchase'}
+              </button>
 
-                <button
-                  disabled={isCurrent || isProcessing}
-                  onClick={() => handleSubscribe(plan.name)}
-                  className={`py-3 px-4 rounded-3xl font-medium mb-6 ${isCurrent || isProcessing
-                    ? 'bg-gray-700 cursor-not-allowed'
-                    : 'bg-white text-blue-700 hover:bg-gray-200 cursor-pointer'
-                    }`}
-                >
-                  {isCurrent
-                    ? 'Current plan'
-                    : isProcessing
-                      ? 'Processing...'
-                      : 'Purchase'}
-                </button>
-
-                <div className="text-sm text-gray-300 mb-6">
-                  <div>{plan.tokens}</div>
-                  <div>{plan.images}</div>
-                </div>
-
-                <ul className="space-y-3 text-sm flex-1">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start">
-                      {feature.available ? (
-                        <IconCheck size={18} className="text-green-500 mr-2 flex-shrink-0" />
-                      ) : (
-                        <IconX size={18} className="text-red-500 mr-2 flex-shrink-0" />
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {plan.features.map((feature, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '8px',
+                      background: 'rgba(99, 102, 241, 0.15)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      <feature.icon size={14} color="#818cf8" />
+                    </div>
+                    <span style={{ color: '#d1d5db', fontSize: '14px', display: 'inline-flex', alignItems: 'center', flexWrap: 'nowrap' }}>
+                      {feature.name}
+                      {feature.explanation && (
+                        <HoverCard width={280} shadow="md">
+                          <HoverCard.Target>
+                            <IconInfoCircle size={14} style={{ marginLeft: '6px', cursor: 'help', color: '#6b7280', flexShrink: 0 }} />
+                          </HoverCard.Target>
+                          <HoverCard.Dropdown>
+                            <Text size="sm">{feature.explanation}</Text>
+                          </HoverCard.Dropdown>
+                        </HoverCard>
                       )}
-                      <span className={feature.available ? 'text-gray-200' : 'text-gray-500'}>
-                        {feature.name}
-                        {" "}
-                        {feature.explanation && feature.available && (
-                          <HoverCard width={280} shadow="md">
-                            <HoverCard.Target>
-                              <IconInfoCircle size={16} className="inline" />
-                            </HoverCard.Target>
-                            <HoverCard.Dropdown>
-                              <Text size="sm">
-                                {feature.explanation}
-                              </Text>
-                            </HoverCard.Dropdown>
-                          </HoverCard>
-                        )}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Coming Soon Section */}
-      <div className="mt-16 text-center">
-        <div className="inline-block bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-full px-6 py-2 mb-8">
-          🎬 Video Generation Coming Soon
-        </div>
-      </div>
-
-      {/* LoRa Training Section */}
-      <div className="mt-12 max-w-4xl mx-auto">
-        <div className="rounded-2xl p-8 border border-gray-800" style={{
-          background: 'linear-gradient(80.42deg, rgba(0, 0, 0, 0.16) 25.25%, rgba(83, 84, 108, 0.16) 98.05%)',
-        }}>
-          <h2 className="text-3xl font-bold text-center mb-6">LoRa Character Training</h2>
-          <p className="text-gray-300 text-center mb-8">
-            Train custom AI models for your characters with our professional LoRa training service
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-4">
-              <div className="text-4xl font-bold text-indigo-400 mb-2">$60</div>
-              <div className="text-gray-300">Per single LoRa character training</div>
-            </div>
-            
-            <div className="text-center p-4">
-              <div className="text-2xl mb-2">💰</div>
-              <div className="text-gray-300">Sell your trained LoRa models and earn revenue</div>
-            </div>
-            
-            <div className="text-center p-4">
-              <div className="text-2xl mb-2">📦</div>
-              <div className="text-gray-300">Bulk buy training credits with exclusive discounts</div>
-            </div>
+      {/* ============ SECTION 2: TOKEN PACKS ============ */}
+      <div style={{ maxWidth: '1000px', margin: '0 auto 80px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <IconCoins size={20} color="#818cf8" />
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Token Packs</span>
           </div>
+          <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px' }}>Buy Tokens</h2>
+          <p style={{ color: '#9ca3af' }}>Generation tokens for creating images. Buy more, save more.</p>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '16px',
+        }}>
+          {tokenPacks.map((pack) => (
+            <div
+              key={pack.id}
+              style={{
+                borderRadius: '16px',
+                padding: '24px',
+                background: 'linear-gradient(160deg, rgba(17, 17, 30, 0.9) 0%, rgba(30, 30, 50, 0.6) 100%)',
+                border: '1px solid #333',
+                textAlign: 'center',
+                position: 'relative',
+                transition: 'border-color 0.3s, transform 0.3s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#6366f1';
+                e.currentTarget.style.transform = 'translateY(-4px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#333';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              {pack.discount && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-10px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'linear-gradient(135deg, #059669, #10b981)',
+                  color: '#fff',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '3px 12px',
+                  borderRadius: '999px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  whiteSpace: 'nowrap',
+                }}>
+                  <IconDiscount2 size={12} />
+                  {pack.discount}
+                </div>
+              )}
+
+              <div style={{ marginBottom: '4px' }}>
+                <IconCoins size={28} color="#818cf8" style={{ marginBottom: '8px' }} />
+              </div>
+
+              <div style={{ fontSize: '24px', fontWeight: 700, marginBottom: '2px' }}>{pack.amount}</div>
+              <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px' }}>tokens</div>
+
+              <div style={{ fontSize: '28px', fontWeight: 700, marginBottom: '4px' }}>{pack.price}</div>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '20px' }}>{pack.pricePerToken}/token</div>
+
+              <button
+                onClick={() => handlePurchase(pack.id)}
+                disabled={isProcessing}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(99, 102, 241, 0.4)',
+                  background: 'rgba(99, 102, 241, 0.1)',
+                  color: '#c7d2fe',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  transition: 'background 0.2s',
+                  opacity: isProcessing ? 0.6 : 1,
+                }}
+                onMouseEnter={(e) => { if (!isProcessing) e.currentTarget.style.background = 'rgba(99, 102, 241, 0.25)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)'; }}
+              >
+                {processingProduct === pack.id ? 'Processing...' : 'Buy Tokens'}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ============ SECTION 3: LORA TOKEN PACKS ============ */}
+      <div style={{ maxWidth: '1000px', margin: '0 auto 80px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <IconSparkles size={20} color="#a78bfa" />
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '1.5px' }}>LoRA Token Packs</span>
+          </div>
+          <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px' }}>LoRA Character Training</h2>
+          <p style={{ color: '#9ca3af' }}>Train custom AI models for your characters. Each token trains one LoRA model.</p>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '16px',
+        }}>
+          {loraTokenPacks.map((pack) => (
+            <div
+              key={pack.id}
+              style={{
+                borderRadius: '16px',
+                padding: '24px',
+                background: 'linear-gradient(160deg, rgba(17, 17, 30, 0.9) 0%, rgba(30, 30, 50, 0.6) 100%)',
+                border: '1px solid #333',
+                textAlign: 'center',
+                position: 'relative',
+                transition: 'border-color 0.3s, transform 0.3s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#a78bfa';
+                e.currentTarget.style.transform = 'translateY(-4px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#333';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              {pack.discount && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-10px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: 'linear-gradient(135deg, #059669, #10b981)',
+                  color: '#fff',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '3px 12px',
+                  borderRadius: '999px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  whiteSpace: 'nowrap',
+                }}>
+                  <IconDiscount2 size={12} />
+                  {pack.discount}
+                </div>
+              )}
+
+              <div style={{ marginBottom: '4px' }}>
+                <IconSparkles size={28} color="#a78bfa" style={{ marginBottom: '8px' }} />
+              </div>
+
+              <div style={{ fontSize: '24px', fontWeight: 700, marginBottom: '2px' }}>{pack.amount}</div>
+              <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px' }}>LoRA {parseInt(pack.amount) === 1 ? 'token' : 'tokens'}</div>
+
+              <div style={{ fontSize: '28px', fontWeight: 700, marginBottom: '4px' }}>{pack.price}</div>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '20px' }}>{pack.perUnit}</div>
+
+              <button
+                onClick={() => handlePurchase(pack.id)}
+                disabled={isProcessing}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(168, 85, 247, 0.4)',
+                  background: 'rgba(168, 85, 247, 0.1)',
+                  color: '#ddd6fe',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  transition: 'background 0.2s',
+                  opacity: isProcessing ? 0.6 : 1,
+                }}
+                onMouseEnter={(e) => { if (!isProcessing) e.currentTarget.style.background = 'rgba(168, 85, 247, 0.25)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)'; }}
+              >
+                {processingProduct === pack.id ? 'Processing...' : 'Buy LoRA Tokens'}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Info Footer */}
+      <div style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}>
+        <div style={{
+          padding: '24px',
+          borderRadius: '16px',
+          background: 'rgba(99, 102, 241, 0.08)',
+          border: '1px solid rgba(99, 102, 241, 0.2)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px' }}>
+            <IconShieldCheck size={20} color="#818cf8" />
+            <span style={{ fontWeight: 600, color: '#c7d2fe' }}>All Purchases Are One-Time</span>
+          </div>
+          <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>
+            No subscriptions, no recurring charges. Buy tokens as you need them. Any purchase upgrades you to a Paid Customer with full access to all features.
+          </p>
         </div>
       </div>
     </div>

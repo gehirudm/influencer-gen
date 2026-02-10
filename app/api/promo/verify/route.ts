@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     // Get the promo code document
     const promoRef = db.collection('promo-codes').doc(normalizedPromoCode);
-    
+
     // Use transaction to ensure atomic operations
     const result = await db.runTransaction(async (transaction) => {
       // First, check if the user has already used any promo code
@@ -43,53 +43,54 @@ export async function POST(request: NextRequest) {
       const promoUsageQuery = await transaction.get(
         userTokenHistoryRef.where('type', '==', 'promo')
       );
-      
+
       if (!promoUsageQuery.empty) {
         throw new Error("You have already redeemed a promo code on this account");
       }
 
       const promoDoc = await transaction.get(promoRef);
-      
+
       // Check if promo code exists
       if (!promoDoc.exists) {
         throw new Error("Invalid promo code");
       }
-      
+
       const promoData = promoDoc.data();
-      
+
       // Check if promo code is already used
       if (promoData?.isUsed) {
         throw new Error("This promo code has already been used");
       }
-      
+
       // Check if promo code is expired
       const expiresAt = new Date(promoData?.expiresAt);
       const now = new Date();
-      
+
       if (expiresAt < now) {
         throw new Error("This promo code has expired");
       }
-      
+
       // Get user's system document
       const userSystemRef = db.collection('users').doc(userId).collection('private').doc('system');
       const userSystemDoc = await transaction.get(userSystemRef);
-      
+
       if (!userSystemDoc.exists) {
         // Create system document if it doesn't exist
         transaction.set(userSystemRef, {
-          subscription_tier: "promo",
+          isPaidCustomer: false,
           tokens: promoData?.tokenAmount,
+          loraTokens: 0,
           lastUpdated: new Date().toISOString(),
           hasUsedPromoCode: true
         });
-        
+
         // Mark promo code as used
         transaction.update(promoRef, {
           isUsed: true,
           usedBy: userId,
           usedAt: new Date().toISOString()
         });
-        
+
         return {
           success: true,
           tokenAmount: promoData?.tokenAmount,
@@ -97,28 +98,26 @@ export async function POST(request: NextRequest) {
           message: "Promo code redeemed successfully!"
         };
       }
-      
+
       // Update existing user system document
       const userData = userSystemDoc.data();
       const currentTokens = userData?.tokens || 0;
       const tokenAmount = promoData?.tokenAmount;
-      const subscription_tier = userData?.subscription_tier && userData?.subscription_tier !== "promo"  ? userData?.subscription_tier : "promo";
-      
+
       // Mark promo code as used
       transaction.update(promoRef, {
         isUsed: true,
         usedBy: userId,
         usedAt: new Date().toISOString()
       });
-      
+
       // Add tokens to user's account
       transaction.update(userSystemRef, {
-        subscription_tier,
         tokens: currentTokens + tokenAmount,
         lastUpdated: new Date().toISOString(),
         hasUsedPromoCode: true
       });
-      
+
       // Add redemption record to user's history
       const historyRef = db.collection('users').doc(userId).collection('tokenHistory').doc();
       transaction.set(historyRef, {
@@ -128,7 +127,7 @@ export async function POST(request: NextRequest) {
         description: promoData?.description || "Promo code redemption",
         timestamp: new Date().toISOString()
       });
-      
+
       return {
         success: true,
         tokenAmount,
@@ -137,18 +136,18 @@ export async function POST(request: NextRequest) {
         message: "Promo code redeemed successfully!"
       };
     });
-    
+
     // Send credits notification after successful redemption
     if (result.success) {
       await createCreditsNotification(userId, result.tokenAmount, 'promo code');
     }
-    
+
     return NextResponse.json(result);
-    
+
   } catch (error: any) {
     console.error("Error redeeming promo code:", error);
-    
-    return NextResponse.json({ 
+
+    return NextResponse.json({
       success: false,
       error: error.message || "Failed to redeem promo code"
     }, { status: 400 });

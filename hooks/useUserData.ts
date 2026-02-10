@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { getFirestore, doc, onSnapshot } from 'firebase/firestore';
 import app from '@/lib/firebase';
-import { SUBSCRIPTION_TIERS_TYPE } from '@/lib/subscriptions';
 
 interface UserData {
   displayName: string | null;
@@ -18,7 +17,8 @@ interface UserPrivateData {
 
 interface UserSystemData {
   tokens: number;
-  subscription_tier?: SUBSCRIPTION_TIERS_TYPE;
+  loraTokens: number;
+  isPaidCustomer: boolean;
   isAdmin?: boolean;
 }
 
@@ -47,10 +47,11 @@ export function useUserData(): UserDataHookResult {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(currentUser === null ? false : true);
-      
+
       if (!currentUser) {
         setUserData(null);
         setPrivateData(null);
+        setSystemData(null);
         setLoading(false);
         return;
       }
@@ -110,15 +111,21 @@ export function useUserData(): UserDataHookResult {
         doc(db, 'users', user.uid, 'private', 'system'),
         (docSnapshot) => {
           if (docSnapshot.exists()) {
-            setSystemData(docSnapshot.data() as UserPrivateData);
+            const data = docSnapshot.data();
+            setSystemData({
+              tokens: data.tokens || 0,
+              loraTokens: data.loraTokens || 0,
+              isPaidCustomer: data.isPaidCustomer || false,
+              isAdmin: data.isAdmin || false,
+            });
           } else {
-            setSystemData({ tokens: 0 });
+            setSystemData({ tokens: 0, loraTokens: 0, isPaidCustomer: false });
           }
           setLoading(false);
         },
         (err) => {
-          console.error('Error fetching private user data:', err);
-          setError(`Error fetching private user data: ${err.message}`);
+          console.error('Error fetching system user data:', err);
+          setError(`Error fetching system user data: ${err.message}`);
           setLoading(false);
         }
       );

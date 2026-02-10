@@ -44,6 +44,24 @@
     font-size: 14px;
 }
 
+.loraIcon {
+    color: #a78bfa;
+    width: 18px;
+    height: 18px;
+}
+
+.loraValue {
+    color: #a78bfa;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
 .addButton {
     height: 28px;
     font-size: 12px;

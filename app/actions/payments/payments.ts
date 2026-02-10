@@ -5,21 +5,128 @@ import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { revalidatePath } from "next/cache";
 
-// Define subscription tiers and their prices
-const SUBSCRIPTION_TIERS = [
+// Product catalog
+export type ProductType = 'plan' | 'tokens' | 'loraTokens';
+
+export interface Product {
+    id: string;
+    name: string;
+    type: ProductType;
+    price: number;           // USD
+    tokens: number;           // Generation tokens included
+    loraTokens: number;       // LoRA tokens included
+    description: string;
+}
+
+// Plans
+const PLANS: Product[] = [
     {
-        name: "Basic Plan",
+        id: 'basic_plan',
+        name: 'Basic Plan',
+        type: 'plan',
         price: 39.99,
-        tokens: 1000
+        tokens: 1000,
+        loraTokens: 1,
+        description: '1,000 Tokens + 1 LoRA Token',
     },
     {
-        name: "Premium Plan",
+        id: 'premium_plan',
+        name: 'Premium Plan',
+        type: 'plan',
         price: 64.99,
-        tokens: 10000
-    }
+        tokens: 10000,
+        loraTokens: 2,
+        description: '10,000 Tokens + 2 LoRA Tokens',
+    },
 ];
+
+// Token packs (minimum 1000 tokens)
+export const TOKEN_PACKS: Product[] = [
+    {
+        id: 'tokens_1000',
+        name: '1,000 Tokens',
+        type: 'tokens',
+        price: 10,
+        tokens: 1000,
+        loraTokens: 0,
+        description: '1,000 generation tokens',
+    },
+    {
+        id: 'tokens_2000',
+        name: '2,000 Tokens',
+        type: 'tokens',
+        price: 18,
+        tokens: 2000,
+        loraTokens: 0,
+        description: '2,000 generation tokens — 10% off',
+    },
+    {
+        id: 'tokens_5000',
+        name: '5,000 Tokens',
+        type: 'tokens',
+        price: 40,
+        tokens: 5000,
+        loraTokens: 0,
+        description: '5,000 generation tokens — 20% off',
+    },
+    {
+        id: 'tokens_10000',
+        name: '10,000 Tokens',
+        type: 'tokens',
+        price: 70,
+        tokens: 10000,
+        loraTokens: 0,
+        description: '10,000 generation tokens — 30% off',
+    },
+];
+
+// LoRA token packs
+export const LORA_TOKEN_PACKS: Product[] = [
+    {
+        id: 'lora_1',
+        name: '1 LoRA Token',
+        type: 'loraTokens',
+        price: 60,
+        tokens: 0,
+        loraTokens: 1,
+        description: '1 LoRA character training token',
+    },
+    {
+        id: 'lora_2',
+        name: '2 LoRA Tokens',
+        type: 'loraTokens',
+        price: 108,
+        tokens: 0,
+        loraTokens: 2,
+        description: '2 LoRA tokens — 10% off',
+    },
+    {
+        id: 'lora_3',
+        name: '3 LoRA Tokens',
+        type: 'loraTokens',
+        price: 144,
+        tokens: 0,
+        loraTokens: 3,
+        description: '3 LoRA tokens — 20% off',
+    },
+    {
+        id: 'lora_5',
+        name: '5 LoRA Tokens',
+        type: 'loraTokens',
+        price: 210,
+        tokens: 0,
+        loraTokens: 5,
+        description: '5 LoRA tokens — 30% off',
+    },
+];
+
+// All products combined for lookup
+const ALL_PRODUCTS: Product[] = [...PLANS, ...TOKEN_PACKS, ...LORA_TOKEN_PACKS];
+
+export async function getProductById(productId: string): Promise<Product | undefined> {
+    return ALL_PRODUCTS.find(p => p.id === productId);
+}
 
 // NOW Payments API key
 const NOW_PAYMENTS_API_KEY = process.env.NOWPAYMENTS_API_KEY;
@@ -36,7 +143,7 @@ type CreateInvoiceResult = {
 
 export async function createInvoice(formData: FormData): Promise<CreateInvoiceResult> {
     try {
-        const tier = formData.get('tier') as string;
+        const productId = formData.get('productId') as string;
         const cookieStore = await cookies();
 
         // Initialize Firebase Admin
@@ -47,20 +154,20 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
         const sessionCookie = cookieStore.get('__session')?.value;
 
         // Validate required parameters
-        if (!tier || !sessionCookie) {
+        if (!productId || !sessionCookie) {
             return {
                 success: false,
-                error: "Subscription tier and authentication are required"
+                error: "Product selection and authentication are required"
             };
         }
 
-        const requestedTier = SUBSCRIPTION_TIERS.find((tierItem) => tierItem.name === tier);
+        const product = await getProductById(productId);
 
-        // Validate tier
-        if (!requestedTier) {
+        // Validate product
+        if (!product) {
             return {
                 success: false,
-                error: "Invalid subscription tier"
+                error: "Invalid product selection"
             };
         }
 
@@ -83,9 +190,12 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
         // Create the order document in Firestore
         const orderData = {
             userId,
-            tier,
-            amount: requestedTier.price,
-            tokens: requestedTier.tokens,
+            productId: product.id,
+            productType: product.type,
+            productName: product.name,
+            amount: product.price,
+            tokens: product.tokens,
+            loraTokens: product.loraTokens,
             status: 'pending',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -104,15 +214,7 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
             };
         }
 
-        console.log({
-            price_amount: requestedTier.price,
-            price_currency: "USD",
-            order_id: orderId,
-            order_description: `Subscription to ${requestedTier.name}`,
-            ipn_callback_url: `${process.env.NODE_ENV === 'production' ? "https://" : ""}${process.env.NEXT_PUBLIC_APP_URL}/api/payments/callback`,
-            success_url: `${process.env.NODE_ENV === 'production' ? "https://" : ""}${process.env.NEXT_PUBLIC_APP_URL}/pricing/?status=success?orderId=${orderId}`,
-            cancel_url: `${process.env.NODE_ENV === 'production' ? "https://" : ""}${process.env.NEXT_PUBLIC_APP_URL}/pricing/?status=cancel?orderId=${orderId}`,
-        })
+        const baseUrl = `${process.env.NODE_ENV === 'production' ? "https://" : ""}${process.env.NEXT_PUBLIC_APP_URL}`;
 
         const invoiceResponse = await fetch(NOW_PAYMENTS_API_URL, {
             method: "POST",
@@ -121,13 +223,13 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
                 "x-api-key": NOW_PAYMENTS_API_KEY
             },
             body: JSON.stringify({
-                price_amount: requestedTier.price,
+                price_amount: product.price,
                 price_currency: "USD",
                 order_id: orderId,
-                order_description: `Subscription to ${requestedTier.name}`,
-                ipn_callback_url: `${process.env.NODE_ENV === 'production' ? "https://" : ""}${process.env.NEXT_PUBLIC_APP_URL}/api/payments/callback`,
-                success_url: `${process.env.NODE_ENV === 'production' ? "https://" : ""}${process.env.NEXT_PUBLIC_APP_URL}/pricing/?status=success?orderId=${orderId}`,
-                cancel_url: `${process.env.NODE_ENV === 'production' ? "https://" : ""}${process.env.NEXT_PUBLIC_APP_URL}/pricing/?status=cancel?orderId=${orderId}`,
+                order_description: `${product.name} — ${product.description}`,
+                ipn_callback_url: `${baseUrl}/api/payments/callback`,
+                success_url: `${baseUrl}/pricing/?status=success&orderId=${orderId}`,
+                cancel_url: `${baseUrl}/pricing/?status=cancel&orderId=${orderId}`,
             })
         });
 
@@ -135,7 +237,6 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
             const errorData = await invoiceResponse.json();
             console.error("NOW Payments API error:", errorData);
 
-            // Update order with error status
             await orderRef.set({
                 ...orderData,
                 status: 'failed',
@@ -149,8 +250,6 @@ export async function createInvoice(formData: FormData): Promise<CreateInvoiceRe
         }
 
         const invoiceData = await invoiceResponse.json();
-
-        console.log(invoiceData);
 
         // Update order with invoice details
         await orderRef.set({
@@ -184,7 +283,6 @@ export async function createInvoiceAndRedirect(formData: FormData) {
     if (result.success && result.invoiceUrl) {
         redirect(result.invoiceUrl);
     } else {
-        // Redirect to error page with the error message
         redirect(`/pricing?error=${encodeURIComponent(result.error || 'Unknown error')}`);
     }
 }

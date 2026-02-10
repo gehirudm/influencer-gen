@@ -12,6 +12,8 @@ import {
     IconUserPlus,
     IconShirt,
     IconShoppingBag,
+    IconCoins,
+    IconSparkles,
 } from '@tabler/icons-react';
 import {
     Box,
@@ -26,6 +28,7 @@ import {
     Avatar,
     ActionIcon,
     Anchor,
+    Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
@@ -43,9 +46,22 @@ const data = [
     // { link: '/auth?auth_mode=signup', title: 'Sign Up', icon: IconUserPlus },
 ];
 
+const tokenBadgeStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+    padding: '4px 10px',
+    borderRadius: '999px',
+    fontSize: '13px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    textDecoration: 'none',
+    transition: 'opacity 0.2s',
+};
+
 export function Header({ children }: { children?: React.ReactNode }) {
     const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
-    const { userData, loading, error } = useUserData();
+    const { userData, systemData, loading, error } = useUserData();
 
     const userLoggedIn = useMemo(() => !loading && userData != null, [loading, userData]);
 
@@ -94,6 +110,33 @@ export function Header({ children }: { children?: React.ReactNode }) {
                                 <Anchor href='/auth'><Button size='md' radius="xl">Login</Button></Anchor>
                             </>}
                             {userLoggedIn && <>
+                                {/* Token Balances */}
+                                {systemData && (
+                                    <Group gap={6} visibleFrom="sm">
+                                        <Tooltip label={`${systemData.tokens.toLocaleString()} Generation Tokens`} withArrow>
+                                            <Link href="/pricing" style={{
+                                                ...tokenBadgeStyle,
+                                                background: 'rgba(99, 102, 241, 0.15)',
+                                                border: '1px solid rgba(99, 102, 241, 0.3)',
+                                                color: '#c7d2fe',
+                                            }}>
+                                                <IconCoins size={14} />
+                                                <span>{systemData.tokens.toLocaleString()}</span>
+                                            </Link>
+                                        </Tooltip>
+                                        <Tooltip label={`${systemData.loraTokens} LoRA Training Tokens`} withArrow>
+                                            <Link href="/pricing" style={{
+                                                ...tokenBadgeStyle,
+                                                background: 'rgba(168, 85, 247, 0.15)',
+                                                border: '1px solid rgba(168, 85, 247, 0.3)',
+                                                color: '#ddd6fe',
+                                            }}>
+                                                <IconSparkles size={14} />
+                                                <span>{systemData.loraTokens}</span>
+                                            </Link>
+                                        </Tooltip>
+                                    </Group>
+                                )}
                                 <Link href="/account">
                                     {userData?.displayName ?
                                         <Avatar color="initials" radius="xl" size="md">{userData.displayName.split(" ").map(word => word[0].toUpperCase()).join("")}</Avatar> :
@@ -151,19 +194,41 @@ export function Header({ children }: { children?: React.ReactNode }) {
 
                     <Divider my="sm" />
 
-                    <Group justify="center" p="md">
-                        {/* {!userLoggedIn && <>
-                            <Link
-                                href="/auth?auth_mode=signup"
-                                className={classes.navLink}
-                            >
-                                Sign Up
+                    {/* Mobile Token Balances */}
+                    {userLoggedIn && systemData && (
+                        <div style={{ padding: '0 16px', marginBottom: '12px' }}>
+                            <Link href="/pricing" onClick={closeDrawer} style={{ textDecoration: 'none' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    gap: '12px',
+                                    flexWrap: 'wrap',
+                                }}>
+                                    <div style={{
+                                        ...tokenBadgeStyle,
+                                        background: 'rgba(99, 102, 241, 0.15)',
+                                        border: '1px solid rgba(99, 102, 241, 0.3)',
+                                        color: '#c7d2fe',
+                                        padding: '8px 14px',
+                                    }}>
+                                        <IconCoins size={16} />
+                                        <span>{systemData.tokens.toLocaleString()} Tokens</span>
+                                    </div>
+                                    <div style={{
+                                        ...tokenBadgeStyle,
+                                        background: 'rgba(168, 85, 247, 0.15)',
+                                        border: '1px solid rgba(168, 85, 247, 0.3)',
+                                        color: '#ddd6fe',
+                                        padding: '8px 14px',
+                                    }}>
+                                        <IconSparkles size={16} />
+                                        <span>{systemData.loraTokens} LoRA</span>
+                                    </div>
+                                </div>
                             </Link>
-                            <Anchor href='/auth' onClick={closeDrawer}>
-                                <Button size='md' radius="xl">Login</Button>
-                            </Anchor>
-                        </>
-                        } */}
+                        </div>
+                    )}
+
+                    <Group justify="center" p="md">
                         {userLoggedIn &&
                             <Group>
                                 <Link href="/account" onClick={closeDrawer}>

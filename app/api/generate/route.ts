@@ -4,7 +4,7 @@ import { getAuth } from 'firebase-admin/auth';
 import adminApp from '@/lib/firebaseAdmin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
-import { checkGenerateRequestUserAllowance } from '@/lib/subscriptions';
+import { checkGenerateRequestUserAllowance, getUserAccessLevel } from '@/lib/subscriptions';
 import { calculateRequestCost } from '@/lib/cost';
 import { verifyRequestCookies } from '@/lib/requestUtils';
 
@@ -78,9 +78,9 @@ async function checkShouldAddWatermark(userId: string, db: FirebaseFirestore.Fir
     }
 
     const userData = userDoc.data();
-    const userTier = userData?.subscription_tier || "free";
+    const isPaidCustomer = userData?.isPaidCustomer || false;
 
-    return userTier === "free";
+    return !isPaidCustomer;
 }
 
 async function handleBaseAndMaskImages(storage: any, userId: string, jobId: string, cleanedBody: Partial<StableDiffusionRequestInput>) {
@@ -243,9 +243,9 @@ export async function POST(request: NextRequest) {
         }
 
         const userData = userSystemDoc.data();
-        const userSubTier = userData?.subscription_tier || "free";
+        const accessLevel = getUserAccessLevel(userData?.isPaidCustomer, userData?.isAdmin);
 
-        if (!checkGenerateRequestUserAllowance(cleanedBody, userSubTier)) {
+        if (!checkGenerateRequestUserAllowance(cleanedBody, accessLevel)) {
             return NextResponse.json(
                 { error: 'Unauthorized: Subscription required' },
                 { status: 401 }
@@ -265,7 +265,7 @@ export async function POST(request: NextRequest) {
             ...cleanedBody,
             base_img: cleanedBody.base_img ? 'base_img present' : null,
             mask_img: cleanedBody.mask_img ? 'mask_img present' : null,
-            userTier: userSubTier,
+            userAccessLevel: accessLevel,
         });
 
         const jobData = await generateImage({

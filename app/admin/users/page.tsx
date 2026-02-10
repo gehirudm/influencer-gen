@@ -46,58 +46,58 @@ export default function UsersManagementPage() {
         setFilterOptions,
         makeUserAdmin,
         updateUserTokens,
-        updateUserSubscription
+        updateUserPaidStatus
     } = useUserManagement();
 
     // UI state
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [filterField, setFilterField] = useState<string>('email');
     const [adminFilter, setAdminFilter] = useState<string | null>(null);
-    const [subscriptionFilter, setSubscriptionFilter] = useState<string | null>(null);
-    
+    const [paidFilter, setPaidFilter] = useState<string | null>(null);
+
     // Modal states
     const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [editTokens, setEditTokens] = useState<number>(0);
-    const [editSubscription, setEditSubscription] = useState<string | null>(null);
+    const [editPaidStatus, setEditPaidStatus] = useState<boolean>(false);
     const [isUpdating, setIsUpdating] = useState(false);
-    
+
     // Admin toggle confirmation modal
     const [adminModalOpened, { open: openAdminModal, close: closeAdminModal }] = useDisclosure(false);
-    const [userToToggleAdmin, setUserToToggleAdmin] = useState<{id: string, isAdmin: boolean} | null>(null);
+    const [userToToggleAdmin, setUserToToggleAdmin] = useState<{ id: string, isAdmin: boolean } | null>(null);
 
     // Apply filters when search is submitted
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         setFilterOptions({
             ...filterOptions,
             searchQuery: searchQuery,
             filterField: filterField as any
         });
-        
+
         fetchUsers(true);
     };
 
     // Apply admin and subscription filters
     useEffect(() => {
         const newFilterOptions: any = { ...filterOptions };
-        
+
         if (adminFilter) {
             newFilterOptions.isAdmin = adminFilter === 'admin';
         } else {
             delete newFilterOptions.isAdmin;
         }
-        
-        if (subscriptionFilter && subscriptionFilter !== 'all') {
-            newFilterOptions.subscriptionTier = subscriptionFilter === 'none' ? null : subscriptionFilter;
+
+        if (paidFilter && paidFilter !== 'all') {
+            newFilterOptions.isPaidCustomer = paidFilter === 'paid';
         } else {
-            delete newFilterOptions.subscriptionTier;
+            delete newFilterOptions.isPaidCustomer;
         }
-        
+
         setFilterOptions(newFilterOptions);
         fetchUsers(true);
-    }, [adminFilter, subscriptionFilter]);
+    }, [adminFilter, paidFilter]);
 
     // Toggle sort direction
     const toggleSortDirection = () => {
@@ -110,7 +110,7 @@ export default function UsersManagementPage() {
     const handleEditUser = (user: any) => {
         setSelectedUser(user);
         setEditTokens(user.tokens);
-        setEditSubscription(user.subscriptionTier);
+        setEditPaidStatus(user.isPaidCustomer);
         openEditModal();
     };
 
@@ -123,21 +123,21 @@ export default function UsersManagementPage() {
     // Confirm admin status change
     const confirmAdminChange = async () => {
         if (!userToToggleAdmin) return;
-        
+
         setIsUpdating(true);
         try {
             const result = await makeUserAdmin(userToToggleAdmin.id, userToToggleAdmin.isAdmin);
-            
+
             if (!result.success) {
                 throw new Error(result.error);
             }
-            
+
             notifications.show({
                 title: 'Success',
                 message: `User admin status updated successfully`,
                 color: 'green',
             });
-            
+
             closeAdminModal();
         } catch (err: any) {
             notifications.show({
@@ -153,7 +153,7 @@ export default function UsersManagementPage() {
     // Save user changes
     const saveUserChanges = async () => {
         if (!selectedUser) return;
-        
+
         setIsUpdating(true);
         try {
             // Update tokens if changed
@@ -163,24 +163,24 @@ export default function UsersManagementPage() {
                     throw new Error(tokenResult.error);
                 }
             }
-            
-            // Update subscription if changed
-            if (editSubscription !== selectedUser.subscriptionTier) {
-                const subscriptionResult = await updateUserSubscription(
-                    selectedUser.id, 
-                    editSubscription as 'Basic Plan' | 'Premium Plan' | 'promo' | null
+
+            // Update paid status if changed
+            if (editPaidStatus !== selectedUser.isPaidCustomer) {
+                const paidResult = await updateUserPaidStatus(
+                    selectedUser.id,
+                    editPaidStatus
                 );
-                if (!subscriptionResult.success) {
-                    throw new Error(subscriptionResult.error);
+                if (!paidResult.success) {
+                    throw new Error(paidResult.error);
                 }
             }
-            
+
             notifications.show({
                 title: 'Success',
                 message: 'User updated successfully',
                 color: 'green',
             });
-            
+
             closeEditModal();
         } catch (err: any) {
             notifications.show({
@@ -204,19 +204,10 @@ export default function UsersManagementPage() {
     };
 
     // Render subscription badge
-    const renderSubscriptionBadge = (tier: string | null) => {
-        if (!tier) return <Badge color="gray">None</Badge>;
-        
-        switch (tier) {
-            case 'Basic Plan':
-                return <Badge color="blue">Basic</Badge>;
-            case 'Premium Plan':
-                return <Badge color="violet">Premium</Badge>;
-            case 'promo':
-                return <Badge color="orange">Promo</Badge>;
-            default:
-                return <Badge color="gray">{tier}</Badge>;
-        }
+    const renderPaidBadge = (isPaidCustomer: boolean) => {
+        return isPaidCustomer
+            ? <Badge color="green">Paid</Badge>
+            : <Badge color="gray">Free</Badge>;
     };
 
     // Render table rows
@@ -231,45 +222,45 @@ export default function UsersManagementPage() {
                     </div>
                 </Group>
             </Table.Td>
-            
+
             <Table.Td>
                 <Text size="sm">{user.email || 'No Email'}</Text>
             </Table.Td>
-            
+
             <Table.Td>
                 <Group gap="xs">
                     <IconCoin size={16} />
                     <Text>{user.tokens}</Text>
                 </Group>
             </Table.Td>
-            
+
             <Table.Td>
-                {renderSubscriptionBadge(user.subscriptionTier)}
+                {renderPaidBadge(user.isPaidCustomer)}
             </Table.Td>
-            
+
             <Table.Td>
                 <Badge color={user.isAdmin ? 'green' : 'gray'}>
                     {user.isAdmin ? 'Admin' : 'User'}
                 </Badge>
             </Table.Td>
-            
+
             <Table.Td>
                 <Text size="sm">{formatDate(user.registeredDate)}</Text>
             </Table.Td>
-            
+
             <Table.Td>
                 <Group gap={8} justify="flex-end">
                     <Tooltip label="Edit User">
-                        <ActionIcon 
-                            variant="subtle" 
+                        <ActionIcon
+                            variant="subtle"
                             onClick={() => handleEditUser(user)}
                         >
                             <IconEdit size={16} />
                         </ActionIcon>
                     </Tooltip>
-                    
+
                     <Tooltip label={user.isAdmin ? "Remove Admin" : "Make Admin"}>
-                        <ActionIcon 
+                        <ActionIcon
                             variant="subtle"
                             color={user.isAdmin ? "red" : "blue"}
                             onClick={() => handleToggleAdmin(user.id, user.isAdmin)}
@@ -285,18 +276,18 @@ export default function UsersManagementPage() {
     return (
         <Container size="lg" py="xl">
             <Title order={2} mb="md">User Management</Title>
-            
+
             {/* Filters and Search */}
             <Paper withBorder p="md" mb="xl">
                 <Group justify="space-between" mb="md">
                     <Title order={4}>Filters</Title>
-                    <Button 
-                        variant="subtle" 
+                    <Button
+                        variant="subtle"
                         leftSection={<IconAdjustments size={16} />}
                         onClick={() => {
                             setSearchQuery('');
                             setAdminFilter(null);
-                            setSubscriptionFilter(null);
+                            setPaidFilter(null);
                             setFilterOptions({});
                             fetchUsers(true);
                         }}
@@ -304,7 +295,7 @@ export default function UsersManagementPage() {
                         Reset Filters
                     </Button>
                 </Group>
-                
+
                 <Stack>
                     <Group grow>
                         {/* Search Form */}
@@ -316,7 +307,7 @@ export default function UsersManagementPage() {
                                     onChange={(e) => setSearchQuery(e.currentTarget.value)}
                                     leftSection={<IconSearch size={16} />}
                                 />
-                                
+
                                 <Select
                                     value={filterField}
                                     onChange={(value) => setFilterField(value || 'email')}
@@ -326,12 +317,12 @@ export default function UsersManagementPage() {
                                         { value: 'displayName', label: 'Display Name' }
                                     ]}
                                 />
-                                
+
                                 <Button type="submit">Search</Button>
                             </Group>
                         </form>
                     </Group>
-                    
+
                     <Group grow>
                         <Select
                             label="Admin Status"
@@ -344,24 +335,22 @@ export default function UsersManagementPage() {
                                 { value: 'user', label: 'Regular Users Only' }
                             ]}
                         />
-                        
+
                         <Select
-                            label="Subscription"
-                            placeholder="Filter by subscription"
-                            value={subscriptionFilter}
-                            onChange={setSubscriptionFilter}
+                            label="Paid Status"
+                            placeholder="Filter by paid status"
+                            value={paidFilter}
+                            onChange={setPaidFilter}
                             data={[
-                                { value: 'all', label: 'All Subscriptions' },
-                                { value: 'none', label: 'No Subscription' },
-                                { value: 'Basic Plan', label: 'Basic Plan' },
-                                { value: 'Premium Plan', label: 'Premium Plan' },
-                                { value: 'promo', label: 'Promo' }
+                                { value: 'all', label: 'All Users' },
+                                { value: 'paid', label: 'Paid Customers' },
+                                { value: 'free', label: 'Free Users' }
                             ]}
                         />
                     </Group>
                 </Stack>
             </Paper>
-            
+
             {/* Users Table */}
             <Paper withBorder p="md" mb="md">
                 <Group justify="space-between" mb="md">
@@ -369,26 +358,26 @@ export default function UsersManagementPage() {
                         <Title order={4}>Users</Title>
                         <Text c="dimmed" size="sm">({totalUsers} total)</Text>
                     </Group>
-                    
+
                     <Button
                         variant="subtle"
                         onClick={toggleSortDirection}
                         rightSection={
-                            sortDirection === 'asc' 
-                                ? <IconChevronUp size={16} /> 
+                            sortDirection === 'asc'
+                                ? <IconChevronUp size={16} />
                                 : <IconChevronDown size={16} />
                         }
                     >
                         Registration Date: {sortDirection === 'asc' ? 'Oldest First' : 'Newest First'}
                     </Button>
                 </Group>
-                
+
                 {error && (
                     <Alert color="red" mb="md" title="Error">
                         {error}
                     </Alert>
                 )}
-                
+
                 {loading ? (
                     <Group justify="center" p="xl">
                         <Loader />
@@ -406,7 +395,7 @@ export default function UsersManagementPage() {
                                         <Table.Th>User</Table.Th>
                                         <Table.Th>Email</Table.Th>
                                         <Table.Th>Tokens</Table.Th>
-                                        <Table.Th>Subscription</Table.Th>
+                                        <Table.Th>Status</Table.Th>
                                         <Table.Th>Role</Table.Th>
                                         <Table.Th>Registered</Table.Th>
                                         <Table.Th />
@@ -415,11 +404,11 @@ export default function UsersManagementPage() {
                                 <Table.Tbody>{rows}</Table.Tbody>
                             </Table>
                         </Table.ScrollContainer>
-                        
+
                         {hasMore && (
                             <Group justify="center" mt="md">
-                                <Button 
-                                    onClick={loadMoreUsers} 
+                                <Button
+                                    onClick={loadMoreUsers}
                                     loading={loadingMore}
                                     disabled={loadingMore || !hasMore}
                                     variant="outline"
@@ -431,7 +420,7 @@ export default function UsersManagementPage() {
                     </>
                 )}
             </Paper>
-            
+
             {/* Edit User Modal */}
             <Modal
                 opened={editModalOpened}
@@ -450,9 +439,9 @@ export default function UsersManagementPage() {
                                 <Text size="sm">{selectedUser.email}</Text>
                             </div>
                         </Group>
-                        
+
                         <Divider my="xs" />
-                        
+
                         <NumberInput
                             label="Tokens"
                             description="Adjust user's token balance"
@@ -462,26 +451,20 @@ export default function UsersManagementPage() {
                             max={100000}
                             leftSection={<IconCoin size={16} />}
                         />
-                        
-                        <Select
-                            label="Subscription Tier"
-                            description="Change user's subscription level"
-                            value={editSubscription}
-                            onChange={setEditSubscription}
-                            data={[
-                                { value: '', label: 'No Subscription' },
-                                { value: 'Basic Plan', label: 'Basic Plan' },
-                                { value: 'Premium Plan', label: 'Premium Plan' },
-                                { value: 'promo', label: 'Promo' }
-                            ]}
+
+                        <Switch
+                            label="Paid Customer"
+                            description="Toggle user's paid status"
+                            checked={editPaidStatus}
+                            onChange={(event) => setEditPaidStatus(event.currentTarget.checked)}
                         />
-                        
+
                         <Group justify="flex-end" mt="md">
                             <Button variant="default" onClick={closeEditModal}>
                                 Cancel
                             </Button>
-                            <Button 
-                                onClick={saveUserChanges} 
+                            <Button
+                                onClick={saveUserChanges}
                                 loading={isUpdating}
                             >
                                 Save Changes
@@ -490,7 +473,7 @@ export default function UsersManagementPage() {
                     </Stack>
                 )}
             </Modal>
-            
+
             {/* Admin Toggle Confirmation Modal */}
             <Modal
                 opened={adminModalOpened}
@@ -506,14 +489,14 @@ export default function UsersManagementPage() {
                 <Text mb="md">
                     Are you sure you want to {userToToggleAdmin?.isAdmin ? "grant admin privileges to" : "remove admin privileges from"} this user?
                 </Text>
-                
+
                 <Alert color={userToToggleAdmin?.isAdmin ? "green" : "red"} mb="md">
-                    {userToToggleAdmin?.isAdmin 
+                    {userToToggleAdmin?.isAdmin
                         ? "This will give the user full administrative access to the system."
                         : "This will remove the user's administrative access to the system."
                     }
                 </Alert>
-                
+
                 <Group justify="flex-end" mt="xl">
                     <Button variant="default" onClick={closeAdminModal}>
                         Cancel

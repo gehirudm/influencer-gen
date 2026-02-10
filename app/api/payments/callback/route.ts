@@ -4,18 +4,6 @@ import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { createHmac } from 'crypto';
 import { createPurchaseNotification } from '@/app/actions/notifications/notifications';
 
-// Define subscription tiers and their token amounts
-const SUBSCRIPTION_CREDITS = {
-  basic: {
-    tokens: 1000,
-    name: "Basic Plan"
-  },
-  premium: {
-    tokens: 10000,
-    name: "Premium Plan"
-  }
-};
-
 export async function POST(request: NextRequest) {
   if (!process.env.NOWPAYMENTS_IPN_KEY) {
     console.error("NOW Payments API key not configured");
@@ -23,20 +11,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Initialize Firestore
     const db = getFirestore(firebaseApp);
-
-    // Get the webhook payload
     const webhookData = await request.json();
 
     const bodySign = getCallbackBodySignature(webhookData, process.env.NOWPAYMENTS_IPN_KEY);
     const headerSign = request.headers.get('x-nowpayments-sig');
 
     if (!headerSign || bodySign !== headerSign) {
-      console.error("Invalid signature:", {
-        headerSign,
-        bodySign
-      });
+      console.error("Invalid signature:", { headerSign, bodySign });
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
@@ -44,7 +26,6 @@ export async function POST(request: NextRequest) {
 
     // Check if payment is completed
     if (webhookData.payment_status !== 'finished') {
-      // Update order status but don't process further
       await updateOrderStatus(db, webhookData.order_id, webhookData.payment_status, webhookData);
       return NextResponse.json({ success: true });
     }
@@ -59,27 +40,53 @@ export async function POST(request: NextRequest) {
     }
 
     const orderData = orderDoc.data() as FirebaseFirestore.DocumentData;
+    const { userId, tokens, loraTokens, productName, productType } = orderData;
 
-    // Get subscription tier and user ID from the order
-    const { tier, userId } = orderData;
+    // Build the update object
+    const updateData: Record<string, any> = {
+      isPaidCustomer: true,
+      updatedAt: new Date().toISOString(),
+    };
 
-    // Get the token amount for the subscription tier
-    const subscriptionDetails = SUBSCRIPTION_CREDITS[tier as keyof typeof SUBSCRIPTION_CREDITS];
+    // Add tokens if applicable
+    if (tokens && tokens > 0) {
+      updateData.tokens = FieldValue.increment(tokens);
+    }
 
-    // Update user's subscription tier in system document
-    db.collection('users').doc(userId).collection('private').doc('system').set({
-      tokens: FieldValue.increment(subscriptionDetails.tokens),
-      subscription_tier: tier,
-      updatedAt: new Date().toISOString()
-    });
+    // Add LoRA tokens if applicable
+    if (loraTokens && loraTokens > 0) {
+      updateData.loraTokens = FieldValue.increment(loraTokens);
+    }
+
+    // Update user's system document
+    const userSystemRef = db.collection('users').doc(userId).collection('private').doc('system');
+    const userSystemDoc = await userSystemRef.get();
+
+    if (userSystemDoc.exists) {
+      await userSystemRef.update(updateData);
+    } else {
+      // If system doc doesn't exist, set it with defaults
+      await userSystemRef.set({
+        tokens: tokens || 0,
+        loraTokens: loraTokens || 0,
+        isPaidCustomer: true,
+        updatedAt: new Date().toISOString(),
+      });
+    }
 
     // Update the order status to completed
     await updateOrderStatus(db, webhookData.order_id, 'completed', webhookData);
 
-    // Send purchase notification
-    await createPurchaseNotification(userId, subscriptionDetails.name, subscriptionDetails.tokens);
+    // Build notification message
+    const tokenParts: string[] = [];
+    if (tokens && tokens > 0) tokenParts.push(`${tokens} Tokens`);
+    if (loraTokens && loraTokens > 0) tokenParts.push(`${loraTokens} LoRA Token${loraTokens > 1 ? 's' : ''}`);
+    const creditDescription = tokenParts.join(' + ');
 
-    console.log(`Successfully processed payment for order ${webhookData.order_id}. Added ${subscriptionDetails.tokens} tokens to user ${userId}`);
+    // Send purchase notification
+    await createPurchaseNotification(userId, productName || 'Purchase', tokens || 0);
+
+    console.log(`Successfully processed payment for order ${webhookData.order_id}. Added ${creditDescription} to user ${userId}`);
 
     return NextResponse.json({
       success: true,
@@ -92,7 +99,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to update order status
 async function updateOrderStatus(
   db: FirebaseFirestore.Firestore,
   orderId: string,

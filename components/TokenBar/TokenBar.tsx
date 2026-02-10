@@ -2,7 +2,7 @@
 
 import { useUserData } from '@/hooks/useUserData';
 import { Button, Group, Skeleton } from '@mantine/core';
-import { IconCoins } from '@tabler/icons-react';
+import { IconCoins, IconSparkles } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import classes from './TokenBar.module.css';
 
@@ -23,7 +23,7 @@ export function TokenBar() {
         <div className={classes.tokenBar}>
             <div className={classes.content}>
                 <div className={classes.spacer} />
-                
+
                 <div className={classes.tokenCount}>
                     <IconCoins className={classes.tokenIcon} />
                     <span>Tokens:</span>
@@ -35,7 +35,21 @@ export function TokenBar() {
                         </span>
                     )}
                 </div>
-                
+
+                <div className={classes.divider} />
+
+                <div className={classes.tokenCount}>
+                    <IconSparkles className={classes.loraIcon} />
+                    <span>LoRA:</span>
+                    {loading ? (
+                        <Skeleton height={16} width={30} className={classes.skeleton} />
+                    ) : (
+                        <span className={classes.loraValue}>
+                            {systemData?.loraTokens ?? 0}
+                        </span>
+                    )}
+                </div>
+
                 <Button
                     onClick={handleAddTokens}
                     size="xs"

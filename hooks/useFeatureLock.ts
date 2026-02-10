@@ -1,5 +1,5 @@
 import { useUserData } from '@/hooks/useUserData';
-import { FeatureId, SUBSCRIPTION_FEATURES } from '@/lib/subscriptions';
+import { FeatureId, SUBSCRIPTION_FEATURES, getUserAccessLevel } from '@/lib/subscriptions';
 import { useMemo } from 'react';
 
 export function useFeatureAccess(featureId: FeatureId): {
@@ -14,8 +14,8 @@ export function useFeatureAccess(featureId: FeatureId): {
 
 		if (systemData.isAdmin) return true;
 
-		const tier = systemData.subscription_tier || 'free';
-		const features = SUBSCRIPTION_FEATURES[tier] ?? SUBSCRIPTION_FEATURES.free;
+		const accessLevel = getUserAccessLevel(systemData.isPaidCustomer, systemData.isAdmin);
+		const features = SUBSCRIPTION_FEATURES[accessLevel] ?? SUBSCRIPTION_FEATURES.free;
 
 		return features.includes(featureId);
 	}, [featureId, systemData, loading, error]);

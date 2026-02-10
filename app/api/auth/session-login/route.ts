@@ -4,7 +4,6 @@ import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import csrf from "csrf";
 import { serialize } from 'cookie';
-import { TOKEN_AMOUNT_PER_SUBSCRIPTION } from '@/lib/subscriptions';
 import { createWelcomeNotification } from '@/app/actions/notifications/notifications';
 
 const tokens = new csrf();
@@ -94,13 +93,14 @@ async function ensureUserDocumentExists(decoded: DecodedIdToken): Promise<string
         await userRef.set(userData);
 
         await userRef.collection('private').doc('system').set({
-            tokens: TOKEN_AMOUNT_PER_SUBSCRIPTION.free,
-            subscription_tier: "free",
+            tokens: 100,
+            loraTokens: 0,
+            isPaidCustomer: false,
             isAdmin: false
         });
 
         console.log(`User document created for user ID: ${userId}`);
-        
+
         return "auth/landing";
     }
 

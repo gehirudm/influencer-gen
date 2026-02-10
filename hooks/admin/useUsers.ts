@@ -28,26 +28,28 @@ interface UserData {
     avatarUrl: string | null;
     registeredDate: string;
     lastLoginAt: string | null;
-    subscriptionTier: 'Basic Plan' | 'Premium Plan' | 'promo' | null;
+    isPaidCustomer: boolean;
     tokens: number;
+    loraTokens: number;
     isAdmin: boolean;
 }
 
 // Define system data interface
 interface SystemData {
     tokens: number;
+    loraTokens: number;
     isAdmin: boolean;
-    subscriptionTier: 'Basic Plan' | 'Premium Plan' | 'promo' | null;
+    isPaidCustomer: boolean;
 }
 
 // Define sort options
-type SortField = 'registeredDate' | 'username' | 'email' | 'subscriptionTier' | 'tokens';
+type SortField = 'registeredDate' | 'username' | 'email' | 'isPaidCustomer' | 'tokens';
 type FilterField = 'username' | 'email' | 'displayName';
 type SortDirection = 'asc' | 'desc';
 
 // Define filter options
 interface FilterOptions {
-    subscriptionTier?: 'Basic Plan' | 'Premium Plan' | 'promo' | null;
+    isPaidCustomer?: boolean;
     searchQuery?: string;
     filterField?: FilterField;
     isAdmin?: boolean;
@@ -75,7 +77,7 @@ interface UseUserManagementReturn {
     // User management actions
     makeUserAdmin: (userId: string, isAdmin: boolean) => Promise<{ success: boolean; error?: string }>;
     updateUserTokens: (userId: string, tokens: number) => Promise<{ success: boolean; error?: string }>;
-    updateUserSubscription: (userId: string, tier: 'Basic Plan' | 'Premium Plan' | 'promo' | null) => Promise<{ success: boolean; error?: string }>;
+    updateUserPaidStatus: (userId: string, isPaidCustomer: boolean) => Promise<{ success: boolean; error?: string }>;
 }
 
 export function useUserManagement(): UseUserManagementReturn {
@@ -115,8 +117,9 @@ export function useUserManagement(): UseUserManagementReturn {
 
                     newSystemDataMap.set(userId, {
                         tokens: data.tokens ?? 0,
+                        loraTokens: data.loraTokens ?? 0,
                         isAdmin: data.isAdmin ?? false,
-                        subscriptionTier: data.subscription_tier ?? null
+                        isPaidCustomer: data.isPaidCustomer ?? false
                     });
                 }
             });
@@ -135,8 +138,9 @@ export function useUserManagement(): UseUserManagementReturn {
         const userId = doc.id;
         const systemData = systemMap.get(userId) || {
             tokens: 0,
+            loraTokens: 0,
             isAdmin: false,
-            subscriptionTier: null
+            isPaidCustomer: false
         };
 
         return {
@@ -147,8 +151,9 @@ export function useUserManagement(): UseUserManagementReturn {
             avatarUrl: data.photoURL || data.avatarUrl || null,
             registeredDate: data.createdAt || data.metadata?.creationTime || null,
             lastLoginAt: data.lastLoginAt || data.metadata?.lastSignInTime || null,
-            subscriptionTier: systemData.subscriptionTier,
+            isPaidCustomer: systemData.isPaidCustomer,
             tokens: systemData.tokens,
+            loraTokens: systemData.loraTokens,
             isAdmin: systemData.isAdmin
         };
     }, []);
@@ -171,12 +176,12 @@ export function useUserManagement(): UseUserManagementReturn {
             let userIds: string[] = [];
 
             // If filtering by subscription tier or admin status, filter from the systemDataMap
-            if (filterOptions.subscriptionTier || filterOptions.isAdmin !== undefined) {
+            if (filterOptions.isPaidCustomer !== undefined) {
                 for (const [userId, data] of currentSystemMap.entries()) {
-                    const tierMatch = !filterOptions.subscriptionTier || data.subscriptionTier === filterOptions.subscriptionTier;
+                    const paidMatch = data.isPaidCustomer === filterOptions.isPaidCustomer;
                     const adminMatch = filterOptions.isAdmin === undefined || data.isAdmin === filterOptions.isAdmin;
 
-                    if (tierMatch && adminMatch) {
+                    if (paidMatch && adminMatch) {
                         userIds.push(userId);
                     }
                 }
@@ -302,7 +307,7 @@ export function useUserManagement(): UseUserManagementReturn {
             // Update systemDataMap
             setSystemDataMap(prev => {
                 const newMap = new Map(prev);
-                const existingData = newMap.get(userId) || { tokens: 0, isAdmin: false, subscriptionTier: null };
+                const existingData = newMap.get(userId) || { tokens: 0, loraTokens: 0, isAdmin: false, isPaidCustomer: false };
                 newMap.set(userId, { ...existingData, isAdmin });
                 return newMap;
             });
@@ -345,7 +350,7 @@ export function useUserManagement(): UseUserManagementReturn {
             // Update systemDataMap
             setSystemDataMap(prev => {
                 const newMap = new Map(prev);
-                const existingData = newMap.get(userId) || { tokens: 0, isAdmin: false, subscriptionTier: null };
+                const existingData = newMap.get(userId) || { tokens: 0, loraTokens: 0, isAdmin: false, isPaidCustomer: false };
                 newMap.set(userId, { ...existingData, tokens });
                 return newMap;
             });
@@ -361,28 +366,28 @@ export function useUserManagement(): UseUserManagementReturn {
     }, []);
 
     // Function to update user subscription tier
-    const updateUserSubscription = useCallback(async (
+    const updateUserPaidStatus = useCallback(async (
         userId: string,
-        tier: 'Basic Plan' | 'Premium Plan' | 'promo' | null
+        isPaidCustomer: boolean
     ) => {
         try {
             const db = getFirestore(app);
 
-            // Update user's system document with subscription_tier
+            // Update user's system document with isPaidCustomer
             const userSystemRef = doc(db, 'users', userId, 'private', 'system');
             const userSystemDoc = await getDoc(userSystemRef);
 
             if (userSystemDoc.exists()) {
-                await updateDoc(userSystemRef, { subscription_tier: tier });
+                await updateDoc(userSystemRef, { isPaidCustomer });
             } else {
-                await setDoc(userSystemRef, { subscription_tier: tier });
+                await setDoc(userSystemRef, { isPaidCustomer });
             }
 
             // Update local state
             setUsers(prev =>
                 prev.map(user =>
                     user.id === userId
-                        ? { ...user, subscriptionTier: tier }
+                        ? { ...user, isPaidCustomer }
                         : user
                 )
             );
@@ -390,17 +395,17 @@ export function useUserManagement(): UseUserManagementReturn {
             // Update systemDataMap
             setSystemDataMap(prev => {
                 const newMap = new Map(prev);
-                const existingData = newMap.get(userId) || { tokens: 0, isAdmin: false, subscriptionTier: null };
-                newMap.set(userId, { ...existingData, subscriptionTier: tier });
+                const existingData = newMap.get(userId) || { tokens: 0, loraTokens: 0, isAdmin: false, isPaidCustomer: false };
+                newMap.set(userId, { ...existingData, isPaidCustomer });
                 return newMap;
             });
 
             return { success: true };
         } catch (err: any) {
-            console.error('Error updating subscription tier:', err);
+            console.error('Error updating paid status:', err);
             return {
                 success: false,
-                error: err.message || 'Failed to update subscription tier'
+                error: err.message || 'Failed to update paid status'
             };
         }
     }, []);
@@ -425,6 +430,6 @@ export function useUserManagement(): UseUserManagementReturn {
         setFilterOptions,
         makeUserAdmin,
         updateUserTokens,
-        updateUserSubscription
+        updateUserPaidStatus
     };
 }
