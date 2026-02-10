@@ -11,6 +11,7 @@ import {
     IconUserCircle,
     IconUserPlus,
     IconShirt,
+    IconShoppingBag,
 } from '@tabler/icons-react';
 import {
     Box,
@@ -33,11 +34,10 @@ import { useUserData } from '@/hooks/useUserData';
 import { useMemo } from 'react';
 
 const data = [
-    { link: '/discover', title: 'Discover', icon: IconCompass },
-    { link: '/create', title: 'Create', icon: IconPlus },
+    { link: '/generate-images', title: 'Generate Images', icon: IconPlus },
     { link: '/undress', title: 'Undress', icon: IconShirt, requiresAuth: true },
     // { link: '/video', title: 'Video', icon: IconVideo },
-    { link: '/character', title: 'Character', icon: IconUser },
+    { link: '/marketplace', title: 'Marketplace', icon: IconShoppingBag },
     { link: '/pricing', title: 'Pricing', icon: IconCurrencyDollar },
     { link: '/news', title: 'News', icon: IconNews },
     // { link: '/auth?auth_mode=signup', title: 'Sign Up', icon: IconUserPlus },

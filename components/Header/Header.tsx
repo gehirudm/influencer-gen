@@ -34,7 +34,7 @@ import { useUserData } from '@/hooks/useUserData';
 import { useMemo } from 'react';
 
 const data = [
-    { link: '/create', title: 'Create', icon: IconPlus },
+    { link: '/generate-images', title: 'Generate Images', icon: IconPlus },
     { link: '/undress', title: 'Undress', icon: IconShirt, requiresAuth: true },
     // { link: '/video', title: 'Video', icon: IconVideo },
     { link: '/marketplace', title: 'Marketplace', icon: IconShoppingBag },

@@ -4,35 +4,41 @@ import {
     IconVideo,
     IconFileText,
     IconCurrencyDollar,
-    IconCompass,
+    IconFolder,
     IconPlus,
     IconSwitchHorizontal,
     IconUser,
     IconShirt,
+    IconBell,
+    IconShoppingBag,
 } from '@tabler/icons-react';
-import { Avatar, Center, Group, Stack, Tooltip, UnstyledButton, Text, Mark } from '@mantine/core';
+import { Avatar, Center, Group, Stack, Tooltip, UnstyledButton, Text, Mark, Badge, Indicator } from '@mantine/core';
 import { usePathname, useRouter } from 'next/navigation';
 import classes from './Navbar.module.css';
 import collapsedClasses from './NavbarCollapsed.module.css';
 import { UserButton } from '../UserButton';
 import { useMediaQuery } from '@mantine/hooks';
+import { useInboxNotifications } from '@/hooks/useInboxNotifications';
 
 const data = [
-    { link: '/discover', label: 'Discover', icon: IconCompass },
+    { link: '/assets', label: 'Assets', icon: IconFolder },
     { link: '/create', label: 'Create', icon: IconPlus },
     { link: '/undress', label: 'Undress', icon: IconShirt },
     // { link: '/video', label: 'Video', icon: IconVideo },
     { link: '/character', label: 'Character', icon: IconUser },
     // { link: '/projects', label: 'Projects', icon: IconFileText },
     { link: '/pricing', label: 'Pricing', icon: IconCurrencyDollar },
+    { link: '/inbox', label: 'Inbox', icon: IconBell },
+    { link: '/marketplace', label: 'Marketplace', icon: IconShoppingBag },
 ];
 
 export default function Navbar({ children }: { children?: React.ReactNode }) {
-    const [active, setActive] = useState('Discover');
+    const [active, setActive] = useState('Assets');
     const [collapsed, setCollapsed] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
     const isSmallScreen = useMediaQuery('(max-width: 56.25em)');
+    const { unreadCount } = useInboxNotifications();
 
     // Set collapsed state based on screen size only on initial render and when screen size changes
     useEffect(() => {
@@ -57,11 +63,11 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
                             component="span"
                             inherit
                             variant="gradient"
-                            gradient={{ from: 'blue', to: 'cyan' }}
+                            gradient={{ from: 'blue', to: 'purple' }}
                             fw="bolder"
                             fz={26}
                         >
-                            InfluencerGEN
+                            Fantazy.pro
                         </Text>
                     </Group>
                     {data.map((item) => (
@@ -78,6 +84,11 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
                         >
                             <item.icon className={classes.linkIcon} stroke={1.5} />
                             <span>{item.label}</span>
+                            {item.label === 'Inbox' && unreadCount > 0 && (
+                                <Badge size="sm" circle style={{ marginLeft: 'auto' }}>
+                                    {unreadCount}
+                                </Badge>
+                            )}
                         </a>
                     ))}
                 </div>
@@ -88,7 +99,7 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
                         <span>Close Sidebar</span>
                     </a>
 
-                    <UserButton onClick={() => router.push('/profile')} />
+                    <UserButton onClick={() => router.push('/account')} />
                 </div>
             </nav>
             <div className={classes.content}>
@@ -98,16 +109,18 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
     );
 
     // Collapsed navbar view (NavbarLink component inlined for simplicity)
-    const NavbarLink = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active?: boolean, onClick?: () => void }) => {
+    const NavbarLink = ({ icon: Icon, label, active, onClick, showBadge }: { icon: any, label: string, active?: boolean, onClick?: () => void, showBadge?: boolean }) => {
         return (
             <Tooltip label={label} position="right" transitionProps={{ duration: 0 }}>
-                <UnstyledButton
-                    onClick={onClick}
-                    className={collapsedClasses.link}
-                    data-active={active || undefined}
-                >
-                    <Icon size={20} stroke={1.5} />
-                </UnstyledButton>
+                <Indicator disabled={!showBadge} color="red" size={10} processing>
+                    <UnstyledButton
+                        onClick={onClick}
+                        className={collapsedClasses.link}
+                        data-active={active || undefined}
+                    >
+                        <Icon size={18} stroke={1.5} />
+                    </UnstyledButton>
+                </Indicator>
             </Tooltip>
         );
     };
@@ -135,6 +148,7 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
                                 {...link}
                                 key={link.label}
                                 active={link.label === active || undefined}
+                                showBadge={link.label === 'Inbox' && unreadCount > 0}
                                 onClick={() => {
                                     setActive(link.label);
                                     router.push(link.link);

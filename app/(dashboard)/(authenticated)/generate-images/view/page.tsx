@@ -139,7 +139,7 @@ export default function ViewGeneratedImagePage() {
       <Group mb="md">
         <Button
           component={Link}
-          href="/create"
+          href="/generate-images"
           variant="subtle"
           leftSection={<IconArrowBack size={16} />}
         >
@@ -362,7 +362,7 @@ export default function ViewGeneratedImagePage() {
                   variant="light"
                   leftSection={<IconWand size={16} />}
                   component={Link}
-                  href={`/create?recreate=${job?.id}`}
+                  href={`/generate-images?recreate=${job?.id}`}
                 >
                   Recreate with these settings
                 </Button>
@@ -370,7 +370,7 @@ export default function ViewGeneratedImagePage() {
                   variant="outline"
                   leftSection={<IconEditCircle size={16} />}
                   component={Link}
-                  href={`/create?inpaint=${job?.id}`}
+                  href={`/generate-images?inpaint=${job?.id}`}
                 >
                   Inpaint this image
                 </Button>
