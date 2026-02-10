@@ -16,10 +16,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (isMobile) {
         return (
             <Stack gap={0}>
-                <Header>
-                    <TokenBar />
-                    {children}
-                </Header>
+                <TokenBar />
+                <Header>{children}</Header>
                 <Footer></Footer>
             </Stack>
         );
@@ -27,9 +25,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     // Desktop view: use Navbar (left sidebar)
     return (
-        <Navbar>
+        <>
             <TokenBar />
-            {children}
-        </Navbar>
+            <Navbar>{children}</Navbar>
+        </>
     );
 }

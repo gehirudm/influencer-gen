@@ -1,0 +1,106 @@
+.tokenBar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 1400px;
+    width: 100%;
+}
+
+.tokenCount {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #e0e0e0;
+}
+
+.tokenIcon {
+    color: #fbbf24;
+    width: 18px;
+    height: 18px;
+}
+
+.tokenValue {
+    color: #fbbf24;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.addButton {
+    height: 28px;
+    font-size: 12px;
+    padding: 0 12px;
+    background: linear-gradient(135deg, rgb(99, 102, 241) 0%, rgb(168, 85, 247) 100%);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.addButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.skeleton {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.spacer {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .tokenBar {
+        height: 36px;
+        padding: 0 12px;
+    }
+    
+    .content {
+        gap: 12px;
+    }
+    
+    .tokenCount {
+        font-size: 12px;
+    }
+    
+    .tokenValue {
+        font-size: 13px;
+    }
+    
+    .addButton {
+        height: 26px;
+        font-size: 11px;
+        padding: 0 10px;
+    }
+}

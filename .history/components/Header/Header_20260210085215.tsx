@@ -45,7 +45,7 @@ const data = [
 
 export function Header({ children }: { children?: React.ReactNode }) {
     const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
-    const { userData, loading, error } = useUserData();
+    const { userData, systemData, loading, error } = useUserData();
 
     const userLoggedIn = useMemo(() => !loading && userData != null, [loading, userData]);
 
