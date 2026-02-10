@@ -373,10 +373,10 @@ export default function ImageGeneratorPage() {
     const previousJobs = completedJobs.slice(1);
 
     return (
-        <Box style={{ height: '100%', width: '100%' }}>
+        <Box style={{ height: 'calc(100vh - 40px)', width: '100%', overflow: 'hidden' }}>
             <Grid gutter="md" style={{ margin: 0, height: '100%' }}>
                 {/* Left Column - Input Data */}
-                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column', padding: '0.75rem' }}>
+                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '0.75rem' }}>
                     <ScrollArea 
                         style={{ flex: 1, marginBottom: '1rem' }} 
                         scrollbarSize={10}
@@ -734,7 +734,7 @@ export default function ImageGeneratorPage() {
             </Grid.Col>
 
                 {/* Right Column - Output */}
-                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: 'calc(100vh - 40px)', padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
+                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: '100%', padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
                     <Stack gap="md" style={{ flex: 1, overflow: 'hidden' }}>
                         {/* Current/Latest Image */}
                         <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444', flex: 1, minHeight: 0 }}>

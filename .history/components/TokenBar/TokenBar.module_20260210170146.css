@@ -1,6 +1,6 @@
 .tokenBar {
     position: sticky;
-    top: calc(var(--mantine-spacing-md) * -1);
+    top: 0;
     left: 0;
     right: 0;
     height: 40px;
@@ -11,7 +11,6 @@
     display: flex;
     align-items: center;
     padding: 0;
-    margin: calc(var(--mantine-spacing-md) * -1) calc(var(--mantine-spacing-md) * -1) 0 calc(var(--mantine-spacing-md) * -1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -20,7 +19,7 @@
     align-items: center;
     gap: 16px;
     width: 100%;
-    padding: 0 12px;
+    padding: 0 20px;
 }
 
 .tokenCount {
@@ -83,13 +82,11 @@
 @media (max-width: 768px) {
     .tokenBar {
         height: 36px;
-        top: -15px;
-        margin: -15px -30px 0 -30px;
     }
     
     .content {
         gap: 12px;
-        padding: 0 8px;
+        padding: 0 12px;
     }
     
     .tokenCount {
