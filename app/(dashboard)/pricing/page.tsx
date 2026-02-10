@@ -1,6 +1,6 @@
 "use client"
 
-import { createInvoiceAndRedirect } from '@/app/actions/payments/payments';
+import { PaymentModal } from '@/components/PaymentModal/PaymentModal';
 import { useUserData } from '@/hooks/useUserData';
 import { Group, HoverCard, Stack, Text, Badge } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -115,12 +115,14 @@ function PricingPageMessageBox() {
 const PricingPage = () => {
   const router = useRouter();
   const { user, systemData, loading } = useUserData();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingProduct, setProcessingProduct] = useState<string | null>(null);
 
   const isPaidCustomer = systemData?.isPaidCustomer || false;
 
-  const handlePurchase = async (productId: string) => {
+  // Payment modal state
+  const [modalOpened, setModalOpened] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<{ id: string; name: string; price: string } | null>(null);
+
+  const handlePurchase = (productId: string, productName: string, price: string) => {
     if (!user && !loading) {
       notifications.show({
         title: 'Authentication Required',
@@ -140,32 +142,8 @@ const PricingPage = () => {
       return;
     }
 
-    try {
-      setIsProcessing(true);
-      setProcessingProduct(productId);
-
-      notifications.show({
-        id: 'payment-processing',
-        title: 'Processing Payment',
-        message: 'Creating your invoice, please wait...',
-        loading: true,
-        autoClose: false,
-        withCloseButton: false,
-      });
-
-      const formData = new FormData();
-      formData.append('productId', productId);
-      await createInvoiceAndRedirect(formData);
-
-    } catch (error: any) {
-      setIsProcessing(false);
-      setProcessingProduct(null);
-      notifications.show({
-        title: 'Error',
-        message: error.message || 'Failed to process payment request',
-        color: 'red',
-      });
-    }
+    setSelectedProduct({ id: productId, name: productName, price });
+    setModalOpened(true);
   };
 
   return (
@@ -331,8 +309,7 @@ const PricingPage = () => {
               </div>
 
               <button
-                disabled={isProcessing}
-                onClick={() => handlePurchase(plan.id)}
+                onClick={() => handlePurchase(plan.id, `${plan.name} Plan`, plan.price)}
                 style={{
                   width: '100%',
                   padding: '14px',
@@ -340,17 +317,16 @@ const PricingPage = () => {
                   border: plan.highlight ? 'none' : '1px solid rgba(99, 102, 241, 0.4)',
                   fontWeight: 600,
                   fontSize: '16px',
-                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  cursor: 'pointer',
                   background: plan.highlight
                     ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
                     : 'linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(139, 92, 246, 0.25))',
                   color: '#fff',
                   marginBottom: '24px',
                   transition: 'opacity 0.2s',
-                  opacity: isProcessing ? 0.6 : 1,
                 }}
               >
-                {processingProduct === plan.id ? 'Processing...' : 'Purchase'}
+                Purchase
               </button>
 
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -459,8 +435,7 @@ const PricingPage = () => {
               <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '20px' }}>{pack.pricePerToken}/token</div>
 
               <button
-                onClick={() => handlePurchase(pack.id)}
-                disabled={isProcessing}
+                onClick={() => handlePurchase(pack.id, `${pack.amount} Tokens`, pack.price)}
                 style={{
                   width: '100%',
                   padding: '10px',
@@ -470,14 +445,13 @@ const PricingPage = () => {
                   color: '#c7d2fe',
                   fontWeight: 600,
                   fontSize: '14px',
-                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  cursor: 'pointer',
                   transition: 'background 0.2s',
-                  opacity: isProcessing ? 0.6 : 1,
                 }}
-                onMouseEnter={(e) => { if (!isProcessing) e.currentTarget.style.background = 'rgba(99, 102, 241, 0.25)'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(99, 102, 241, 0.25)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)'; }}
               >
-                {processingProduct === pack.id ? 'Processing...' : 'Buy Tokens'}
+                Buy Tokens
               </button>
             </div>
           ))}
@@ -554,8 +528,7 @@ const PricingPage = () => {
               <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '20px' }}>{pack.perUnit}</div>
 
               <button
-                onClick={() => handlePurchase(pack.id)}
-                disabled={isProcessing}
+                onClick={() => handlePurchase(pack.id, `${pack.amount} LoRA Token${parseInt(pack.amount) > 1 ? 's' : ''}`, pack.price)}
                 style={{
                   width: '100%',
                   padding: '10px',
@@ -565,14 +538,13 @@ const PricingPage = () => {
                   color: '#ddd6fe',
                   fontWeight: 600,
                   fontSize: '14px',
-                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  cursor: 'pointer',
                   transition: 'background 0.2s',
-                  opacity: isProcessing ? 0.6 : 1,
                 }}
-                onMouseEnter={(e) => { if (!isProcessing) e.currentTarget.style.background = 'rgba(168, 85, 247, 0.25)'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(168, 85, 247, 0.25)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)'; }}
               >
-                {processingProduct === pack.id ? 'Processing...' : 'Buy LoRA Tokens'}
+                Buy LoRA Tokens
               </button>
             </div>
           ))}
@@ -596,6 +568,17 @@ const PricingPage = () => {
           </p>
         </div>
       </div>
+
+      {/* Payment Method Modal */}
+      {selectedProduct && (
+        <PaymentModal
+          opened={modalOpened}
+          onClose={() => { setModalOpened(false); setSelectedProduct(null); }}
+          productId={selectedProduct.id}
+          productName={selectedProduct.name}
+          price={selectedProduct.price}
+        />
+      )}
     </div>
   );
 };

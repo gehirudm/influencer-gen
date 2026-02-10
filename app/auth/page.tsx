@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, TextInput, PasswordInput, Container, Paper, Title, Text, Divider, Anchor, Group, Transition, Checkbox, Center, Loader, Box } from "@mantine/core";
 import { hasLength, isEmail, useForm } from "@mantine/form";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendSignInLinkToEmail, signInWithPopup, GoogleAuthProvider, ActionCodeSettings, isSignInWithEmailLink, signInWithEmailLink, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendSignInLinkToEmail, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider, ActionCodeSettings, isSignInWithEmailLink, signInWithEmailLink, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import app from "@/lib/firebase";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from 'next/navigation'
@@ -204,6 +204,36 @@ export default function AuthPage() {
 		}
 	}, []);
 
+	const handleForgotPassword = async () => {
+		const email = form.values.email;
+		if (!email || !form.isValid('email')) {
+			notifications.show({
+				position: "top-center",
+				color: "yellow",
+				title: "Email Required",
+				message: "Please enter your email address first.",
+			});
+			return;
+		}
+
+		try {
+			await sendPasswordResetEmail(auth, email);
+			notifications.show({
+				position: "top-center",
+				color: "green",
+				title: "Reset Link Sent",
+				message: "If an account exists with that email, a password reset link has been sent.",
+			});
+		} catch (error: any) {
+			notifications.show({
+				position: "top-center",
+				color: "red",
+				title: "Error",
+				message: error.message || "Failed to send password reset email.",
+			});
+		}
+	};
+
 	const handleSubmit = async (values: typeof form.values) => {
 		setIsAuthenticating(true); // Set loading state
 		try {
@@ -236,7 +266,7 @@ export default function AuthPage() {
 			router.replace(next);
 		} catch (error: any) {
 			console.log(error);
-			
+
 			if (error.message.includes('INVALID_LOGIN_CREDENTIALS')) {
 				notifications.show({
 					position: "top-center",
@@ -347,11 +377,17 @@ export default function AuthPage() {
 							mt="md"
 							{...form.getInputProps('password')}
 						/>
-						<Checkbox
-							label="Remember Me"
-							mt="md"
-							{...form.getInputProps('rememberMe', { type: 'checkbox' })}
-						/>
+						<Group justify="space-between" mt="sm">
+							<Checkbox
+								label="Remember Me"
+								{...form.getInputProps('rememberMe', { type: 'checkbox' })}
+							/>
+							{mode === "signin" && (
+								<Anchor size="sm" component="button" type="button" onClick={handleForgotPassword}>
+									Forgot password?
+								</Anchor>
+							)}
+						</Group>
 						<Button fullWidth mt="xl" type="submit" loading={isAuthenticating}>
 							{mode === "signup" ? "Sign Up" : mode === "signin" ? "Login" : "Send Sign-In Link"}
 						</Button>

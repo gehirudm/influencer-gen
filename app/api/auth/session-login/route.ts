@@ -114,5 +114,5 @@ async function ensureUserDocumentExists(decoded: DecodedIdToken): Promise<string
         }
     }
 
-    return "/discover";
+    return "/generate-images";
 }
