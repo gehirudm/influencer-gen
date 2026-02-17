@@ -691,11 +691,11 @@ export default function Home() {
       {/* SECTION 7: Final CTA */}
       <div className="bg-black py-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="backdrop-blur-xl bg-gradient-to-br from-indigo-500/10 via-violet-500/10 to-indigo-500/10 border-2 border-indigo-500/50 rounded-3xl p-12 text-center relative overflow-hidden">
+          <div className="bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-pink-900/40 border-2 border-indigo-500 rounded-3xl p-12 text-center relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-full opacity-10">
               <div className="absolute top-10 left-10 w-32 h-32 bg-indigo-500 rounded-full blur-3xl"></div>
-              <div className="absolute bottom-10 right-10 w-40 h-40 bg-violet-500 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-10 right-10 w-40 h-40 bg-pink-500 rounded-full blur-3xl"></div>
             </div>
 
             <div className="relative z-10">
@@ -705,7 +705,7 @@ export default function Home() {
                 <Text
                   component="span"
                   variant="gradient"
-                  gradient={{ from: 'indigo', to: 'violet' }}
+                  gradient={{ from: 'violet', to: 'pink' }}
                   className="text-4xl md:text-6xl font-bold"
                 >
                   Fantasy to Life?
@@ -724,7 +724,7 @@ export default function Home() {
                 </button>
                 <button
                   onClick={() => router.push("/pricing")}
-                  className="backdrop-blur-xl bg-white/10 border-2 border-white/40 hover:bg-white/20 text-white px-12 py-5 rounded-full text-xl font-bold transition"
+                  className="bg-transparent border-2 border-white/60 hover:bg-white/10 text-white px-12 py-5 rounded-full text-xl font-bold transition"
                 >
                   View Pricing
                 </button>
@@ -732,15 +732,15 @@ export default function Home() {
 
               <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
                 <div className="flex items-center gap-2">
-                  <IconSparkles size={16} className="text-indigo-400" />
+                  <IconSparkles size={16} className="text-green-400" />
                   <span>1,000 Free Credits</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <IconShieldCheck size={16} className="text-indigo-400" />
+                  <IconShieldCheck size={16} className="text-green-400" />
                   <span>No Credit Card Required</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <IconBolt size={16} className="text-indigo-400" />
+                  <IconBolt size={16} className="text-green-400" />
                   <span>Instant Access</span>
                 </div>
               </div>
@@ -750,7 +750,7 @@ export default function Home() {
       </div>
 
       {/* Community Section */}
-      <div className="bg-black py-20">
+      <div className="bg-gradient-to-b from-black via-zinc-950 to-black py-20">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Join Our Growing Community

@@ -750,7 +750,7 @@ export default function Home() {
       </div>
 
       {/* Community Section */}
-      <div className="bg-black py-20">
+      <div className="bg-gradient-to-b from-black via-zinc-950 to-black py-20">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Join Our Growing Community

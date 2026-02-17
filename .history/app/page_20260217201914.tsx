@@ -456,7 +456,7 @@ export default function Home() {
             <Text
               component="span"
               variant="gradient"
-              gradient={{ from: 'indigo', to: 'violet' }}
+              gradient={{ from: 'violet', to: 'pink' }}
               className="text-lg font-semibold uppercase tracking-wider"
             >
               Pricing
@@ -471,18 +471,18 @@ export default function Home() {
 
           {/* Free Plan Highlight */}
           <div className="max-w-4xl mx-auto mb-12">
-            <div className="backdrop-blur-xl bg-white/5 border-2 border-indigo-500/50 rounded-2xl p-8 text-center">
+            <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 border-2 border-green-500 rounded-2xl p-8 text-center">
               <div className="flex items-center justify-center mb-4">
-                <IconRocket size={48} className="text-indigo-400" />
+                <IconRocket size={48} className="text-green-400" />
               </div>
               <h3 className="text-3xl font-bold mb-2">Start 100% Free</h3>
-              <p className="text-5xl font-bold text-indigo-400 mb-4">1,000 Free Credits</p>
+              <p className="text-5xl font-bold text-green-400 mb-4">1,000 Free Credits</p>
               <p className="text-gray-300 text-lg mb-6">
                 No credit card required. Start creating immediately with full access to all features.
               </p>
               <button
                 onClick={() => router.push("/auth")}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-4 rounded-full text-lg font-semibold transition shadow-lg shadow-indigo-500/50"
+                className="bg-green-600 hover:bg-green-700 text-white px-10 py-4 rounded-full text-lg font-semibold transition shadow-lg shadow-green-500/50"
               >
                 Claim Your Free Credits
               </button>
@@ -492,7 +492,7 @@ export default function Home() {
           {/* Pricing Plans */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
             {/* Basic Plan */}
-            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-indigo-500/50 transition">
+            <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-2xl p-8 border border-zinc-800 hover:border-indigo-600 transition">
               <div className="mb-6">
                 <h3 className="text-2xl font-bold mb-2">Basic Plan</h3>
                 <div className="flex items-baseline gap-2">
@@ -514,35 +514,35 @@ export default function Home() {
 
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start gap-3">
-                  <IconCamera size={20} className="text-indigo-400 mt-1 flex-shrink-0" />
-                  <span className="text-gray-400">All image generation features</span>
+                  <IconCamera size={20} className="text-green-400 mt-1 flex-shrink-0" />
+                  <span className="text-gray-300">All image generation features</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <IconWand size={20} className="text-indigo-400 mt-1 flex-shrink-0" />
-                  <span className="text-gray-400">AI Undress tool</span>
+                  <IconWand size={20} className="text-green-400 mt-1 flex-shrink-0" />
+                  <span className="text-gray-300">AI Undress tool</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <IconUsers size={20} className="text-indigo-400 mt-1 flex-shrink-0" />
-                  <span className="text-gray-400">Character creation</span>
+                  <IconUsers size={20} className="text-green-400 mt-1 flex-shrink-0" />
+                  <span className="text-gray-300">Character creation</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <IconSparkles size={20} className="text-indigo-400 mt-1 flex-shrink-0" />
-                  <span className="text-gray-400">1 LoRA character training</span>
+                  <IconSparkles size={20} className="text-green-400 mt-1 flex-shrink-0" />
+                  <span className="text-gray-300">1 LoRA character training</span>
                 </li>
               </ul>
 
               <button
                 onClick={() => router.push("/pricing")}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl text-lg font-semibold transition shadow-lg shadow-indigo-500/30"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl text-lg font-semibold transition"
               >
                 Get Started
               </button>
             </div>
 
             {/* Premium Plan */}
-            <div className="backdrop-blur-xl bg-gradient-to-br from-indigo-500/10 to-violet-500/10 rounded-2xl p-8 border-2 border-indigo-500/50 hover:border-indigo-400 transition relative">
+            <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border-2 border-indigo-500 hover:border-indigo-400 transition relative">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <div className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-6 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-1 rounded-full text-sm font-bold flex items-center gap-2">
                   <IconCrown size={16} />
                   POPULAR
                 </div>
@@ -569,26 +569,26 @@ export default function Home() {
 
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start gap-3">
-                  <IconCamera size={20} className="text-indigo-400 mt-1 flex-shrink-0" />
-                  <span className="text-gray-400">All image generation features</span>
+                  <IconCamera size={20} className="text-green-400 mt-1 flex-shrink-0" />
+                  <span className="text-gray-300">All image generation features</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <IconWand size={20} className="text-indigo-400 mt-1 flex-shrink-0" />
-                  <span className="text-gray-400">AI Undress tool</span>
+                  <IconWand size={20} className="text-green-400 mt-1 flex-shrink-0" />
+                  <span className="text-gray-300">AI Undress tool</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <IconUsers size={20} className="text-indigo-400 mt-1 flex-shrink-0" />
-                  <span className="text-gray-400">Unlimited characters</span>
+                  <IconUsers size={20} className="text-green-400 mt-1 flex-shrink-0" />
+                  <span className="text-gray-300">Unlimited characters</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <IconSparkles size={20} className="text-indigo-400 mt-1 flex-shrink-0" />
-                  <span className="text-gray-400">2 LoRA character trainings</span>
+                  <IconSparkles size={20} className="text-green-400 mt-1 flex-shrink-0" />
+                  <span className="text-gray-300">2 LoRA character trainings</span>
                 </li>
               </ul>
 
               <button
                 onClick={() => router.push("/pricing")}
-                className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white py-4 rounded-xl text-lg font-semibold transition shadow-lg shadow-indigo-500/50"
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-4 rounded-xl text-lg font-semibold transition shadow-lg shadow-indigo-500/50"
               >
                 Get Premium
               </button>
@@ -606,7 +606,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 6: FAQ */}
-      <div className="bg-black py-20">
+      <div className="bg-gradient-to-b from-black via-zinc-950 to-black py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Text
@@ -628,9 +628,9 @@ export default function Home() {
           <div className="space-y-4">
             <Accordion
               classNames={{
-                item: "backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl overflow-hidden",
-                control: "hover:bg-white/10 text-white font-semibold text-lg p-6",
-                content: "text-gray-400 p-6 pt-0",
+                item: "bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden",
+                control: "hover:bg-zinc-800 text-white font-semibold text-lg p-6",
+                content: "text-gray-300 p-6 pt-0",
                 chevron: "text-indigo-400"
               }}
               chevron={<IconChevronDown size={24} />}
@@ -691,11 +691,11 @@ export default function Home() {
       {/* SECTION 7: Final CTA */}
       <div className="bg-black py-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="backdrop-blur-xl bg-gradient-to-br from-indigo-500/10 via-violet-500/10 to-indigo-500/10 border-2 border-indigo-500/50 rounded-3xl p-12 text-center relative overflow-hidden">
+          <div className="bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-pink-900/40 border-2 border-indigo-500 rounded-3xl p-12 text-center relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-full opacity-10">
               <div className="absolute top-10 left-10 w-32 h-32 bg-indigo-500 rounded-full blur-3xl"></div>
-              <div className="absolute bottom-10 right-10 w-40 h-40 bg-violet-500 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-10 right-10 w-40 h-40 bg-pink-500 rounded-full blur-3xl"></div>
             </div>
 
             <div className="relative z-10">
@@ -705,7 +705,7 @@ export default function Home() {
                 <Text
                   component="span"
                   variant="gradient"
-                  gradient={{ from: 'indigo', to: 'violet' }}
+                  gradient={{ from: 'violet', to: 'pink' }}
                   className="text-4xl md:text-6xl font-bold"
                 >
                   Fantasy to Life?
@@ -724,7 +724,7 @@ export default function Home() {
                 </button>
                 <button
                   onClick={() => router.push("/pricing")}
-                  className="backdrop-blur-xl bg-white/10 border-2 border-white/40 hover:bg-white/20 text-white px-12 py-5 rounded-full text-xl font-bold transition"
+                  className="bg-transparent border-2 border-white/60 hover:bg-white/10 text-white px-12 py-5 rounded-full text-xl font-bold transition"
                 >
                   View Pricing
                 </button>
@@ -732,15 +732,15 @@ export default function Home() {
 
               <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
                 <div className="flex items-center gap-2">
-                  <IconSparkles size={16} className="text-indigo-400" />
+                  <IconSparkles size={16} className="text-green-400" />
                   <span>1,000 Free Credits</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <IconShieldCheck size={16} className="text-indigo-400" />
+                  <IconShieldCheck size={16} className="text-green-400" />
                   <span>No Credit Card Required</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <IconBolt size={16} className="text-indigo-400" />
+                  <IconBolt size={16} className="text-green-400" />
                   <span>Instant Access</span>
                 </div>
               </div>
@@ -750,7 +750,7 @@ export default function Home() {
       </div>
 
       {/* Community Section */}
-      <div className="bg-black py-20">
+      <div className="bg-gradient-to-b from-black via-zinc-950 to-black py-20">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Join Our Growing Community
