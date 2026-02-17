@@ -147,7 +147,7 @@ const PricingPage = () => {
   };
 
   return (
-    <div style={{ padding: '64px 24px', background: '#000', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ padding: '24px 24px', background: '#000', color: '#fff', minHeight: '100vh' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '48px' }}>
         <h1 style={{ fontSize: '48px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.3, padding: '4px 0', background: 'linear-gradient(135deg, #a78bfa, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>

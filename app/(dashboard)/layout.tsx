@@ -68,7 +68,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <Navbar>
             <TokenBar />
-            {children}
+            <div style={{ marginTop: '20px' }}>
+                {children}
+            </div>
         </Navbar>
     );
 }
