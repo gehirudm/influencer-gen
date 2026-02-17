@@ -622,7 +622,7 @@ export default function Home() {
       </div>
 
       {/* Community Section */}
-      <div className="bg-gradient-to-br from-blue-900 via-blue-950 to-black py-20">
+      <div className="bg-gradient-to-br from-blue-950/60 via-slate-950 to-black py-20">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Join Our Growing Community
@@ -724,6 +724,67 @@ export default function Home() {
               View All FAQs
               <IconArrowNarrowRight size={20} className="ml-2" />
             </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 7: Final CTA */}
+      <div className="bg-black py-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="backdrop-blur-xl bg-gradient-to-br from-indigo-500/10 via-violet-500/10 to-indigo-500/10 border-2 border-indigo-500/50 rounded-3xl p-12 text-center relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-10">
+              <div className="absolute top-10 left-10 w-32 h-32 bg-indigo-500 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-10 right-10 w-40 h-40 bg-violet-500 rounded-full blur-3xl"></div>
+            </div>
+
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                Ready to Bring Your
+                <br />
+                <Text
+                  component="span"
+                  variant="gradient"
+                  gradient={{ from: 'indigo', to: 'violet' }}
+                  className="text-3xl md:text-4xl font-bold"
+                >
+                  Fantasy to Life?
+                </Text>
+              </h2>
+              <p className="text-base text-gray-300 mb-8 max-w-2xl mx-auto">
+                Join thousands of creators who are already using Fantazy to unleash their creativity. Start free today.
+              </p>
+              
+              <div className="flex flex-wrap justify-center gap-4 mb-8">
+                <button
+                  onClick={() => router.push("/auth")}
+                  className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-700 hover:via-indigo-600 hover:to-violet-700 text-white px-8 py-3 rounded-full text-lg font-semibold transition shadow-2xl shadow-indigo-500/50"
+                >
+                  Get Started Free
+                </button>
+                <button
+                  onClick={() => router.push("/pricing")}
+                  className="backdrop-blur-xl bg-white/10 border-2 border-white/40 hover:bg-white/20 text-white px-8 py-3 rounded-full text-lg font-semibold transition"
+                >
+                  View Pricing
+                </button>
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
+                <div className="flex items-center gap-2">
+                  <IconSparkles size={16} className="text-indigo-400" />
+                  <span>1,000 Free Credits</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <IconShieldCheck size={16} className="text-indigo-400" />
+                  <span>No Credit Card Required</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <IconBolt size={16} className="text-indigo-400" />
+                  <span>Instant Access</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

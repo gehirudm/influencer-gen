@@ -88,11 +88,11 @@ export default function Home() {
         </div>
 
         {/* Angled Images - Left Side */}
-        <div className="absolute left-[18%] top-1/2 -translate-y-1/2 z-0 hidden lg:block">
-          <div className="relative w-64 h-[450px]">
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 z-0 hidden lg:block">
+          <div className="relative w-64 h-[600px]">
             {/* Top Left Image */}
             <div 
-              className="absolute top-0 left-0 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl z-10"
+              className="absolute top-0 left-0 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl"
               style={{ transform: 'rotate(-12deg) translateY(0px)' }}
             >
               <img
@@ -103,7 +103,7 @@ export default function Home() {
             </div>
             {/* Bottom Left Image */}
             <div 
-              className="absolute top-40 left-0 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl z-0"
+              className="absolute bottom-0 left-12 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl"
               style={{ transform: 'rotate(8deg) translateY(0px)' }}
             >
               <img
@@ -116,11 +116,11 @@ export default function Home() {
         </div>
 
         {/* Angled Images - Right Side */}
-        <div className="absolute right-[18%] top-1/2 -translate-y-1/2 z-0 hidden lg:block">
-          <div className="relative w-64 h-[450px]">
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 z-0 hidden lg:block">
+          <div className="relative w-64 h-[600px]">
             {/* Top Right Image */}
             <div 
-              className="absolute top-0 right-0 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl z-10"
+              className="absolute top-0 right-0 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl"
               style={{ transform: 'rotate(12deg) translateY(0px)' }}
             >
               <img
@@ -131,7 +131,7 @@ export default function Home() {
             </div>
             {/* Bottom Right Image */}
             <div 
-              className="absolute top-40 right-0 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl z-0"
+              className="absolute bottom-0 right-12 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl"
               style={{ transform: 'rotate(-8deg) translateY(0px)' }}
             >
               <img
@@ -145,33 +145,27 @@ export default function Home() {
 
         {/* Hero Content - Centered */}
         <div className="relative z-10 flex items-center justify-center h-screen">
-          <div className="text-center px-8 pt-24 md:pt-0 max-w-3xl">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-[1.1]">
-              <div className="text-white">
-                Bring Your
-              </div>
-              <div>
-                <Text
-                  component="span"
-                  variant="gradient"
-                  gradient={{ from: 'indigo', to: 'violet' }}
-                  inherit
-                >
-                  Fantazy
-                </Text>
-                <span className="text-white"> to Life</span>
-              </div>
+          <div className="text-center px-8 pt-24 md:pt-0 max-w-4xl">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+              <Text
+                component="span"
+                variant="gradient"
+                gradient={{ from: 'cyan', to: 'pink' }}
+                inherit
+              >
+                Bring Your Fantasy to Life
+              </Text>
             </h1>
-            <p className="text-base md:text-lg mb-4 text-gray-200">
+            <p className="text-lg md:text-2xl mb-4 text-gray-200">
               Create Anything. No Limits. No Censored. No Bullshit.
             </p>
-            <p className="text-sm md:text-base mb-8 text-gray-400 max-w-xl mx-auto">
+            <p className="text-base md:text-lg mb-8 text-gray-400 max-w-2xl mx-auto">
               Unleash your creativity with AI-powered image generation. Build characters, generate stunning visuals, and bring your wildest ideas to reality.
             </p>
             <div className="flex gap-4 flex-wrap justify-center">
               <button
                 onClick={() => router.push("/auth")}
-                className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-700 hover:via-indigo-600 hover:to-violet-700 text-white px-8 py-3 rounded-full text-base font-semibold transition cursor-pointer shadow-lg shadow-indigo-500/50"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full text-base font-semibold transition cursor-pointer shadow-lg shadow-indigo-500/50"
               >
                 Start Free
               </button>
@@ -201,7 +195,7 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4">
               Everything You Need in One Place
             </h2>
-            <p className="text-base text-gray-400 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
               From character creation to image generation, we've got all the tools you need
             </p>
           </div>
@@ -218,14 +212,15 @@ export default function Home() {
                   <IconUsers size={120} className="text-indigo-400/30 group-hover:scale-110 transition-transform" />
                 </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-                <h3 className="text-xl font-bold mb-2">Create Your Dream Character</h3>
-                <p className="text-gray-400 text-sm mb-3">
-                  Build custom characters with detailed appearance settings
-                </p>
-                <div className="flex items-center text-indigo-400 text-sm font-semibold">
-                  Learn more <IconArrowNarrowRight size={16} className="ml-1" />
+                <div className="backdrop-blur-md bg-black/60 rounded-xl p-6 border border-white/10">
+                  <h3 className="text-xl font-bold mb-2">Create Your Dream Character</h3>
+                  <p className="text-gray-400 text-sm mb-3">
+                    Build custom characters with detailed appearance settings
+                  </p>
+                  <div className="flex items-center text-indigo-400 text-sm font-semibold">
+                    Learn more <IconArrowNarrowRight size={16} className="ml-1" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -241,14 +236,15 @@ export default function Home() {
                   <IconWand size={120} className="text-violet-400/30 group-hover:scale-110 transition-transform" />
                 </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-                <h3 className="text-xl font-bold mb-2">Undress Tool</h3>
-                <p className="text-gray-400 text-sm mb-3">
-                  Advanced AI technology to transform images
-                </p>
-                <div className="flex items-center text-indigo-400 text-sm font-semibold">
-                  Learn more <IconArrowNarrowRight size={16} className="ml-1" />
+                <div className="backdrop-blur-md bg-black/60 rounded-xl p-6 border border-white/10">
+                  <h3 className="text-xl font-bold mb-2">Undress Tool</h3>
+                  <p className="text-gray-400 text-sm mb-3">
+                    Advanced AI technology to transform images
+                  </p>
+                  <div className="flex items-center text-indigo-400 text-sm font-semibold">
+                    Learn more <IconArrowNarrowRight size={16} className="ml-1" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -264,14 +260,15 @@ export default function Home() {
                   <IconCamera size={120} className="text-indigo-400/30 group-hover:scale-110 transition-transform" />
                 </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-                <h3 className="text-xl font-bold mb-2">Create Images</h3>
-                <p className="text-gray-400 text-sm mb-3">
-                  Generate stunning images from text prompts
-                </p>
-                <div className="flex items-center text-indigo-400 text-sm font-semibold">
-                  Learn more <IconArrowNarrowRight size={16} className="ml-1" />
+                <div className="backdrop-blur-md bg-black/60 rounded-xl p-6 border border-white/10">
+                  <h3 className="text-xl font-bold mb-2">Create Images</h3>
+                  <p className="text-gray-400 text-sm mb-3">
+                    Generate stunning images from text prompts
+                  </p>
+                  <div className="flex items-center text-indigo-400 text-sm font-semibold">
+                    Learn more <IconArrowNarrowRight size={16} className="ml-1" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -287,14 +284,15 @@ export default function Home() {
                   <IconPalette size={120} className="text-violet-400/30 group-hover:scale-110 transition-transform" />
                 </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-                <h3 className="text-xl font-bold mb-2">Image Inpainting</h3>
-                <p className="text-gray-400 text-sm mb-3">
-                  Edit and refine images with precision
-                </p>
-                <div className="flex items-center text-indigo-400 text-sm font-semibold">
-                  Learn more <IconArrowNarrowRight size={16} className="ml-1" />
+                <div className="backdrop-blur-md bg-black/60 rounded-xl p-6 border border-white/10">
+                  <h3 className="text-xl font-bold mb-2">Image Inpainting</h3>
+                  <p className="text-gray-400 text-sm mb-3">
+                    Edit and refine images with precision
+                  </p>
+                  <div className="flex items-center text-indigo-400 text-sm font-semibold">
+                    Learn more <IconArrowNarrowRight size={16} className="ml-1" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -305,7 +303,7 @@ export default function Home() {
       {/* SECTION 3: Features */}
       <div className="bg-black py-20 relative">
         {/* Background Image */}
-        <div className="absolute inset-0 opacity-45">
+        <div className="absolute inset-0 opacity-5">
           <img
             src="/landing/slides/1.webp"
             alt="Background"
@@ -325,7 +323,7 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4">
               Why Choose Fantazy?
             </h2>
-            <p className="text-base text-gray-400 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
               Powerful features designed for creators who demand the best
             </p>
           </div>
@@ -415,7 +413,7 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4">
               See What's Possible
             </h2>
-            <p className="text-base text-gray-400 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
               Real creations from our community. Your imagination is the only limit.
             </p>
           </div>
@@ -451,7 +449,7 @@ export default function Home() {
           <div className="flex flex-wrap justify-center gap-4">
             <button
               onClick={() => router.push("/pricing")}
-              className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-700 hover:via-indigo-600 hover:to-violet-700 text-white px-6 py-2.5 rounded-full text-base font-semibold transition shadow-lg shadow-indigo-500/50"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full text-base font-semibold transition shadow-lg shadow-indigo-500/50"
             >
               See Pricing
             </button>
@@ -480,7 +478,7 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4">
               Pay As You Grow
             </h2>
-            <p className="text-base text-gray-400 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
               Start free with 1,000 credits. Upgrade when you're ready.
             </p>
           </div>
@@ -498,7 +496,7 @@ export default function Home() {
               </p>
               <button
                 onClick={() => router.push("/auth")}
-                className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-700 hover:via-indigo-600 hover:to-violet-700 text-white px-8 py-3 rounded-full text-base font-semibold transition shadow-lg shadow-indigo-500/50"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full text-base font-semibold transition shadow-lg shadow-indigo-500/50"
               >
                 Claim Your Free Credits
               </button>
@@ -549,7 +547,7 @@ export default function Home() {
 
               <button
                 onClick={() => router.push("/pricing")}
-                className="w-full bg-gray-900 hover:bg-gray-800 border border-gray-700 text-white py-3 rounded-xl text-base font-semibold transition"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-base font-semibold transition shadow-lg shadow-indigo-500/30"
               >
                 Get Started
               </button>
@@ -604,7 +602,7 @@ export default function Home() {
 
               <button
                 onClick={() => router.push("/pricing")}
-                className="w-full bg-gray-900 hover:bg-gray-800 border border-gray-700 text-white py-3 rounded-xl text-base font-semibold transition"
+                className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white py-3 rounded-xl text-base font-semibold transition shadow-lg shadow-indigo-500/50"
               >
                 Get Premium
               </button>
@@ -622,12 +620,12 @@ export default function Home() {
       </div>
 
       {/* Community Section */}
-      <div className="bg-gradient-to-br from-blue-900 via-blue-950 to-black py-20">
+      <div className="bg-gradient-to-br from-indigo-900/40 via-black to-black py-20">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Join Our Growing Community
           </h2>
-          <p className="text-base text-gray-400 mb-8">
+          <p className="text-xl text-gray-400 mb-8">
             Connect with other creators, get support, and stay updated with the latest features
           </p>
 
@@ -636,7 +634,7 @@ export default function Home() {
               href="https://t.me/FantazyPro"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center bg-gray-900 hover:bg-gray-800 border border-gray-700 text-white px-6 py-2.5 rounded-full font-semibold transition"
+              className="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full font-semibold transition shadow-lg shadow-indigo-500/50"
             >
               <IconBrandTelegram size={20} className="mr-2" />
               Join us on Telegram
@@ -660,15 +658,15 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4">
               Frequently Asked Questions
             </h2>
-            <p className="text-base text-gray-400">
+            <p className="text-xl text-gray-400">
               Everything you need to know about Fantazy
             </p>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             <Accordion
               classNames={{
-                item: "backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl overflow-hidden mb-4",
+                item: "backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl overflow-hidden",
                 control: "hover:bg-white/10 text-white font-semibold text-lg p-6",
                 content: "text-gray-400 p-6 pt-0",
                 chevron: "text-indigo-400"
@@ -724,6 +722,67 @@ export default function Home() {
               View All FAQs
               <IconArrowNarrowRight size={20} className="ml-2" />
             </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 7: Final CTA */}
+      <div className="bg-black py-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="backdrop-blur-xl bg-gradient-to-br from-indigo-500/10 via-violet-500/10 to-indigo-500/10 border-2 border-indigo-500/50 rounded-3xl p-12 text-center relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-10">
+              <div className="absolute top-10 left-10 w-32 h-32 bg-indigo-500 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-10 right-10 w-40 h-40 bg-violet-500 rounded-full blur-3xl"></div>
+            </div>
+
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                Ready to Bring Your
+                <br />
+                <Text
+                  component="span"
+                  variant="gradient"
+                  gradient={{ from: 'indigo', to: 'violet' }}
+                  className="text-3xl md:text-4xl font-bold"
+                >
+                  Fantasy to Life?
+                </Text>
+              </h2>
+              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                Join thousands of creators who are already using Fantazy to unleash their creativity. Start free today.
+              </p>
+              
+              <div className="flex flex-wrap justify-center gap-4 mb-8">
+                <button
+                  onClick={() => router.push("/auth")}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full text-lg font-semibold transition shadow-2xl shadow-indigo-500/50"
+                >
+                  Get Started Free
+                </button>
+                <button
+                  onClick={() => router.push("/pricing")}
+                  className="backdrop-blur-xl bg-white/10 border-2 border-white/40 hover:bg-white/20 text-white px-8 py-3 rounded-full text-lg font-semibold transition"
+                >
+                  View Pricing
+                </button>
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
+                <div className="flex items-center gap-2">
+                  <IconSparkles size={16} className="text-indigo-400" />
+                  <span>1,000 Free Credits</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <IconShieldCheck size={16} className="text-indigo-400" />
+                  <span>No Credit Card Required</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <IconBolt size={16} className="text-indigo-400" />
+                  <span>Instant Access</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
