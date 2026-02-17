@@ -81,7 +81,7 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white">
 
       {/* SECTION 1: Hero Section */}
-      <div className="relative min-h-screen bg-black overflow-x-clip">
+      <div className="relative min-h-screen bg-black overflow-x-hidden">
         {/* Navigation */}
         <div className="absolute inset-0 z-20 h-30">
           <Header></Header>
@@ -187,14 +187,17 @@ export default function Home() {
 
         {/* Scroll Down Arrow */}
         <div className="absolute bottom-12 left-0 right-0 z-30 flex justify-center pointer-events-none">
-          <div
-            className="animate-bounce pointer-events-auto cursor-pointer"
-            onClick={() => {
-              const nextSection = document.getElementById('pick-your-tool');
-              nextSection?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            <IconChevronDown size={32} className="text-white" stroke={2.5} />
+          <div className="animate-bounce pointer-events-auto">
+            <div
+              onClick={() => {
+                const nextSection = document.getElementById('pick-your-tool');
+                nextSection?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex flex-col items-center gap-1 cursor-pointer bg-indigo-500/20 backdrop-blur-sm rounded-full px-4 py-3 border border-indigo-500/30"
+            >
+              <span className="text-white text-xs font-semibold uppercase tracking-wider">Scroll</span>
+              <IconChevronDown size={28} className="text-indigo-400" stroke={3} />
+            </div>
           </div>
         </div>
       </div>
