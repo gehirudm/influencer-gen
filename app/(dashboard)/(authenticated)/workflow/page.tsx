@@ -6,6 +6,7 @@ import {
     Title,
     Text,
     Textarea,
+    TextInput,
     Button,
     Card,
     Badge,
@@ -15,10 +16,9 @@ import {
     Group,
     Stack,
     Grid,
-    Progress
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconAlertCircle, IconPhoto, IconCheck, IconClock, IconPlayerPlay } from '@tabler/icons-react';
+import { IconAlertCircle, IconPhoto, IconCheck, IconClock, IconPlayerPlay, IconLink } from '@tabler/icons-react';
 import styles from './page.module.css';
 
 type JobStatus = 'IDLE' | 'IN_QUEUE' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
@@ -44,7 +44,9 @@ interface JobState {
 const POLL_INTERVAL = 2000; // Poll every 2 seconds
 
 export default function WorkflowPage() {
+    const [loraUrl, setLoraUrl] = useState('');
     const [prompt, setPrompt] = useState('');
+    const [negativePrompt, setNegativePrompt] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [jobState, setJobState] = useState<JobState>({
         jobId: null,
@@ -109,10 +111,19 @@ export default function WorkflowPage() {
     }, []);
 
     const handleSubmit = async () => {
+        if (!loraUrl.trim()) {
+            notifications.show({
+                title: 'Validation Error',
+                message: 'Please enter a LoRA URL',
+                color: 'red'
+            });
+            return;
+        }
+
         if (!prompt.trim()) {
             notifications.show({
                 title: 'Validation Error',
-                message: 'Please enter a prompt',
+                message: 'Please enter a positive prompt',
                 color: 'red'
             });
             return;
@@ -132,7 +143,11 @@ export default function WorkflowPage() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ prompt: prompt.trim() })
+                body: JSON.stringify({
+                    prompt: prompt.trim(),
+                    negativePrompt: negativePrompt.trim(),
+                    loraUrl: loraUrl.trim()
+                })
             });
 
             const data = await response.json();
@@ -191,20 +206,44 @@ export default function WorkflowPage() {
     return (
         <Container className={styles.container}>
             <Title order={1} className={styles.title}>
-                ComfyUI Workflow Generator
+                LoRA Workflow Generator
             </Title>
             <Text size="lg" c="dimmed" className={styles.description}>
-                Generate images using the Z-Image Turbo workflow. Enter your prompt below and click generate.
+                Generate images using a custom LoRA model. Provide the LoRA URL, your prompt, and optional negative prompt.
             </Text>
 
             <div className={styles.form}>
+                <TextInput
+                    label="LoRA URL"
+                    placeholder="https://huggingface.co/.../model.safetensors?download=true"
+                    leftSection={<IconLink size={16} />}
+                    value={loraUrl}
+                    onChange={(e) => setLoraUrl(e.currentTarget.value)}
+                    className={styles.promptInput}
+                    disabled={isSubmitting || isProcessing}
+                    description="Direct download URL to a .safetensors LoRA file"
+                    required
+                />
+
                 <Textarea
-                    label="Prompt"
-                    placeholder="Describe the image you want to generate... (e.g., 'A beautiful sunset over mountains, vibrant colors, cinematic lighting')"
+                    label="Positive Prompt"
+                    placeholder="Describe the image you want to generate..."
                     minRows={4}
                     maxRows={8}
                     value={prompt}
                     onChange={(e) => setPrompt(e.currentTarget.value)}
+                    className={styles.promptInput}
+                    disabled={isSubmitting || isProcessing}
+                    required
+                />
+
+                <Textarea
+                    label="Negative Prompt"
+                    placeholder="Describe what you don't want in the image... (optional)"
+                    minRows={2}
+                    maxRows={4}
+                    value={negativePrompt}
+                    onChange={(e) => setNegativePrompt(e.currentTarget.value)}
                     className={styles.promptInput}
                     disabled={isSubmitting || isProcessing}
                 />
@@ -213,7 +252,7 @@ export default function WorkflowPage() {
                     size="lg"
                     leftSection={isSubmitting || isProcessing ? <Loader size={18} color="white" /> : <IconPhoto size={18} />}
                     onClick={handleSubmit}
-                    disabled={isSubmitting || isProcessing || !prompt.trim()}
+                    disabled={isSubmitting || isProcessing || !prompt.trim() || !loraUrl.trim()}
                     className={styles.generateButton}
                     fullWidth
                 >
@@ -244,8 +283,8 @@ export default function WorkflowPage() {
                             <div className={styles.loaderContainer}>
                                 <Loader size="sm" />
                                 <Text size="sm">
-                                    {jobState.status === 'IN_QUEUE' 
-                                        ? 'Waiting in queue...' 
+                                    {jobState.status === 'IN_QUEUE'
+                                        ? 'Waiting in queue...'
                                         : 'Generating your image...'}
                                 </Text>
                             </div>
