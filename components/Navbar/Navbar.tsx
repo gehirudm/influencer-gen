@@ -58,17 +58,9 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
         <div className={classes.container}>
             <nav className={classes.navbar}>
                 <div className={classes.navbarMain}>
-                    <Group className={classes.header} justify="space-between">
-                        <Text
-                            component="span"
-                            inherit
-                            variant="gradient"
-                            gradient={{ from: 'blue', to: 'purple' }}
-                            fw="bolder"
-                            fz={26}
-                        >
-                            Fantazy.pro
-                        </Text>
+                    <Group className={classes.header} justify="flex-start" gap={8} wrap="nowrap">
+                        <Image src="/fantazy.png" alt="Fantazy Logo" width={36} height={36} />
+                        <Image src="/fantazy_text.png" alt="Fantazy" width={120} height={28} style={{ objectFit: 'contain' }} />
                     </Group>
                     {data.map((item) => (
                         <a
@@ -129,16 +121,7 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
         <div className={collapsedClasses.container}>
             <nav className={collapsedClasses.navbar}>
                 <Center className={classes.header}>
-                    <Text
-                        component="span"
-                        inherit
-                        variant="gradient"
-                        gradient={{ from: 'blue', to: 'cyan' }}
-                        fw="bolder"
-                        fz={26}
-                    >
-                        IGEN
-                    </Text>
+                    <Image src="/fantazy.png" alt="Fantazy Logo" width={36} height={36} />
                 </Center>
 
                 <div className={collapsedClasses.navbarMain}>

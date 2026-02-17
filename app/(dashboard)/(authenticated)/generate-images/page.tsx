@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react';
-import { 
-    Grid, 
-    Card, 
-    Stack, 
-    Button, 
-    Textarea, 
-    NumberInput, 
-    TextInput, 
+import {
+    Grid,
+    Card,
+    Stack,
+    Button,
+    Textarea,
+    NumberInput,
+    TextInput,
     Switch,
     Box,
     Text,
@@ -18,7 +18,8 @@ import {
     Badge,
     Image,
     Container,
-    SimpleGrid
+    SimpleGrid,
+    Accordion
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useForm } from '@mantine/form';
@@ -104,36 +105,36 @@ export default function ImageGeneratorPage() {
 
     // Premade character placeholders
     const premadeCharacters = [
-        { 
-            id: 'premade-1', 
+        {
+            id: 'premade-1',
             name: 'Emily Carter',
             age: '19',
             image: '/character/premade characters/Emily Carter.webp',
             tags: ['College', 'Blonde', 'Cheerful']
         },
-        { 
-            id: 'premade-2', 
+        {
+            id: 'premade-2',
             name: 'Laura Bennett',
             age: '38',
             image: '/character/premade characters/Laura Bennett.webp',
             tags: ['Mature', 'Confident', 'Caring']
         },
-        { 
-            id: 'premade-3', 
+        {
+            id: 'premade-3',
             name: 'Aiko Tanaka',
             age: '20',
             image: '/character/premade characters/Aiko Tanaka.webp',
             tags: ['Anime', 'Energetic', 'Cute']
         },
-        { 
-            id: 'premade-4', 
+        {
+            id: 'premade-4',
             name: 'Raven Blackwood',
             age: '22',
             image: '/character/premade characters/Raven Blackwood.webp',
             tags: ['Goth', 'Aesthetic', 'Mysterious']
         },
-        { 
-            id: 'premade-5', 
+        {
+            id: 'premade-5',
             name: 'Nyla Monroe',
             age: '25',
             image: '/character/premade characters/Nyla Monroe.webp',
@@ -200,7 +201,7 @@ export default function ImageGeneratorPage() {
                     snapshot.forEach((doc) => {
                         const data = doc.data();
                         if (data) {
-                            characterData.push({ 
+                            characterData.push({
                                 id: `marketplace-${data.characterId}`,
                                 name: data.characterName,
                                 image: data.characterImage,
@@ -266,13 +267,13 @@ export default function ImageGeneratorPage() {
         if (selectedReference && selectedCharacter && selectedCharacter.startsWith('premade-')) {
             const imageNumber = getPremadeCharacterImageNumber(selectedCharacter);
             const selectedRef = referenceImages.find(ref => ref.id === selectedReference);
-            
+
             if (imageNumber && selectedRef) {
                 setLoading(true);
-                
+
                 // Random loading time between 8-15 seconds
                 const randomLoadingTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
-                
+
                 setTimeout(() => {
                     const mockJob = {
                         id: `local-${Date.now()}`,
@@ -285,12 +286,12 @@ export default function ImageGeneratorPage() {
                             prompt: form.values.prompt || selectedRef.name,
                         }
                     };
-                    
+
                     // Add to jobs list (this will update the UI)
                     userJobs.unshift(mockJob as any);
-                    
+
                     setLoading(false);
-                    
+
                     // Start blur effect: 100% -> 20% -> 0%
                     setImageBlur(50);
                     setTimeout(() => {
@@ -299,14 +300,14 @@ export default function ImageGeneratorPage() {
                             setImageBlur(0);
                         }, 300);
                     }, 300);
-                    
+
                     notifications.show({
                         title: 'Success',
                         message: 'Image generated successfully!',
                         color: 'green'
                     });
                 }, randomLoadingTime);
-                
+
                 return;
             }
         }
@@ -377,8 +378,8 @@ export default function ImageGeneratorPage() {
             <Grid gutter="md" style={{ margin: 0, height: '100%' }}>
                 {/* Left Column - Input Data */}
                 <Grid.Col span={{ base: 12, md: 8 }} style={{ height: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column', padding: '0.75rem' }}>
-                    <ScrollArea 
-                        style={{ flex: 1, marginBottom: '1rem' }} 
+                    <ScrollArea
+                        style={{ flex: 1, marginBottom: '1rem' }}
                         scrollbarSize={10}
                         offsetScrollbars
                         styles={{
@@ -392,336 +393,346 @@ export default function ImageGeneratorPage() {
                             }
                         }}
                     >
-                    <Stack gap="md" pr="md">
-                        {/* Character Selection */}
-                        <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-                            <Text size="sm" fw={500} mb="sm" c="white">Select a Character</Text>
-                            {charactersLoading && (
-                                <Text size="sm" c="dimmed">Loading characters...</Text>
-                            )}
-                            <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                {/* Left Arrow */}
-                                <Box
-                                    onClick={scrollCharLeft}
-                                    style={{
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    <IconChevronLeft size={28} color="#4a7aba" />
-                                </Box>
-                                
-                                {/* Cards Container */}
-                                <Box
-                                    ref={charScrollRef}
-                                    style={{
-                                        overflow: 'hidden',
-                                        flex: 1,
-                                    }}
-                                >
-                                <Group gap="xs" wrap="nowrap">
-                                    {/* Create Your Own Character Card */}
-                                    <Card
-                                        p="sm"
+                        <Stack gap="md" pr="md">
+                            {/* Character Selection */}
+                            <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
+                                <Text size="sm" fw={500} mb="sm" c="white">Select a Character</Text>
+                                {charactersLoading && (
+                                    <Text size="sm" c="dimmed">Loading characters...</Text>
+                                )}
+                                <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {/* Left Arrow */}
+                                    <Box
+                                        onClick={scrollCharLeft}
                                         style={{
-                                            backgroundColor: '#2a2a2a',
-                                            border: '2px dashed #4a7aba',
                                             cursor: 'pointer',
-                                            minWidth: 'calc((100% - 32px) / 5)',
-                                            maxWidth: 'calc((100% - 32px) / 5)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexShrink: 0,
                                         }}
-                                        onClick={() => router.push('/dashboard/characters')}
                                     >
-                                        <Stack gap="xs">
-                                            <Box
-                                                style={{
-                                                    width: '100%',
-                                                    aspectRatio: '3/4',
-                                                    backgroundColor: '#1a1a1a',
-                                                    borderRadius: '4px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    border: '1px solid #444',
-                                                }}
-                                            >
-                                                <Stack align="center" gap="xs">
-                                                    <Text size="3rem" c="#4a7aba">+</Text>
-                                                    <Text size="xs" c="#4a7aba" fw={600} ta="center">
-                                                        Create Your Own
-                                                    </Text>
-                                                </Stack>
-                                            </Box>
-                                            <Text size="xs" fw={600} c="white" ta="center">
-                                                Custom Character
-                                            </Text>
-                                        </Stack>
-                                    </Card>
-                                    
-                                    {allCharacters.map((character) => (
-                                        <Card
-                                            key={character.id}
-                                            p="sm"
-                                            style={{
-                                                backgroundColor: selectedCharacter === character.id ? '#3a5a8a' : '#1a1a1a',
-                                                border: selectedCharacter === character.id ? '2px solid #4a7aba' : '1px solid #333',
-                                                cursor: 'pointer',
-                                                minWidth: 'calc((100% - 32px) / 5)',
-                                                maxWidth: 'calc((100% - 32px) / 5)',
-                                            }}
-                                            onClick={() => setSelectedCharacter(character.id)}
-                                        >
-                                            <Stack gap="xs">
-                                                <Box
-                                                    style={{
-                                                        width: '100%',
-                                                        aspectRatio: '3/4',
-                                                        backgroundColor: '#2a2a2a',
-                                                        borderRadius: '4px',
-                                                        overflow: 'hidden',
-                                                        position: 'relative',
-                                                    }}
-                                                >
-                                                    <img 
-                                                        src={character.image} 
-                                                        alt={character.name}
-                                                        style={{
-                                                            width: '100%',
-                                                            height: '100%',
-                                                            objectFit: 'cover'
-                                                        }}
-                                                    />
-                                                    {character.isMarketplace && (
-                                                        <Badge 
-                                                            variant="filled" 
-                                                            color={character.purchaseType === 'full_claim' ? 'violet' : 'blue'} 
-                                                            size="xs"
-                                                            leftSection={character.purchaseType === 'full_claim' ? <IconLock size={10} /> : <IconUsers size={10} />}
-                                                            style={{
-                                                                position: 'absolute',
-                                                                top: '4px',
-                                                                left: '4px',
-                                                            }}
-                                                        >
-                                                            {character.purchaseType === 'full_claim' ? 'Exclusive' : 'Licensed'}
-                                                        </Badge>
-                                                    )}
-                                                </Box>
-                                                <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
-                                                    {character.name} ({character.age})
-                                                </Text>
-                                            </Stack>
-                                        </Card>
-                                    ))}
-                                </Group>
-                                </Box>
-                                
-                                {/* Right Arrow */}
-                                <Box
-                                    onClick={scrollCharRight}
-                                    style={{
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    <IconChevronRight size={28} color="#4a7aba" />
-                                </Box>
-                            </Box>
-                        </Card>
+                                        <IconChevronLeft size={28} color="#4a7aba" />
+                                    </Box>
 
-                        {/* Reference Image Selection */}
-                        <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-                            <Text size="sm" fw={500} mb="sm" c="white">Reference Image Style</Text>
-                            <Text size="xs" c="dimmed" mb="sm">Choose a visual style for your generation</Text>
-                            <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                {/* Left Arrow */}
-                                <Box
-                                    onClick={scrollRefLeft}
-                                    style={{
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    <IconChevronLeft size={28} color="#4a7aba" />
-                                </Box>
-                                
-                                {/* Cards Container */}
-                                <Box
-                                    ref={refScrollRef}
-                                    style={{
-                                        overflow: 'hidden',
-                                        flex: 1,
-                                    }}
-                                >
-                                    <Group gap="xs" wrap="nowrap">
-                                {referenceImages.map((ref) => (
-                                    <Card
-                                        key={ref.id}
-                                        p="sm"
+                                    {/* Cards Container */}
+                                    <Box
+                                        ref={charScrollRef}
                                         style={{
-                                            backgroundColor: selectedReference === ref.id ? '#3a5a8a' : '#1a1a1a',
-                                            border: selectedReference === ref.id ? '2px solid #4a7aba' : '1px solid #333',
-                                            cursor: ref.premium ? 'not-allowed' : 'pointer',
-                                            opacity: ref.premium ? 0.6 : 1,
-                                            minWidth: 'calc((100% - 40px) / 6)',
-                                            maxWidth: 'calc((100% - 40px) / 6)',
+                                            overflow: 'hidden',
+                                            flex: 1,
                                         }}
-                                        onClick={() => !ref.premium && setSelectedReference(ref.id)}
                                     >
-                                        <Stack gap="xs">
-                                            <Box
+                                        <Group gap="xs" wrap="nowrap">
+                                            {/* Create Your Own Character Card */}
+                                            <Card
+                                                p="sm"
                                                 style={{
-                                                    width: '100%',
-                                                    aspectRatio: '3/4',
                                                     backgroundColor: '#2a2a2a',
-                                                    borderRadius: '4px',
-                                                    overflow: 'hidden',
-                                                    position: 'relative',
+                                                    border: '2px dashed #4a7aba',
+                                                    cursor: 'pointer',
+                                                    minWidth: 'calc((100% - 32px) / 5)',
+                                                    maxWidth: 'calc((100% - 32px) / 5)',
                                                 }}
+                                                onClick={() => router.push('/dashboard/characters')}
                                             >
-                                                <img 
-                                                    src={ref.image} 
-                                                    alt={ref.name}
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        objectFit: 'cover',
-                                                        transition: 'filter 0.2s ease, transform 0.3s ease',
-                                                    }}
-                                                    onMouseEnter={(e) => !ref.premium && (e.currentTarget.style.transform = 'scale(1.08)')}
-                                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                                />
-                                                {ref.premium && (
+                                                <Stack gap="xs">
                                                     <Box
                                                         style={{
-                                                            position: 'absolute',
-                                                            top: '8px',
-                                                            right: '8px',
-                                                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                                                            padding: '6px',
-                                                            borderRadius: '50%',
+                                                            width: '100%',
+                                                            aspectRatio: '3/4',
+                                                            backgroundColor: '#1a1a1a',
+                                                            borderRadius: '4px',
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center',
+                                                            border: '1px solid #444',
                                                         }}
                                                     >
-                                                        <IconCrown size={20} color="#FFD700" />
+                                                        <Stack align="center" gap="xs">
+                                                            <Text size="3rem" c="#4a7aba">+</Text>
+                                                            <Text size="xs" c="#4a7aba" fw={600} ta="center">
+                                                                Create Your Own
+                                                            </Text>
+                                                        </Stack>
                                                     </Box>
-                                                )}
-                                            </Box>
-                                            <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
-                                                {ref.name}
-                                            </Text>
-                                        </Stack>
-                                    </Card>
-                                ))}
-                                </Group>
-                                </Box>
-                                
-                                {/* Right Arrow */}
-                                <Box
-                                    onClick={scrollRefRight}
-                                    style={{
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    <IconChevronRight size={28} color="#4a7aba" />
-                                </Box>
-                            </Box>
-                        </Card>
+                                                    <Text size="xs" fw={600} c="white" ta="center">
+                                                        Custom Character
+                                                    </Text>
+                                                </Stack>
+                                            </Card>
 
-                        {/* Image Prompt */}
-                        <Textarea
-                            label="Image Prompt"
-                            placeholder="Describe the image you want to generate..."
-                            minRows={4}
-                            {...form.getInputProps('prompt')}
-                            disabled
-                            styles={{ input: { opacity: 0.6 } }}
-                        />
+                                            {allCharacters.map((character) => (
+                                                <Card
+                                                    key={character.id}
+                                                    p="sm"
+                                                    style={{
+                                                        backgroundColor: selectedCharacter === character.id ? '#3a5a8a' : '#1a1a1a',
+                                                        border: selectedCharacter === character.id ? '2px solid #4a7aba' : '1px solid #333',
+                                                        cursor: 'pointer',
+                                                        minWidth: 'calc((100% - 32px) / 5)',
+                                                        maxWidth: 'calc((100% - 32px) / 5)',
+                                                    }}
+                                                    onClick={() => setSelectedCharacter(character.id)}
+                                                >
+                                                    <Stack gap="xs">
+                                                        <Box
+                                                            style={{
+                                                                width: '100%',
+                                                                aspectRatio: '3/4',
+                                                                backgroundColor: '#2a2a2a',
+                                                                borderRadius: '4px',
+                                                                overflow: 'hidden',
+                                                                position: 'relative',
+                                                            }}
+                                                        >
+                                                            <img
+                                                                src={character.image}
+                                                                alt={character.name}
+                                                                style={{
+                                                                    width: '100%',
+                                                                    height: '100%',
+                                                                    objectFit: 'cover'
+                                                                }}
+                                                            />
+                                                            {character.isMarketplace && (
+                                                                <Badge
+                                                                    variant="filled"
+                                                                    color={character.purchaseType === 'full_claim' ? 'violet' : 'blue'}
+                                                                    size="xs"
+                                                                    leftSection={character.purchaseType === 'full_claim' ? <IconLock size={10} /> : <IconUsers size={10} />}
+                                                                    style={{
+                                                                        position: 'absolute',
+                                                                        top: '4px',
+                                                                        left: '4px',
+                                                                    }}
+                                                                >
+                                                                    {character.purchaseType === 'full_claim' ? 'Exclusive' : 'Licensed'}
+                                                                </Badge>
+                                                            )}
+                                                        </Box>
+                                                        <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
+                                                            {character.name} ({character.age})
+                                                        </Text>
+                                                    </Stack>
+                                                </Card>
+                                            ))}
+                                        </Group>
+                                    </Box>
 
-                        {/* Negative Prompt */}
-                        <Textarea
-                            label="Negative Prompt"
-                            placeholder="What you don't want in the image..."
-                            minRows={2}
-                            {...form.getInputProps('negative_prompt')}
-                            disabled
-                            styles={{ input: { opacity: 0.6 } }}
-                        />
-
-                        {/* Steps and CFG in one line */}
-                        <Group grow align="flex-start">
-                            <NumberInput
-                                label="Steps"
-                                description="Inference steps"
-                                min={1}
-                                max={100}
-                                {...form.getInputProps('steps')}
-                                disabled
-                                styles={{ input: { opacity: 0.6 } }}
-                            />
-                            <NumberInput
-                                label="CFG Scale"
-                                description="Prompt adherence"
-                                min={1}
-                                max={20}
-                                step={0.5}
-                                decimalScale={1}
-                                {...form.getInputProps('cfg_scale')}
-                                disabled
-                                styles={{ input: { opacity: 0.6 } }}
-                            />
-                        </Group>
-
-                        {/* Seed */}
-                        <TextInput
-                            label="Seed"
-                            placeholder="Leave empty for random"
-                            description="Use a specific seed for reproducible results"
-                            {...form.getInputProps('seed')}
-                            disabled
-                            styles={{ input: { opacity: 0.6 } }}
-                        />
-
-                        {/* Image Format (Aspect Ratio) - Card Selection */}
-                        <Box style={{ opacity: 0.6, pointerEvents: 'none' }}>
-                            <Text size="sm" fw={500} mb="xs" c="white">Image Format</Text>
-                            <Text size="xs" c="dimmed" mb="sm">Select the aspect ratio for the output image</Text>
-                            <SimpleGrid cols={4} spacing="xs">
-                                {aspectRatios.map((ratio) => (
-                                    <Card
-                                        key={ratio.value}
-                                        p="sm"
+                                    {/* Right Arrow */}
+                                    <Box
+                                        onClick={scrollCharRight}
                                         style={{
-                                            backgroundColor: form.values.aspectRatio === ratio.value ? '#3a5a8a' : '#2a2a2a',
-                                            border: form.values.aspectRatio === ratio.value ? '2px solid #4a7aba' : '1px solid #444',
-                                            cursor: 'not-allowed',
-                                            textAlign: 'center',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexShrink: 0,
                                         }}
                                     >
-                                        <Text size="sm" fw={500} c="white">{ratio.label}</Text>
-                                        <Text size="xs" c="dimmed">{ratio.width}×{ratio.height}</Text>
-                                    </Card>
-                                ))}
-                            </SimpleGrid>
-                        </Box>
-                    </Stack>
+                                        <IconChevronRight size={28} color="#4a7aba" />
+                                    </Box>
+                                </Box>
+                            </Card>
+
+                            {/* Reference Image Selection */}
+                            <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
+                                <Text size="sm" fw={500} mb="sm" c="white">Reference Image Style</Text>
+                                <Text size="xs" c="dimmed" mb="sm">Choose a visual style for your generation</Text>
+                                <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {/* Left Arrow */}
+                                    <Box
+                                        onClick={scrollRefLeft}
+                                        style={{
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        <IconChevronLeft size={28} color="#4a7aba" />
+                                    </Box>
+
+                                    {/* Cards Container */}
+                                    <Box
+                                        ref={refScrollRef}
+                                        style={{
+                                            overflow: 'hidden',
+                                            flex: 1,
+                                        }}
+                                    >
+                                        <Group gap="xs" wrap="nowrap">
+                                            {referenceImages.map((ref) => (
+                                                <Card
+                                                    key={ref.id}
+                                                    p="sm"
+                                                    style={{
+                                                        backgroundColor: selectedReference === ref.id ? '#3a5a8a' : '#1a1a1a',
+                                                        border: selectedReference === ref.id ? '2px solid #4a7aba' : '1px solid #333',
+                                                        cursor: ref.premium ? 'not-allowed' : 'pointer',
+                                                        opacity: ref.premium ? 0.6 : 1,
+                                                        minWidth: 'calc((100% - 40px) / 6)',
+                                                        maxWidth: 'calc((100% - 40px) / 6)',
+                                                    }}
+                                                    onClick={() => !ref.premium && setSelectedReference(ref.id)}
+                                                >
+                                                    <Stack gap="xs">
+                                                        <Box
+                                                            style={{
+                                                                width: '100%',
+                                                                aspectRatio: '3/4',
+                                                                backgroundColor: '#2a2a2a',
+                                                                borderRadius: '4px',
+                                                                overflow: 'hidden',
+                                                                position: 'relative',
+                                                            }}
+                                                        >
+                                                            <img
+                                                                src={ref.image}
+                                                                alt={ref.name}
+                                                                style={{
+                                                                    width: '100%',
+                                                                    height: '100%',
+                                                                    objectFit: 'cover',
+                                                                    transition: 'filter 0.2s ease, transform 0.3s ease',
+                                                                }}
+                                                                onMouseEnter={(e) => !ref.premium && (e.currentTarget.style.transform = 'scale(1.08)')}
+                                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                                            />
+                                                            {ref.premium && (
+                                                                <Box
+                                                                    style={{
+                                                                        position: 'absolute',
+                                                                        top: '8px',
+                                                                        right: '8px',
+                                                                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                                                        padding: '6px',
+                                                                        borderRadius: '50%',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                    }}
+                                                                >
+                                                                    <IconCrown size={20} color="#FFD700" />
+                                                                </Box>
+                                                            )}
+                                                        </Box>
+                                                        <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
+                                                            {ref.name}
+                                                        </Text>
+                                                    </Stack>
+                                                </Card>
+                                            ))}
+                                        </Group>
+                                    </Box>
+
+                                    {/* Right Arrow */}
+                                    <Box
+                                        onClick={scrollRefRight}
+                                        style={{
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexShrink: 0,
+                                        }}
+                                    >
+                                        <IconChevronRight size={28} color="#4a7aba" />
+                                    </Box>
+                                </Box>
+                            </Card>
+
+                            {/* Image Prompt */}
+                            <Textarea
+                                label="Image Prompt"
+                                placeholder="Describe the image you want to generate..."
+                                minRows={4}
+                                {...form.getInputProps('prompt')}
+                                disabled
+                                styles={{ input: { opacity: 0.6 } }}
+                            />
+
+                            {/* Custom Settings Accordion */}
+                            <Accordion variant="contained">
+                                <Accordion.Item value="custom-settings" style={{ border: '1px solid #333', backgroundColor: '#0a0a0a' }}>
+                                    <Accordion.Control style={{ color: 'white' }}>Custom Settings</Accordion.Control>
+                                    <Accordion.Panel>
+                                        <Stack gap="md">
+                                            {/* Negative Prompt */}
+                                            <Textarea
+                                                label="Negative Prompt"
+                                                placeholder="What you don't want in the image..."
+                                                minRows={2}
+                                                {...form.getInputProps('negative_prompt')}
+                                                disabled
+                                                styles={{ input: { opacity: 0.6 } }}
+                                            />
+
+                                            {/* Steps and CFG in one line */}
+                                            <Group grow align="flex-start">
+                                                <NumberInput
+                                                    label="Steps"
+                                                    description="Inference steps"
+                                                    min={1}
+                                                    max={100}
+                                                    {...form.getInputProps('steps')}
+                                                    disabled
+                                                    styles={{ input: { opacity: 0.6 } }}
+                                                />
+                                                <NumberInput
+                                                    label="CFG Scale"
+                                                    description="Prompt adherence"
+                                                    min={1}
+                                                    max={20}
+                                                    step={0.5}
+                                                    decimalScale={1}
+                                                    {...form.getInputProps('cfg_scale')}
+                                                    disabled
+                                                    styles={{ input: { opacity: 0.6 } }}
+                                                />
+                                            </Group>
+
+                                            {/* Seed */}
+                                            <TextInput
+                                                label="Seed"
+                                                placeholder="Leave empty for random"
+                                                description="Use a specific seed for reproducible results"
+                                                {...form.getInputProps('seed')}
+                                                disabled
+                                                styles={{ input: { opacity: 0.6 } }}
+                                            />
+
+                                            {/* Image Format (Aspect Ratio) - Card Selection */}
+                                            <Box style={{ opacity: 0.6, pointerEvents: 'none' }}>
+                                                <Text size="sm" fw={500} mb="xs" c="white">Image Format</Text>
+                                                <Text size="xs" c="dimmed" mb="sm">Select the aspect ratio for the output image</Text>
+                                                <SimpleGrid cols={4} spacing="xs">
+                                                    {aspectRatios.map((ratio) => (
+                                                        <Card
+                                                            key={ratio.value}
+                                                            p="sm"
+                                                            style={{
+                                                                backgroundColor: form.values.aspectRatio === ratio.value ? '#3a5a8a' : '#2a2a2a',
+                                                                border: form.values.aspectRatio === ratio.value ? '2px solid #4a7aba' : '1px solid #444',
+                                                                cursor: 'not-allowed',
+                                                                textAlign: 'center',
+                                                            }}
+                                                        >
+                                                            <Text size="sm" fw={500} c="white">{ratio.label}</Text>
+                                                            <Text size="xs" c="dimmed">{ratio.width}×{ratio.height}</Text>
+                                                        </Card>
+                                                    ))}
+                                                </SimpleGrid>
+                                            </Box>
+                                        </Stack>
+                                    </Accordion.Panel>
+                                </Accordion.Item>
+                            </Accordion>
+                        </Stack>
                     </ScrollArea>
-                    
+
                     {/* Generate Button - Sticky at bottom */}
                     <Button
                         fullWidth
@@ -731,7 +742,7 @@ export default function ImageGeneratorPage() {
                     >
                         Generate (Costs Tokens)
                     </Button>
-            </Grid.Col>
+                </Grid.Col>
 
                 {/* Right Column - Output */}
                 <Grid.Col span={{ base: 12, md: 4 }} style={{ height: 'calc(100vh - 40px)', padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
@@ -768,8 +779,8 @@ export default function ImageGeneratorPage() {
                                         src={latestJob.imageUrls[0].privateUrl}
                                         alt="Latest generated image"
                                         fit="contain"
-                                        style={{ 
-                                            width: '100%', 
+                                        style={{
+                                            width: '100%',
                                             height: '100%',
                                             filter: `blur(${imageBlur}px)`,
                                             transition: 'none'
