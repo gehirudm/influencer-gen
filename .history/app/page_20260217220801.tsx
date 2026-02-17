@@ -103,7 +103,7 @@ export default function Home() {
             </div>
             {/* Bottom Left Image */}
             <div 
-              className="absolute top-48 left-0 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl z-0"
+              className="absolute top-28 left-0 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl z-0"
               style={{ transform: 'rotate(8deg) translateY(0px)' }}
             >
               <img
