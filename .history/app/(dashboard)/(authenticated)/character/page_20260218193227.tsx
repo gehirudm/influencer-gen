@@ -347,7 +347,7 @@ export default function CharacterCreationPage() {
                             ))}
                         </SimpleGrid>
                     </Card>
-                </div>
+                </Card>
             </Stack>
 
             {/* Delete Confirmation Modal */}

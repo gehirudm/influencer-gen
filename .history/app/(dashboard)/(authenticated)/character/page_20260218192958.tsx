@@ -155,7 +155,7 @@ export default function CharacterCreationPage() {
             
             <Stack gap="md">
                 {/* Your Characters Section */}
-                <div>
+                <Card p={{ base: 'md', md: 'lg' }} withBorder={false}>
                     <Title size={36} mb={{ base: 'md', md: 'lg' }} c="white">
                         Your Characters
                     </Title>
@@ -288,10 +288,10 @@ export default function CharacterCreationPage() {
                             </SimpleGrid>
                         )}
                     </Card>
-                </div>
+                </Card>
 
                 {/* Use a Premade Character Section */}
-                <div>
+                <Card p={{ base: 'md', md: 'lg' }} withBorder={false}>
                     <Title size={36} mb={{ base: 'md', md: 'lg' }} c="white">
                         Premade Characters
                     </Title>
@@ -347,7 +347,7 @@ export default function CharacterCreationPage() {
                             ))}
                         </SimpleGrid>
                     </Card>
-                </div>
+                </Card>
             </Stack>
 
             {/* Delete Confirmation Modal */}
