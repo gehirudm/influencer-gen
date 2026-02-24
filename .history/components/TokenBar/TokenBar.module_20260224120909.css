@@ -1,0 +1,127 @@
+.tokenBar {
+    position: sticky;
+    top: calc(var(--mantine-spacing-md) * -1);
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: calc(var(--mantine-spacing-md) * -1) calc(var(--mantine-spacing-md) * -1) 0 calc(var(--mantine-spacing-md) * -1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 0 var(--mantine-spacing-xl);
+}
+
+.tokenCount {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #e0e0e0;
+}
+
+.tokenIcon {
+    color: #fbbf24;
+    width: 18px;
+    height: 18px;
+}
+
+.tokenValue {
+    color: #fbbf24;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.loraIcon {
+    color: #a78bfa;
+    width: 18px;
+    height: 18px;
+}
+
+.loraValue {
+    color: #a78bfa;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.addButton {
+    height: 28px;
+    font-size: 12px;
+    padding: 0 12px;
+    margin-left: auto;
+    background: linear-gradient(135deg, rgb(99, 102, 241) 0%, rgb(168, 85, 247) 100%);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.addButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.skeleton {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.spacer {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .tokenBar {
+        height: 36px;
+        top: -20px;
+        margin: -20px -10px 0 -10px;
+    }
+
+    .content {
+        gap: 12px;
+        padding: 0 20px;
+    }
+
+    .tokenCount {
+        font-size: 12px;
+    }
+
+    .tokenValue {
+        font-size: 13px;
+    }
+
+    .addButton {
+        height: 26px;
+        font-size: 11px;
+        padding: 0 10px;
+    }
+}
