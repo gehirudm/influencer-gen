@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react';
-import { useMediaQuery } from '@mantine/hooks';
 import {
     Grid,
     Card,
@@ -67,7 +66,6 @@ export default function ImageGeneratorPage() {
     const { characters, loading: charactersLoading } = useCharacters();
     const { jobs: userJobs } = useUserJobs();
     const router = useRouter();
-    const isMobile = useMediaQuery('(max-width: 768px)');
 
     const [loading, setLoading] = useState(false);
     const [useCharacter, setUseCharacter] = useState(true);
@@ -376,14 +374,14 @@ export default function ImageGeneratorPage() {
     const previousJobs = completedJobs.slice(1);
 
     return (
-        <Box style={{ height: '100%', width: '100%' }} pt={{ base: 'sm', md: 0 }}>
-            <Grid gutter="xs" style={{ margin: 0, height: '100%' }}>
+        <Box style={{ height: '100%', width: '100%' }}>
+            <Grid gutter="md" style={{ margin: 0, height: '100%' }}>
                 {/* Left Column - Input Data */}
-                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: isMobile ? 'auto' : 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column', padding: isMobile ? '0.25rem 0.15rem' : '0.75rem' }}>
+                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column', padding: '0.75rem' }}>
                     <ScrollArea
-                        style={{ flex: 1, marginBottom: isMobile ? '0.5rem' : '1rem' }}
-                        scrollbarSize={isMobile ? 0 : 10}
-                        offsetScrollbars={!isMobile}
+                        style={{ flex: 1, marginBottom: '1rem' }}
+                        scrollbarSize={10}
+                        offsetScrollbars
                         styles={{
                             scrollbar: {
                                 '&[data-orientation="vertical"] .mantine-ScrollArea-thumb': {
@@ -395,7 +393,7 @@ export default function ImageGeneratorPage() {
                             }
                         }}
                     >
-                        <Stack gap={isMobile ? 'xs' : 'md'} pr={isMobile ? 0 : 'md'}>
+                        <Stack gap="md" pr="md">
                             {/* Character Selection */}
                             <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
                                 <Text size="sm" fw={500} mb="sm" c="white">Select a Character</Text>
@@ -433,8 +431,8 @@ export default function ImageGeneratorPage() {
                                                     backgroundColor: '#2a2a2a',
                                                     border: '2px dashed #4a7aba',
                                                     cursor: 'pointer',
-                                                    minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
-                                                    maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
+                                                    minWidth: 'calc((100% - 32px) / 5)',
+                                                    maxWidth: 'calc((100% - 32px) / 5)',
                                                 }}
                                                 onClick={() => router.push('/dashboard/characters')}
                                             >
@@ -451,10 +449,15 @@ export default function ImageGeneratorPage() {
                                                             border: '1px solid #444',
                                                         }}
                                                     >
-                                                        <Text size="2rem" c="#4a7aba">+</Text>
+                                                        <Stack align="center" gap="xs">
+                                                            <Text size="3rem" c="#4a7aba">+</Text>
+                                                            <Text size="xs" c="#4a7aba" fw={600} ta="center">
+                                                                Create Your Own
+                                                            </Text>
+                                                        </Stack>
                                                     </Box>
-                                                    <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
-                                                        Custom
+                                                    <Text size="xs" fw={600} c="white" ta="center">
+                                                        Custom Character
                                                     </Text>
                                                 </Stack>
                                             </Card>
@@ -467,8 +470,8 @@ export default function ImageGeneratorPage() {
                                                         backgroundColor: selectedCharacter === character.id ? '#3a5a8a' : '#1a1a1a',
                                                         border: selectedCharacter === character.id ? '2px solid #4a7aba' : '1px solid #333',
                                                         cursor: 'pointer',
-                                                        minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
-                                                        maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
+                                                        minWidth: 'calc((100% - 32px) / 5)',
+                                                        maxWidth: 'calc((100% - 32px) / 5)',
                                                     }}
                                                     onClick={() => setSelectedCharacter(character.id)}
                                                 >
@@ -570,8 +573,8 @@ export default function ImageGeneratorPage() {
                                                         border: selectedReference === ref.id ? '2px solid #4a7aba' : '1px solid #333',
                                                         cursor: ref.premium ? 'not-allowed' : 'pointer',
                                                         opacity: ref.premium ? 0.6 : 1,
-                                                        minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
-                                                        maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
+                                                        minWidth: 'calc((100% - 40px) / 6)',
+                                                        maxWidth: 'calc((100% - 40px) / 6)',
                                                     }}
                                                     onClick={() => !ref.premium && setSelectedReference(ref.id)}
                                                 >
@@ -742,10 +745,10 @@ export default function ImageGeneratorPage() {
                 </Grid.Col>
 
                 {/* Right Column - Output */}
-                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: isMobile ? 'auto' : 'calc(100vh - 40px)', padding: isMobile ? '0.25rem 0.15rem' : '0.75rem', display: 'flex', flexDirection: 'column' }}>
+                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: 'calc(100vh - 40px)', padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
                     <Stack gap="md" style={{ flex: 1, overflow: 'hidden' }}>
                         {/* Current/Latest Image */}
-                        <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444', flex: isMobile ? undefined : 1, minHeight: isMobile ? '200px' : 0, maxHeight: isMobile ? '260px' : undefined }}>
+                        <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444', flex: 1, minHeight: 0 }}>
                             <Box
                                 style={{
                                     width: '100%',

@@ -23,6 +23,7 @@ import {
   IconCrown
 } from "@tabler/icons-react";
 import { Header } from "@/components/Header/Header";
+import Footer from "@/components/Footer/Footer";
 import { useEffect, useState } from "react";
 
 function BackgroundImageCarousel() {

@@ -20,7 +20,7 @@
     align-items: center;
     gap: 16px;
     width: 100%;
-    padding: 0 var(--mantine-spacing-xl);
+    padding: 0 var(--mantine-spacing-md);
 }
 
 .tokenCount {
@@ -108,7 +108,7 @@
 
     .content {
         gap: 12px;
-        padding: 0 20px;
+        padding: 0 10px;
     }
 
     .tokenCount {

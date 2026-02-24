@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useCsrfToken } from "@/hooks/useCsrfToken";
 import { IconBrandGoogle, IconBrandGoogleFilled } from "@tabler/icons-react";
 import { Header } from "@/components/Header/Header";
+import Footer from "@/components/Footer/Footer";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 
 

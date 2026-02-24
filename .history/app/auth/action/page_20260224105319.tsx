@@ -123,6 +123,7 @@ export default function AuthPage() {
                         <Text ta="center" mt="md">Processing your request...</Text>
                     </Stack>
                 </Center>
+                <Footer />
             </>
         );
     }
@@ -147,6 +148,7 @@ export default function AuthPage() {
                         </Button>
                     </Paper>
                 </Container>
+                <Footer />
             </>
         );
     }
@@ -202,6 +204,7 @@ export default function AuthPage() {
                         </form>
                     </Paper>
                 </Container>
+                <Footer />
             </>
         );
     }
@@ -233,6 +236,7 @@ export default function AuthPage() {
                         </Text>
                     </Paper>
                 </Container>
+                <Footer />
             </>
         );
     }
@@ -257,6 +261,7 @@ export default function AuthPage() {
                         </Button>
                     </Paper>
                 </Container>
+                <Footer />
             </>
         );
     }
