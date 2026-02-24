@@ -273,7 +273,7 @@ export default function CharacterCreationPage() {
                                             </Group>
                                         </Box>
                                         
-                                        <Text size="sm" c="white" ta="center" mb="xs">
+                                        <Text size="sm" c="white" ta="center" mb="sm">
                                             <Text component="span" fw={600}>{character.characterName}</Text>
                                         </Text>
                                         

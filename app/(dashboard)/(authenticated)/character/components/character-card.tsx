@@ -79,7 +79,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
     const displayImage = character.baseImageUrl || character.imageUrls[0];
 
     return (
-        <Card p="md" style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}>
+        <Card p={{ base: 'xs', md: 'md' }} style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}>
             <Box
                 style={{
                     width: '100%',
@@ -88,7 +88,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
                     borderRadius: '8px',
                     overflow: 'hidden',
                     position: 'relative',
-                    marginBottom: '12px',
+                    marginBottom: '8px',
                 }}
             >
                 <img 
@@ -135,7 +135,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
                 </ActionIcon>
             </Box>
             
-            <Text size="sm" c="white" ta="center" mb="sm">
+            <Text size="sm" c="white" ta="center" mb="xs">
                 <Text component="span" fw={600}>{character.name}</Text>
                 {character.age && (
                     <Text component="span" fw={400}> ({character.age})</Text>

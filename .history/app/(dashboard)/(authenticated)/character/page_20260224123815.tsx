@@ -217,7 +217,7 @@ export default function CharacterCreationPage() {
 
                                 {/* Marketplace Purchased Characters */}
                                 {marketplaceCharacters.map((character) => (
-                                    <Card key={character.id} p={{ base: 'xs', md: 'md' }} style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}>
+                                    <Card key={character.id} p="md" style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}>
                                         <Box
                                             style={{
                                                 width: '100%',
@@ -226,7 +226,7 @@ export default function CharacterCreationPage() {
                                                 borderRadius: '8px',
                                                 overflow: 'hidden',
                                                 position: 'relative',
-                                                marginBottom: '8px',
+                                                marginBottom: '12px',
                                             }}
                                         >
                                             <img 
@@ -273,7 +273,7 @@ export default function CharacterCreationPage() {
                                             </Group>
                                         </Box>
                                         
-                                        <Text size="sm" c="white" ta="center" mb="xs">
+                                        <Text size="sm" c="white" ta="center" mb="sm">
                                             <Text component="span" fw={600}>{character.characterName}</Text>
                                         </Text>
                                         

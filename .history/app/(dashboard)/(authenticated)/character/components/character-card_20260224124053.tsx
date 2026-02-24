@@ -25,7 +25,7 @@ interface CharacterCardProps {
         name: string;
         imageUrls: string[];
         baseImageUrl?: string;
-        ageRange?: string;
+        age?: string;
         gender?: string;
     }
 }
@@ -72,14 +72,14 @@ export function CharacterCard({ character }: CharacterCardProps) {
 
     const handleUseCharacter = (characterId: string) => {
         selectCharacter(characterId);
-        router.push(`/create?gen_type=advanced`);
+        router.push(`/generate-images?gen_type=advanced`);
     }
 
     // Use base image if available, otherwise fall back to first image
     const displayImage = character.baseImageUrl || character.imageUrls[0];
 
     return (
-        <Card p="md" style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}>
+        <Card p={{ base: 'xs', md: 'md' }} style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}>
             <Box
                 style={{
                     width: '100%',
@@ -88,7 +88,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
                     borderRadius: '8px',
                     overflow: 'hidden',
                     position: 'relative',
-                    marginBottom: '12px',
+                    marginBottom: '8px',
                 }}
             >
                 <img 
@@ -135,10 +135,10 @@ export function CharacterCard({ character }: CharacterCardProps) {
                 </ActionIcon>
             </Box>
             
-            <Text size="sm" c="white" ta="center" mb="sm">
+            <Text size="sm" c="white" ta="center" mb="xs">
                 <Text component="span" fw={600}>{character.name}</Text>
-                {character.ageRange && (
-                    <Text component="span" fw={400}> ({character.ageRange})</Text>
+                {character.age && (
+                    <Text component="span" fw={400}> ({character.age})</Text>
                 )}
             </Text>
             

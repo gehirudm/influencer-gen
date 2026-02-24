@@ -168,7 +168,7 @@ export default function CharacterCreationPage() {
                             <SimpleGrid cols={{ base: 2, sm: 2, md: 3, lg: 5 }} spacing="md">
                                 {/* Create New Character Card */}
                                 <Card 
-                                    p={{ base: 'xs', md: 'sm' }}
+                                    p="sm" 
                                     style={{ 
                                         backgroundColor: '#2a2a2a', 
                                         border: '2px dashed #4a7aba', 
@@ -179,32 +179,23 @@ export default function CharacterCreationPage() {
                                     <Box
                                         style={{
                                             width: '100%',
-                                            aspectRatio: '3/4',
+                                            height: '100%',
                                             backgroundColor: '#1a1a1a',
                                             borderRadius: '4px',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             border: '1px solid #444',
-                                            marginBottom: '8px',
+                                            minHeight: '280px',
                                         }}
                                     >
-                                        <Text size="3rem" c="#4a7aba">+</Text>
+                                        <Stack align="center" gap="xs">
+                                            <Text size="3rem" c="#4a7aba">+</Text>
+                                            <Text size="sm" c="#4a7aba" fw={600} ta="center">
+                                                Create a new character
+                                            </Text>
+                                        </Stack>
                                     </Box>
-                                    <Text size="sm" c="#4a7aba" fw={600} ta="center" mb="xs">
-                                        New Character
-                                    </Text>
-                                    <Button
-                                        variant="outline"
-                                        color="blue"
-                                        radius="sm"
-                                        size="sm"
-                                        fullWidth
-                                        style={{ fontWeight: 700, pointerEvents: 'none' }}
-                                        tabIndex={-1}
-                                    >
-                                        CREATE
-                                    </Button>
                                 </Card>
 
                                 {/* User Characters */}
@@ -217,7 +208,7 @@ export default function CharacterCreationPage() {
 
                                 {/* Marketplace Purchased Characters */}
                                 {marketplaceCharacters.map((character) => (
-                                    <Card key={character.id} p={{ base: 'xs', md: 'md' }} style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}>
+                                    <Card key={character.id} p="md" style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}>
                                         <Box
                                             style={{
                                                 width: '100%',
@@ -226,7 +217,7 @@ export default function CharacterCreationPage() {
                                                 borderRadius: '8px',
                                                 overflow: 'hidden',
                                                 position: 'relative',
-                                                marginBottom: '8px',
+                                                marginBottom: '12px',
                                             }}
                                         >
                                             <img 
@@ -273,7 +264,7 @@ export default function CharacterCreationPage() {
                                             </Group>
                                         </Box>
                                         
-                                        <Text size="sm" c="white" ta="center" mb="xs">
+                                        <Text size="sm" c="white" ta="center" mb="sm">
                                             <Text component="span" fw={600}>{character.characterName}</Text>
                                         </Text>
                                         
