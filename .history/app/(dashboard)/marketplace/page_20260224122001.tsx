@@ -317,15 +317,10 @@ export default function MarketplacePage() {
       <Modal
         opened={opened}
         onClose={handleCloseModal}
-        size={isMobile ? 'calc(100vw - 32px)' : 'xl'}
+        size="xl"
         padding={0}
         withCloseButton={false}
         centered
-        scrollAreaComponent={undefined}
-        overlayProps={{ backgroundOpacity: 0.8, blur: 4 }}
-        styles={{
-          content: { maxHeight: isMobile ? '90vh' : undefined, overflowY: isMobile ? 'auto' : undefined },
-        }}
       >
         {selectedCharacter && (
           <div className={classes.modalContent}>
@@ -339,12 +334,9 @@ export default function MarketplacePage() {
               <IconX size={20} />
             </ActionIcon>
 
-            <Group align="flex-start" gap={0} wrap="nowrap" style={isMobile ? { flexDirection: 'column', height: 'auto' } : { height: '600px' }}>
+            <Group align="flex-start" gap={0} wrap="nowrap" style={{ height: '600px' }}>
               {/* Left: Image */}
-              <Box style={isMobile
-                ? { width: '100%', height: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' }
-                : { width: '50%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' }
-              }>
+              <Box style={{ width: '50%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' }}>
                 <Image
                   src={selectedCharacter.image}
                   alt={selectedCharacter.name}
@@ -354,10 +346,7 @@ export default function MarketplacePage() {
               </Box>
 
               {/* Right: Details */}
-              <Box style={isMobile
-                ? { width: '100%', padding: '1rem', overflowY: 'visible', height: 'auto' }
-                : { width: '50%', padding: '2rem', overflowY: 'auto', height: '100%' }
-              }>
+              <Box style={{ width: '50%', padding: '2rem', overflowY: 'auto', height: '100%' }}>
                 <Stack gap="md">
                   <div>
                     <Group justify="space-between" align="flex-start" mb="xs">
@@ -441,7 +430,7 @@ export default function MarketplacePage() {
                   {/* Pricing Options */}
                   <Stack gap="md">
                     <div>
-                      <Group justify="space-between" mb="xs" wrap={isMobile ? 'wrap' : 'nowrap'}>
+                      <Group justify="space-between" mb="xs">
                         <div>
                           <Text size="md" fw={600}>
                             Full Claim (Exclusive)
@@ -450,7 +439,7 @@ export default function MarketplacePage() {
                             Complete ownership of the model
                           </Text>
                         </div>
-                        <Text size={isMobile ? 'lg' : 'xl'} fw={700} c="violet">
+                        <Text size="xl" fw={700} c="violet">
                           {selectedCharacter.fullClaimPrice} tokens
                         </Text>
                       </Group>
@@ -468,7 +457,7 @@ export default function MarketplacePage() {
                     </div>
 
                     <div>
-                      <Group justify="space-between" mb="xs" wrap={isMobile ? 'wrap' : 'nowrap'}>
+                      <Group justify="space-between" mb="xs">
                         <div>
                           <Text size="md" fw={600}>
                             Limited License
@@ -478,7 +467,7 @@ export default function MarketplacePage() {
                             {(selectedCharacter.licensesSold >= selectedCharacter.maxLicenses || selectedCharacter.fullyClaimed) && ' - SOLD OUT'}
                           </Text>
                         </div>
-                        <Text size={isMobile ? 'lg' : 'xl'} fw={700} c="blue">
+                        <Text size="xl" fw={700} c="blue">
                           {selectedCharacter.licensePrice} tokens
                         </Text>
                       </Group>

@@ -317,15 +317,11 @@ export default function MarketplacePage() {
       <Modal
         opened={opened}
         onClose={handleCloseModal}
-        size={isMobile ? 'calc(100vw - 32px)' : 'xl'}
+        size={isMobile ? '100%' : 'xl'}
+        fullScreen={isMobile}
         padding={0}
         withCloseButton={false}
         centered
-        scrollAreaComponent={undefined}
-        overlayProps={{ backgroundOpacity: 0.8, blur: 4 }}
-        styles={{
-          content: { maxHeight: isMobile ? '90vh' : undefined, overflowY: isMobile ? 'auto' : undefined },
-        }}
       >
         {selectedCharacter && (
           <div className={classes.modalContent}>

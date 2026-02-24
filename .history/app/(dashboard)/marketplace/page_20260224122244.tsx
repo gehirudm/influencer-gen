@@ -317,15 +317,11 @@ export default function MarketplacePage() {
       <Modal
         opened={opened}
         onClose={handleCloseModal}
-        size={isMobile ? 'calc(100vw - 32px)' : 'xl'}
+        size={isMobile ? '100%' : 'xl'}
+        fullScreen={isMobile}
         padding={0}
         withCloseButton={false}
         centered
-        scrollAreaComponent={undefined}
-        overlayProps={{ backgroundOpacity: 0.8, blur: 4 }}
-        styles={{
-          content: { maxHeight: isMobile ? '90vh' : undefined, overflowY: isMobile ? 'auto' : undefined },
-        }}
       >
         {selectedCharacter && (
           <div className={classes.modalContent}>
@@ -441,7 +437,7 @@ export default function MarketplacePage() {
                   {/* Pricing Options */}
                   <Stack gap="md">
                     <div>
-                      <Group justify="space-between" mb="xs" wrap={isMobile ? 'wrap' : 'nowrap'}>
+                      <Group justify="space-between" mb="xs">
                         <div>
                           <Text size="md" fw={600}>
                             Full Claim (Exclusive)
@@ -450,7 +446,7 @@ export default function MarketplacePage() {
                             Complete ownership of the model
                           </Text>
                         </div>
-                        <Text size={isMobile ? 'lg' : 'xl'} fw={700} c="violet">
+                        <Text size="xl" fw={700} c="violet">
                           {selectedCharacter.fullClaimPrice} tokens
                         </Text>
                       </Group>
@@ -468,7 +464,7 @@ export default function MarketplacePage() {
                     </div>
 
                     <div>
-                      <Group justify="space-between" mb="xs" wrap={isMobile ? 'wrap' : 'nowrap'}>
+                      <Group justify="space-between" mb="xs">
                         <div>
                           <Text size="md" fw={600}>
                             Limited License
@@ -478,7 +474,7 @@ export default function MarketplacePage() {
                             {(selectedCharacter.licensesSold >= selectedCharacter.maxLicenses || selectedCharacter.fullyClaimed) && ' - SOLD OUT'}
                           </Text>
                         </div>
-                        <Text size={isMobile ? 'lg' : 'xl'} fw={700} c="blue">
+                        <Text size="xl" fw={700} c="blue">
                           {selectedCharacter.licensePrice} tokens
                         </Text>
                       </Group>
