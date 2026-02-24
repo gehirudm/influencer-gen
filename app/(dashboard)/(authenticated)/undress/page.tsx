@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
+import { useMediaQuery } from '@mantine/hooks';
 import { 
     Grid, 
     Card, 
@@ -46,6 +47,7 @@ export default function UndressPage() {
 
     const { jobs: userJobs } = useUserJobs();
     const router = useRouter();
+    const isMobile = useMediaQuery('(max-width: 768px)');
 
     const [loading, setLoading] = useState(false);
     const [uploadedImage, setUploadedImage] = useState<File | null>(null);
@@ -191,13 +193,13 @@ export default function UndressPage() {
     const previousJobs = completedJobs.slice(1);
 
     return (
-        <Box style={{ height: '100%', width: '100%' }}>
-            <Grid gutter="md" style={{ margin: 0, height: '100%' }}>
+        <Box style={{ height: '100%', width: '100%' }} pt={{ base: 'sm', md: 0 }}>
+            <Grid gutter="xs" style={{ margin: 0, height: '100%' }}>
                 {/* Left Column - Input Data */}
-                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column', padding: '0.75rem' }}>
+                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: isMobile ? 'auto' : 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column', padding: isMobile ? '0.25rem 0.15rem' : '0.75rem' }}>
                         {/* Scrollable Content */}
-                        <Box style={{ flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
-                            <Stack gap="md">
+                        <Box style={{ flex: isMobile ? undefined : 1, overflowY: isMobile ? 'visible' : 'auto', paddingRight: isMobile ? 0 : '8px' }}>
+                            <Stack gap="md" px={isMobile ? 'sm' : 0}>
                                 {/* Image Upload */}
                                 <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
                                     <Text size="sm" fw={500} mb="sm" c="white">Upload Image</Text>
@@ -453,6 +455,7 @@ export default function UndressPage() {
                         </Box>
 
                         {/* Undress Button - Sticky at bottom */}
+                        <Box px={isMobile ? 'sm' : 0}>
                         <Button
                             fullWidth
                             size="lg"
@@ -464,13 +467,14 @@ export default function UndressPage() {
                         >
                             {loading ? 'Processing...' : 'Undress (Costs Tokens)'}
                         </Button>
+                        </Box>
                 </Grid.Col>
 
                 {/* Right Column - Output */}
-                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: 'calc(100vh - 40px)', padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
-                        <Stack gap="md" style={{ flex: 1, overflow: 'hidden' }}>
+                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: isMobile ? 'auto' : 'calc(100vh - 40px)', padding: isMobile ? '0.25rem 0.15rem' : '0.75rem', display: 'flex', flexDirection: 'column' }}>
+                        <Stack gap="md" px={isMobile ? 'sm' : 0} style={{ flex: 1, overflow: 'hidden' }}>
                             {/* Current/Latest Image */}
-                            <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444', flex: 1, minHeight: 0 }}>
+                            <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444', flex: isMobile ? undefined : 1, minHeight: isMobile ? '200px' : 0, maxHeight: isMobile ? '260px' : undefined }}>
                                 <Box
                                     style={{
                                         width: '100%',
@@ -486,12 +490,12 @@ export default function UndressPage() {
                                 >
                                     {loading ? (
                                         <Stack align="center" gap="sm">
-                                            <IconPhoto size={64} color="#4a7aba" style={{ animation: 'pulse 1.5s ease-in-out infinite' }} />
+                                            <IconPhoto size={64} color="#4a7aba" style={isMobile ? undefined : { animation: 'pulse 1.5s ease-in-out infinite' }} />
                                             <Text c="#4a7aba" size="lg" fw={500}>Processing...</Text>
                                             <Text c="dimmed" size="sm">This may take a few moments</Text>
                                         </Stack>
                                     ) : !latestJob ? (
-                                        showExample ? (
+                                        (!isMobile && showExample) ? (
                                             <Box style={{ position: 'relative', width: '100%', height: '100%', opacity: exampleOpacity, transition: 'none' }}>
                                                 {/* Base image */}
                                                 <img

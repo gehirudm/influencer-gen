@@ -395,7 +395,7 @@ export default function ImageGeneratorPage() {
                             }
                         }}
                     >
-                        <Stack gap={isMobile ? 'xs' : 'md'} pl={isMobile ? 'sm' : 0} pr={isMobile ? 'sm' : 'md'}>
+                        <Stack gap={isMobile ? 'xs' : 'md'} pr={isMobile ? 0 : 'md'} px={isMobile ? 'sm' : 0}>
                             {/* Character Selection */}
                             <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
                                 <Text size="sm" fw={500} mb="sm" c="white">Select a Character</Text>

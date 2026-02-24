@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
+import { useMediaQuery } from '@mantine/hooks';
 import { 
     Grid, 
     Card, 
@@ -46,6 +47,7 @@ export default function UndressPage() {
 
     const { jobs: userJobs } = useUserJobs();
     const router = useRouter();
+    const isMobile = useMediaQuery('(max-width: 768px)');
 
     const [loading, setLoading] = useState(false);
     const [uploadedImage, setUploadedImage] = useState<File | null>(null);
@@ -58,6 +60,8 @@ export default function UndressPage() {
     const [showExample, setShowExample] = useState(false);
     const [exampleProgress, setExampleProgress] = useState(0);
     const [exampleLoop, setExampleLoop] = useState(0);
+    const [exampleOpacity, setExampleOpacity] = useState(0);
+    const [scanDirection, setScanDirection] = useState<'down' | 'up'>('down');
 
     const handleImageUpload = (file: File | null) => {
         if (file) {
@@ -104,49 +108,84 @@ export default function UndressPage() {
 
     // Example animation effect
     useEffect(() => {
-        // Wait 5 seconds after page load
+        // Wait 0.5 seconds after page load, then fade in over 1.5 seconds
         const initialTimer = setTimeout(() => {
             setShowExample(true);
-            setExampleLoop(1);
-        }, 5000);
+            // Fade in over 1.5 seconds
+            let fadeProgress = 0;
+            const fadeInterval = setInterval(() => {
+                fadeProgress += 0.05;
+                setExampleOpacity(Math.min(fadeProgress, 1));
+                if (fadeProgress >= 1) {
+                    clearInterval(fadeInterval);
+                    // Start animation after fade in
+                    setExampleLoop(1);
+                    setScanDirection('down');
+                }
+            }, 75);
+        }, 500);
 
         return () => clearTimeout(initialTimer);
     }, []);
 
     useEffect(() => {
         if (exampleLoop > 0 && exampleLoop <= 2) {
-            // Animate progress from 0 to 100 over 2 seconds
-            const duration = 2000;
+            // Animate progress over 3 seconds
+            const duration = 3000;
             const steps = 60;
             const stepDuration = duration / steps;
             let currentStep = 0;
 
             const interval = setInterval(() => {
                 currentStep++;
-                setExampleProgress((currentStep / steps) * 100);
+                const progress = (currentStep / steps) * 100;
+                
+                if (scanDirection === 'down') {
+                    setExampleProgress(progress);
+                } else {
+                    setExampleProgress(100 - progress);
+                }
 
                 if (currentStep >= steps) {
                     clearInterval(interval);
-                    // Wait a bit before next loop or fade out
-                    setTimeout(() => {
+                    
+                    if (scanDirection === 'down') {
+                        // Switch to up direction
+                        setTimeout(() => {
+                            setScanDirection('up');
+                        }, 300);
+                    } else {
+                        // Completed up direction
                         if (exampleLoop < 2) {
-                            setExampleProgress(0);
-                            setExampleLoop(exampleLoop + 1);
-                        } else {
-                            // Fade out after second loop
+                            // Start next loop
                             setTimeout(() => {
-                                setShowExample(false);
-                                setExampleProgress(0);
-                                setExampleLoop(0);
-                            }, 1000);
+                                setScanDirection('down');
+                                setExampleLoop(exampleLoop + 1);
+                            }, 300);
+                        } else {
+                            // Fade out over 1.5 seconds after second loop
+                            setTimeout(() => {
+                                let fadeProgress = 1;
+                                const fadeInterval = setInterval(() => {
+                                    fadeProgress -= 0.05;
+                                    setExampleOpacity(Math.max(fadeProgress, 0));
+                                    if (fadeProgress <= 0) {
+                                        clearInterval(fadeInterval);
+                                        setShowExample(false);
+                                        setExampleProgress(0);
+                                        setExampleLoop(0);
+                                        setScanDirection('down');
+                                    }
+                                }, 75);
+                            }, 500);
                         }
-                    }, 500);
+                    }
                 }
             }, stepDuration);
 
             return () => clearInterval(interval);
         }
-    }, [exampleLoop]);
+    }, [exampleLoop, scanDirection]);
 
     // Get completed jobs with images
     const completedJobs = userJobs.filter(job => job.status === 'completed' && job.imageUrls && job.imageUrls.length > 0);
@@ -154,15 +193,13 @@ export default function UndressPage() {
     const previousJobs = completedJobs.slice(1);
 
     return (
-        <Box style={{ height: '100%', width: '100%' }}>
-            <Grid gutter="md" style={{ margin: 0, height: '100%' }}>
+        <Box style={{ height: '100%', width: '100%' }} pt={{ base: 'sm', md: 0 }}>
+            <Grid gutter="xs" style={{ margin: 0, height: '100%' }}>
                 {/* Left Column - Input Data */}
-                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: '100vh', display: 'flex', flexDirection: 'column', padding: '0.75rem' }}>
+                <Grid.Col span={{ base: 12, md: 8 }} style={{ height: isMobile ? 'auto' : 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column', padding: isMobile ? '0.25rem 0.15rem' : '0.75rem' }}>
                         {/* Scrollable Content */}
-                        <Box style={{ flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
-                            <Stack gap="md">
-                                <Title size="h3" c="white">Undress Image</Title>
-
+                        <Box style={{ flex: isMobile ? undefined : 1, overflowY: isMobile ? 'visible' : 'auto', paddingRight: isMobile ? 0 : '8px' }}>
+                            <Stack gap="md" px={isMobile ? 'sm' : 0}>
                                 {/* Image Upload */}
                                 <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
                                     <Text size="sm" fw={500} mb="sm" c="white">Upload Image</Text>
@@ -418,6 +455,7 @@ export default function UndressPage() {
                         </Box>
 
                         {/* Undress Button - Sticky at bottom */}
+                        <Box px={isMobile ? 'sm' : 0}>
                         <Button
                             fullWidth
                             size="lg"
@@ -429,15 +467,14 @@ export default function UndressPage() {
                         >
                             {loading ? 'Processing...' : 'Undress (Costs Tokens)'}
                         </Button>
+                        </Box>
                 </Grid.Col>
 
                 {/* Right Column - Output */}
-                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: '100vh', padding: '0.75rem', display: 'flex', flexDirection: 'column' }}>
+                <Grid.Col span={{ base: 12, md: 4 }} style={{ height: isMobile ? 'auto' : 'calc(100vh - 40px)', padding: isMobile ? '0.25rem 0.15rem' : '0.75rem', display: 'flex', flexDirection: 'column' }}>
                         <Stack gap="md" style={{ flex: 1, overflow: 'hidden' }}>
-                            <Title size="h3" c="white">Result</Title>
-
                             {/* Current/Latest Image */}
-                            <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444', flex: 1, minHeight: 0 }}>
+                            <Card p="md" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444', flex: isMobile ? undefined : 1, minHeight: isMobile ? '200px' : 0, maxHeight: isMobile ? '260px' : undefined }}>
                                 <Box
                                     style={{
                                         width: '100%',
@@ -453,13 +490,13 @@ export default function UndressPage() {
                                 >
                                     {loading ? (
                                         <Stack align="center" gap="sm">
-                                            <IconPhoto size={64} color="#4a7aba" style={{ animation: 'pulse 1.5s ease-in-out infinite' }} />
+                                            <IconPhoto size={64} color="#4a7aba" style={isMobile ? undefined : { animation: 'pulse 1.5s ease-in-out infinite' }} />
                                             <Text c="#4a7aba" size="lg" fw={500}>Processing...</Text>
                                             <Text c="dimmed" size="sm">This may take a few moments</Text>
                                         </Stack>
                                     ) : !latestJob ? (
-                                        showExample ? (
-                                            <Box style={{ position: 'relative', width: '100%', height: '100%', opacity: exampleLoop === 0 ? 0 : 1, transition: 'opacity 1s ease-in-out' }}>
+                                        (!isMobile && showExample) ? (
+                                            <Box style={{ position: 'relative', width: '100%', height: '100%', opacity: exampleOpacity, transition: 'none' }}>
                                                 {/* Base image */}
                                                 <img
                                                     src="/undress/example.webp"
