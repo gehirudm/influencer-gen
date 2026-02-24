@@ -264,7 +264,7 @@ export default function InboxPage() {
 				{/* Toolbar */}
 				<Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
 					<Group justify="space-between" align="flex-end" wrap="nowrap">
-						<Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+						<Group gap="sm" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
 							<Select
 								label={isMobile ? undefined : 'Filter'}
 								placeholder="Filter"
@@ -275,7 +275,7 @@ export default function InboxPage() {
 									{ value: 'unread', label: isMobile ? 'Unread' : 'Unread Only' },
 								]}
 								leftSection={<IconFilter size={16} />}
-								style={{ width: isMobile ? 120 : 160 }}
+								style={{ flex: 1, minWidth: 0 }}
 							/>
 							<Select
 								label={isMobile ? undefined : 'Sort By'}
@@ -289,7 +289,7 @@ export default function InboxPage() {
 									{ value: 'read', label: isMobile ? 'Read' : 'Read First' },
 								]}
 								leftSection={sortBy === 'newest' || sortBy === 'unread' ? <IconSortDescending size={16} /> : <IconSortAscending size={16} />}
-								style={{ width: isMobile ? 120 : 160 }}
+								style={{ flex: 1, minWidth: 0 }}
 							/>
 						</Group>
 
