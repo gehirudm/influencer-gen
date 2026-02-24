@@ -20,7 +20,6 @@ import {
   IconCrown,
 } from '@tabler/icons-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMediaQuery } from '@mantine/hooks';
 import React, { Suspense, useState } from 'react';
 
 // Plan definitions
@@ -116,7 +115,6 @@ function PricingPageMessageBox() {
 const PricingPage = () => {
   const router = useRouter();
   const { user, systemData, loading } = useUserData();
-  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const isPaidCustomer = systemData?.isPaidCustomer || false;
 
@@ -148,8 +146,10 @@ const PricingPage = () => {
     setModalOpened(true);
   };
 
+  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
   return (
-    <div style={{ padding: isMobile ? '24px 12px' : '24px 24px', minHeight: '100vh' }}>
+    <div style={{ padding: 0, background: '#000', color: '#fff', minHeight: '100vh' }}>
+      <Stack px={isMobile ? 'sm' : 0} pt={{ base: 'sm', md: 0 }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '48px' }}>
         <h1 style={{ fontSize: '48px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.3, padding: '4px 0', background: 'linear-gradient(135deg, #a78bfa, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -220,7 +220,7 @@ const PricingPage = () => {
             <IconCrown size={20} color="#a78bfa" />
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Starter Plans</span>
           </div>
-          <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px', lineHeight: isMobile ? 1.3 : undefined }}>Get Started with Full Access</h2>
+          <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px' }}>Get Started with Full Access</h2>
           <p style={{ color: '#9ca3af' }}>Any purchase unlocks all features — choose the plan that fits your needs</p>
         </div>
 
@@ -374,13 +374,13 @@ const PricingPage = () => {
             <IconCoins size={20} color="#818cf8" />
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Token Packs</span>
           </div>
-          <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px', lineHeight: isMobile ? 1.3 : undefined }}>Buy Tokens</h2>
+          <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px' }}>Buy Tokens</h2>
           <p style={{ color: '#9ca3af' }}>Generation tokens for creating images. Buy more, save more.</p>
         </div>
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '16px',
         }}>
           {tokenPacks.map((pack) => (
@@ -467,13 +467,13 @@ const PricingPage = () => {
             <IconSparkles size={20} color="#a78bfa" />
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '1.5px' }}>LoRA Token Packs</span>
           </div>
-          <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px', lineHeight: isMobile ? 1.3 : undefined }}>LoRA Character Training</h2>
+          <h2 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px' }}>LoRA Character Training</h2>
           <p style={{ color: '#9ca3af' }}>Train custom AI models for your characters. Each token trains one LoRA model.</p>
         </div>
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '16px',
         }}>
           {loraTokenPacks.map((pack) => (
