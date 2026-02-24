@@ -102,7 +102,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const [adminChecked, setAdminChecked] = useState(false);
     const [active, setActive] = useState('Dashboard');
     const [collapsed, setCollapsed] = useState(false);
-    const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
     const isSmallScreen = useMediaQuery('(max-width: 56.25em)');
 
     useEffect(() => {
@@ -301,119 +300,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
     );
 
-    // Mobile view: header bar with burger + drawer
-    const mobileView = (
-        <Box style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            {/* Top header bar */}
-            <Box style={{
-                height: '70px',
-                backgroundColor: '#110F29',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 16px',
-                flexShrink: 0,
-            }}>
-                <Text
-                    component="span"
-                    variant="gradient"
-                    gradient={{ from: 'violet', to: 'grape' }}
-                    fw="bolder"
-                    fz={22}
-                >
-                    Admin Panel
-                </Text>
-                <Burger opened={drawerOpened} onClick={toggleDrawer} color="white" />
-            </Box>
-
-            {/* Page content */}
-            <Box style={{ flex: 1, overflow: 'auto' }}>
-                {children}
-            </Box>
-
-            {/* Slide-out drawer */}
-            <Drawer
-                opened={drawerOpened}
-                onClose={closeDrawer}
-                size="100%"
-                padding="md"
-                title={
-                    <Text
-                        component="span"
-                        variant="gradient"
-                        gradient={{ from: 'violet', to: 'grape' }}
-                        fw="bolder"
-                        fz={26}
-                    >
-                        Admin Panel
-                    </Text>
-                }
-                zIndex={1000000}
-            >
-                <ScrollArea h="calc(100vh - 80px)" mx="-md">
-                    <Divider my="sm" />
-
-                    {navItems.map((item) => (
-                        <div key={item.label}>
-                            <a
-                                className={headerClasses.mobileNavLink}
-                                href={item.href}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    setActive(item.label);
-                                    closeDrawer();
-                                    router.push(item.href);
-                                }}
-                                style={item.label === active ? { backgroundColor: 'rgba(139, 92, 246, 0.15)', color: '#c4b5fd' } : undefined}
-                            >
-                                <item.icon size={20} />
-                                <span>{item.label}</span>
-                            </a>
-                            {item.subItems && item.label === active && (
-                                <div style={{ paddingLeft: '1rem' }}>
-                                    {item.subItems.map((subItem) => (
-                                        <a
-                                            key={subItem.label}
-                                            className={headerClasses.mobileNavLink}
-                                            href={subItem.href}
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                closeDrawer();
-                                                router.push(subItem.href);
-                                            }}
-                                            style={pathname === subItem.href ? { backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#c4b5fd', fontSize: '0.9rem' } : { fontSize: '0.9rem', opacity: 0.8 }}
-                                        >
-                                            <span>{subItem.label}</span>
-                                        </a>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    ))}
-
-                    <Divider my="sm" />
-
-                    <a
-                        className={headerClasses.mobileNavLink}
-                        href="/"
-                        onClick={(e) => { e.preventDefault(); closeDrawer(); router.push('/'); }}
-                    >
-                        <IconArrowLeft size={20} />
-                        <span>Back to Site</span>
-                    </a>
-
-                    <a
-                        className={headerClasses.mobileNavLink}
-                        href="/account"
-                        onClick={(e) => { e.preventDefault(); closeDrawer(); router.push('/account'); }}
-                    >
-                        <IconUserCircle size={20} />
-                        <span>Account</span>
-                    </a>
-                </ScrollArea>
-            </Drawer>
-        </Box>
-    );
-
-    return isSmallScreen ? mobileView : (collapsed ? collapsedView : expandedView);
+    return collapsed ? collapsedView : expandedView;
 }

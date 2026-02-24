@@ -130,7 +130,7 @@ export default function AdminMarketplaceLogsPage() {
                 </div>
               </Group>
             </Card>
-            <Group gap="sm" grow align="stretch">
+            <Group gap="sm" grow>
               <Card padding="sm" radius="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
                 <Group gap="xs">
                   <IconLock size={20} color="#8B5CF6" />
