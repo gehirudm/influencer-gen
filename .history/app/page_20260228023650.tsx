@@ -275,7 +275,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 <img src="/landing/section 2/create_your_dream_character.webp" alt="Create Character" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/65 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
                 <h3 className="text-xl font-bold mb-2">Create Your Dream Character</h3>
                 <p className="text-gray-400 text-sm mb-3">
@@ -295,7 +295,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 <img src="/landing/section 2/undress_tool_.webp" alt="Undress Tool" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/65 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
                 <h3 className="text-xl font-bold mb-2">Undress Tool</h3>
                 <p className="text-gray-400 text-sm mb-3">
@@ -315,7 +315,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 <img src="/landing/section 2/create_images_.webp" alt="Create Images" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/65 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
                 <h3 className="text-xl font-bold mb-2">Create Images</h3>
                 <p className="text-gray-400 text-sm mb-3">
@@ -335,7 +335,7 @@ export default function Home() {
               <div className="absolute inset-0">
                 <img src="/landing/section 2/image_impainting.webp" alt="Image Inpainting" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/65 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
                 <h3 className="text-xl font-bold mb-2">Image Inpainting</h3>
                 <p className="text-gray-400 text-sm mb-3">

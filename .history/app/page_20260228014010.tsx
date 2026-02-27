@@ -273,9 +273,12 @@ export default function Home() {
               className="backdrop-blur-xl bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-indigo-500/50 transition-all hover:transform hover:scale-105 cursor-pointer group relative min-h-[400px]"
             >
               <div className="absolute inset-0">
-                <img src="/landing/section 2/create_your_dream_character.webp" alt="Create Character" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-violet-500/20" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <IconUsers size={120} className="text-indigo-400/30 group-hover:scale-110 transition-transform" />
+                </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/65 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
                 <h3 className="text-xl font-bold mb-2">Create Your Dream Character</h3>
                 <p className="text-gray-400 text-sm mb-3">
@@ -293,9 +296,12 @@ export default function Home() {
               className="backdrop-blur-xl bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-indigo-500/50 transition-all hover:transform hover:scale-105 cursor-pointer group relative min-h-[400px]"
             >
               <div className="absolute inset-0">
-                <img src="/landing/section 2/undress_tool_.webp" alt="Undress Tool" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-indigo-500/20" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <IconWand size={120} className="text-violet-400/30 group-hover:scale-110 transition-transform" />
+                </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/65 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
                 <h3 className="text-xl font-bold mb-2">Undress Tool</h3>
                 <p className="text-gray-400 text-sm mb-3">
@@ -313,9 +319,12 @@ export default function Home() {
               className="backdrop-blur-xl bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-indigo-500/50 transition-all hover:transform hover:scale-105 cursor-pointer group relative min-h-[400px]"
             >
               <div className="absolute inset-0">
-                <img src="/landing/section 2/create_images_.webp" alt="Create Images" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-violet-500/20" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <IconCamera size={120} className="text-indigo-400/30 group-hover:scale-110 transition-transform" />
+                </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/65 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
                 <h3 className="text-xl font-bold mb-2">Create Images</h3>
                 <p className="text-gray-400 text-sm mb-3">
@@ -333,9 +342,12 @@ export default function Home() {
               className="backdrop-blur-xl bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-indigo-500/50 transition-all hover:transform hover:scale-105 cursor-pointer group relative min-h-[400px]"
             >
               <div className="absolute inset-0">
-                <img src="/landing/section 2/image_impainting.webp" alt="Image Inpainting" className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-indigo-500/20" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <IconPalette size={120} className="text-violet-400/30 group-hover:scale-110 transition-transform" />
+                </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/65 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
                 <h3 className="text-xl font-bold mb-2">Image Inpainting</h3>
                 <p className="text-gray-400 text-sm mb-3">
