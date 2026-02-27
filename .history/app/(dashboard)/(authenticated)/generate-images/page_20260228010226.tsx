@@ -350,7 +350,6 @@ export default function ImageGeneratorPage() {
 
         // Check if the selected character has a LoRA URL (marketplace character with LoRA)
         const loraUrl = getSelectedCharacterLoraUrl();
-        const loraKeyword = getSelectedCharacterLoraKeyword();
 
         if (loraUrl) {
             // Use LoRA/ComfyUI generation flow (costs 40 tokens)
@@ -383,8 +382,7 @@ export default function ImageGeneratorPage() {
                     body: JSON.stringify({
                         prompt: promptText,
                         negativePrompt: form.values.negative_prompt?.trim() || '',
-                        loraUrl: loraUrl,
-                        loraKeyword: loraKeyword || ''
+                        loraUrl: loraUrl
                     })
                 });
 
