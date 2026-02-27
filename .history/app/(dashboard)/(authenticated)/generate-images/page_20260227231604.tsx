@@ -673,8 +673,8 @@ export default function ImageGeneratorPage() {
                                                         backgroundColor: selectedReference === refImage.id ? '#3a5a8a' : '#1a1a1a',
                                                         border: selectedReference === refImage.id ? '2px solid #4a7aba' : '1px solid #333',
                                                         cursor: 'pointer',
-                                                        minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
-                                                        maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
+                                                        minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
+                                                        maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
                                                     }}
                                                     onClick={() => handleSelectReference(refImage)}
                                                 >

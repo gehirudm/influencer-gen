@@ -52,7 +52,7 @@ if (typeof document !== 'undefined') {
 export default function ImageGeneratorPage() {
     const form = useForm({
         initialValues: {
-            prompt: '',
+            prompt: 'Generate image with selected character and reference style',
             negative_prompt: '',
             aspectRatio: 'portrait',
             steps: 30,
@@ -78,40 +78,6 @@ export default function ImageGeneratorPage() {
     const [marketplaceCharacters, setMarketplaceCharacters] = useState<any[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
     const charScrollRef = useRef<HTMLDivElement>(null);
-
-    // Reference images - local files, prompts + enabled from Firestore
-    const [refData, setRefData] = useState<Record<string, { prompt: string; enabled: boolean }>>({});
-    const [selectedReference, setSelectedReference] = useState<string | null>(null);
-    const refScrollRef = useRef<HTMLDivElement>(null);
-    const isPromptSetByRef = useRef(false);
-
-    // Hardcoded local reference images (all usable on paid page)
-    const referenceImages = [
-        { id: 'balcony-at-sunset', name: 'Balcony at sunset', image: '/character/premade characters/reference images/Balcony at sunset/0.webp' },
-        { id: 'bathroom-mirror-selfie', name: 'Bathroom mirror selfie', image: '/character/premade characters/reference images/bathroom mirror selfie/0.webp' },
-        { id: 'blowing-a-kiss', name: 'Blowing a kiss', image: '/character/premade characters/reference images/Blowing a kiss/0.webp' },
-        { id: 'cop-girl-cosplay', name: 'Cop girl cosplay', image: '/character/premade characters/reference images/Premium-reference-img/cop girl cosplay 2.webp' },
-        { id: 'countertop-arch-pose', name: 'Countertop Arch Pose', image: '/character/premade characters/reference images/Premium-reference-img/Countertop Arch Pose.webp' },
-        { id: 'gym-fitness-pose', name: 'Gym fitness pose', image: '/character/premade characters/reference images/Gym fitness pose/0.webp' },
-        { id: 'holding-chest', name: 'Holding chest', image: '/character/premade characters/reference images/Premium-reference-img/holding chest.webp' },
-        { id: 'kneeling', name: 'Kneeling', image: '/character/premade characters/reference images/Kneeling/0.webp' },
-        { id: 'kneeling-couch-lean', name: 'Kneeling Couch Lean', image: '/character/premade characters/reference images/Premium-reference-img/Kneeling Couch Lean.webp' },
-        { id: 'leaning-forward', name: 'Leaning forward', image: '/character/premade characters/reference images/Premium-reference-img/leaning forward.webp' },
-        { id: 'lying-on-beach', name: 'Lying on beach', image: '/character/premade characters/reference images/Premium-reference-img/lying on beach.webp' },
-        { id: 'naked-in-bathtub', name: 'Naked in bathtub', image: '/character/premade characters/reference images/Naked in bathtub/0.webp' },
-        { id: 'naked-tongue-out', name: 'Naked tongue out', image: '/character/premade characters/reference images/Premium-reference-img/naked tongue out.webp' },
-        { id: 'picnic-lifestyle', name: 'Picnic lifestyle', image: '/character/premade characters/reference images/Picnic lifestyle/0.webp' },
-        { id: 'pregnant-pose', name: 'Pregnant pose', image: '/character/premade characters/reference images/Premium-reference-img/pregnant pose.webp' },
-        { id: 'santa-outfit', name: 'Santa outfit', image: '/character/premade characters/reference images/Premium-reference-img/santa outfit.webp' },
-        { id: 'school-style', name: 'School style', image: '/character/premade characters/reference images/School-style/0.webp' },
-        { id: 'showing-feet', name: 'Showing feet', image: '/character/premade characters/reference images/Premium-reference-img/showing feet.webp' },
-        { id: 'spiderman-cosplay', name: 'Spiderman cosplay', image: '/character/premade characters/reference images/Spiderman cosplay/0.webp' },
-        { id: 'tight-clothes', name: 'Tight clothes', image: '/character/premade characters/reference images/Premium-reference-img/tight clothes.webp' },
-        { id: 'velma-cosplay', name: 'Velma cosplay', image: '/character/premade characters/reference images/Premium-reference-img/velma cosplay.webp' },
-        { id: 'wearing-hijab', name: 'Wearing hijab', image: '/character/premade characters/reference images/Premium-reference-img/wearing hijab.webp' },
-        { id: 'yellow-bikini', name: 'Yellow bikini', image: '/character/premade characters/reference images/Yellow bikini/0.webp' },
-        { id: 'yoga', name: 'Yoga', image: '/character/premade characters/reference images/Premium-reference-img/yoga.webp' },
-    ];
 
     // Redirect free users to the free generation page
     useEffect(() => {
@@ -192,48 +158,6 @@ export default function ImageGeneratorPage() {
             charScrollRef.current.scrollBy({ left: 400, behavior: 'smooth' });
         }
     };
-
-    // Scroll functions for reference images
-    const scrollRefLeft = () => {
-        if (refScrollRef.current) {
-            refScrollRef.current.scrollBy({ left: -400, behavior: 'smooth' });
-        }
-    };
-
-    const scrollRefRight = () => {
-        if (refScrollRef.current) {
-            refScrollRef.current.scrollBy({ left: 400, behavior: 'smooth' });
-        }
-    };
-
-    // Load reference image data (prompt + enabled) from Firestore, keyed by doc ID
-    useEffect(() => {
-        const db = getFirestore(app);
-        const q = query(collection(db, 'reference-images'));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data: Record<string, { prompt: string; enabled: boolean }> = {};
-            snapshot.forEach((docSnap) => {
-                const d = docSnap.data();
-                if (d) {
-                    data[docSnap.id] = {
-                        prompt: d.prompt || '',
-                        enabled: d.enabled !== false,
-                    };
-                }
-            });
-            setRefData(data);
-        }, (error) => {
-            console.error('Error fetching reference image data:', error);
-        });
-        return () => unsubscribe();
-    }, []);
-
-    // Filter reference images: only show enabled ones
-    const visibleReferenceImages = referenceImages.filter((ref) => {
-        const fsEntry = refData[ref.id];
-        // If no Firestore doc yet, show by default; if exists, respect enabled flag
-        return !fsEntry || fsEntry.enabled;
-    });
 
     // Load marketplace purchased characters
     useEffect(() => {
@@ -316,22 +240,6 @@ export default function ImageGeneratorPage() {
     const getDimensions = () => {
         const selected = aspectRatios.find(ratio => ratio.value === form.values.aspectRatio);
         return selected ? { width: selected.width, height: selected.height } : { width: 800, height: 1200 };
-    };
-
-    // Handle reference image selection - uses Firestore prompt if available, falls back to name
-    const handleSelectReference = (refImage: any) => {
-        if (selectedReference === refImage.id) {
-            // Deselect
-            setSelectedReference(null);
-            form.setFieldValue('prompt', '');
-            isPromptSetByRef.current = false;
-        } else {
-            setSelectedReference(refImage.id);
-            const fsEntry = refData[refImage.id];
-            const prompt = fsEntry?.prompt || refImage.name;
-            form.setFieldValue('prompt', prompt);
-            isPromptSetByRef.current = true;
-        }
     };
 
     const handleGenerate = async () => {
@@ -419,6 +327,55 @@ export default function ImageGeneratorPage() {
             }
 
             return;
+        }
+
+        // Check if using any reference image with premade character
+        if (selectedReference && selectedCharacter && selectedCharacter.startsWith('premade-')) {
+            const imageNumber = getPremadeCharacterImageNumber(selectedCharacter);
+            const selectedRef = referenceImages.find(ref => ref.id === selectedReference);
+
+            if (imageNumber && selectedRef) {
+                setLoading(true);
+
+                // Random loading time between 8-15 seconds
+                const randomLoadingTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
+
+                setTimeout(() => {
+                    const mockJob = {
+                        id: `local-${Date.now()}`,
+                        status: 'completed',
+                        imageUrls: [{
+                            privateUrl: selectedRef.image,
+                            publicUrl: ''
+                        }],
+                        metadata: {
+                            prompt: form.values.prompt || selectedRef.name,
+                        }
+                    };
+
+                    // Add to jobs list (this will update the UI)
+                    userJobs.unshift(mockJob as any);
+
+                    setLoading(false);
+
+                    // Start blur effect: 100% -> 20% -> 0%
+                    setImageBlur(50);
+                    setTimeout(() => {
+                        setImageBlur(20);
+                        setTimeout(() => {
+                            setImageBlur(0);
+                        }, 300);
+                    }, 300);
+
+                    notifications.show({
+                        title: 'Success',
+                        message: 'Image generated successfully!',
+                        color: 'green'
+                    });
+                }, randomLoadingTime);
+
+                return;
+            }
         }
 
         const { width, height } = getDimensions();
@@ -640,10 +597,12 @@ export default function ImageGeneratorPage() {
                                 </Box>
                             </Card>
 
-                            {/* Reference Images */}
+                            {/* Reference Image Selection */}
                             <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-                                <Text size="sm" fw={500} mb="sm" c="white">Reference Image (optional)</Text>
+                                <Text size="sm" fw={500} mb="sm" c="white">Reference Image Style</Text>
+                                <Text size="xs" c="dimmed" mb="sm">Choose a visual style for your generation</Text>
                                 <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {/* Left Arrow */}
                                     <Box
                                         onClick={scrollRefLeft}
                                         style={{
@@ -657,6 +616,7 @@ export default function ImageGeneratorPage() {
                                         <IconChevronLeft size={28} color="#4a7aba" />
                                     </Box>
 
+                                    {/* Cards Container */}
                                     <Box
                                         ref={refScrollRef}
                                         style={{
@@ -665,20 +625,27 @@ export default function ImageGeneratorPage() {
                                         }}
                                     >
                                         <Group gap="xs" wrap="nowrap">
-                                            {visibleReferenceImages.map((refImage) => (
+                                            {referenceImages.map((ref) => (
                                                 <Card
-                                                    key={refImage.id}
-                                                    p="xs"
+                                                    key={ref.id}
+                                                    p="sm"
                                                     style={{
-                                                        backgroundColor: selectedReference === refImage.id ? '#3a5a8a' : '#1a1a1a',
-                                                        border: selectedReference === refImage.id ? '2px solid #4a7aba' : '1px solid #333',
-                                                        cursor: 'pointer',
+                                                        backgroundColor: selectedReference === ref.id ? '#3a5a8a' : '#1a1a1a',
+                                                        border: selectedReference === ref.id ? '2px solid #4a7aba' : '1px solid #333',
+                                                        cursor: ref.premium ? 'not-allowed' : 'pointer',
+                                                        opacity: ref.premium ? 0.6 : 1,
                                                         minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
                                                         maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
                                                     }}
-                                                    onClick={() => handleSelectReference(refImage)}
+                                                    onClick={() => {
+                                                        if (!ref.premium) {
+                                                            setSelectedReference(ref.id);
+                                                            isPromptSetByRef.current = true;
+                                                            form.setFieldValue('prompt', ref.name);
+                                                        }
+                                                    }}
                                                 >
-                                                    <Stack gap={4}>
+                                                    <Stack gap="xs">
                                                         <Box
                                                             style={{
                                                                 width: '100%',
@@ -690,35 +657,37 @@ export default function ImageGeneratorPage() {
                                                             }}
                                                         >
                                                             <img
-                                                                src={refImage.image}
-                                                                alt={refImage.name}
+                                                                src={ref.image}
+                                                                alt={ref.name}
                                                                 style={{
                                                                     width: '100%',
                                                                     height: '100%',
                                                                     objectFit: 'cover',
+                                                                    transition: 'filter 0.2s ease, transform 0.3s ease',
                                                                 }}
+                                                                onMouseEnter={(e) => !ref.premium && (e.currentTarget.style.transform = 'scale(1.08)')}
+                                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                                             />
-                                                            {selectedReference === refImage.id && (
+                                                            {ref.premium && (
                                                                 <Box
                                                                     style={{
                                                                         position: 'absolute',
-                                                                        top: 4,
-                                                                        right: 4,
-                                                                        backgroundColor: '#4a7aba',
+                                                                        top: '8px',
+                                                                        right: '8px',
+                                                                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                                                        padding: '6px',
                                                                         borderRadius: '50%',
-                                                                        width: 20,
-                                                                        height: 20,
                                                                         display: 'flex',
                                                                         alignItems: 'center',
                                                                         justifyContent: 'center',
                                                                     }}
                                                                 >
-                                                                    <IconCheck size={14} color="white" />
+                                                                    <IconCrown size={20} color="#FFD700" />
                                                                 </Box>
                                                             )}
                                                         </Box>
-                                                        <Text size="xs" fw={500} c="white" ta="center" lineClamp={1}>
-                                                            {refImage.name}
+                                                        <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
+                                                            {ref.name}
                                                         </Text>
                                                     </Stack>
                                                 </Card>
@@ -726,6 +695,7 @@ export default function ImageGeneratorPage() {
                                         </Group>
                                     </Box>
 
+                                    {/* Right Arrow */}
                                     <Box
                                         onClick={scrollRefRight}
                                         style={{
@@ -746,14 +716,16 @@ export default function ImageGeneratorPage() {
                                 label="Image Prompt"
                                 placeholder="Describe the image you want to generate..."
                                 minRows={4}
-                                {...form.getInputProps('prompt')}
+                                value={form.values.prompt}
                                 onChange={(e) => {
-                                    form.getInputProps('prompt').onChange(e);
-                                    if (isPromptSetByRef.current) {
-                                        isPromptSetByRef.current = false;
+                                    form.setFieldValue('prompt', e.currentTarget.value);
+                                    // If the user is typing (not a programmatic fill), unselect the reference image
+                                    if (!isPromptSetByRef.current) {
                                         setSelectedReference(null);
                                     }
+                                    isPromptSetByRef.current = false;
                                 }}
+                                error={form.errors.prompt}
                             />
 
                             {/* Custom Settings Accordion */}
@@ -845,7 +817,9 @@ export default function ImageGeneratorPage() {
                     >
                         {loading || loraJobStatus === 'IN_QUEUE' || loraJobStatus === 'IN_PROGRESS'
                             ? 'Generating...'
-                            : <span>Generate (<span style={{ color: '#FBBF24' }}>40</span> Tokens)</span>}
+                            : getSelectedCharacterLoraUrl()
+                                ? 'Generate with LoRA (40 Tokens)'
+                                : 'Generate (Costs Tokens)'}
                     </Button>
                     </Box>
                 </Grid.Col>

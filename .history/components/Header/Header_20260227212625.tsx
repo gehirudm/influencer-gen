@@ -57,18 +57,6 @@ export function Header({ children }: { children?: React.ReactNode }) {
 
     const userLoggedIn = useMemo(() => !loading && userData != null, [loading, userData]);
 
-    const generateLink = (systemData?.isPaidCustomer || systemData?.isAdmin) ? '/generate-images' : '/generate-images-free';
-
-    const data = useMemo(() => [
-        { link: '/assets', title: 'Assets', icon: IconFolder },
-        { link: generateLink, title: 'Generate Images', icon: IconPlus },
-        { link: '/undress', title: 'Undress', icon: IconShirt, requiresAuth: true },
-        { link: '/character', title: 'Character', icon: IconUser },
-        { link: '/pricing', title: 'Pricing', icon: IconCurrencyDollar },
-        { link: '/inbox', title: 'Inbox', icon: IconBell },
-        { link: '/marketplace', title: 'Marketplace', icon: IconShoppingBag },
-    ], [generateLink]);
-
     return (
         <Box h="full" w="full">
             <header className={classes.header}>

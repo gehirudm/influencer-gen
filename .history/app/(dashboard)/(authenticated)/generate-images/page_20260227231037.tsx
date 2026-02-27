@@ -79,8 +79,8 @@ export default function ImageGeneratorPage() {
     const [userId, setUserId] = useState<string | null>(null);
     const charScrollRef = useRef<HTMLDivElement>(null);
 
-    // Reference images - local files, prompts + enabled from Firestore
-    const [refData, setRefData] = useState<Record<string, { prompt: string; enabled: boolean }>>({});
+    // Reference images - local files, prompts from Firestore
+    const [refPrompts, setRefPrompts] = useState<Record<string, string>>({});
     const [selectedReference, setSelectedReference] = useState<string | null>(null);
     const refScrollRef = useRef<HTMLDivElement>(null);
     const isPromptSetByRef = useRef(false);
@@ -206,34 +206,24 @@ export default function ImageGeneratorPage() {
         }
     };
 
-    // Load reference image data (prompt + enabled) from Firestore, keyed by doc ID
+    // Load reference image prompts from Firestore
     useEffect(() => {
         const db = getFirestore(app);
         const q = query(collection(db, 'reference-images'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data: Record<string, { prompt: string; enabled: boolean }> = {};
+            const prompts: Record<string, string> = {};
             snapshot.forEach((docSnap) => {
                 const d = docSnap.data();
-                if (d) {
-                    data[docSnap.id] = {
-                        prompt: d.prompt || '',
-                        enabled: d.enabled !== false,
-                    };
+                if (d?.name && d?.prompt) {
+                    prompts[d.name.toLowerCase()] = d.prompt;
                 }
             });
-            setRefData(data);
+            setRefPrompts(prompts);
         }, (error) => {
-            console.error('Error fetching reference image data:', error);
+            console.error('Error fetching reference image prompts:', error);
         });
         return () => unsubscribe();
     }, []);
-
-    // Filter reference images: only show enabled ones
-    const visibleReferenceImages = referenceImages.filter((ref) => {
-        const fsEntry = refData[ref.id];
-        // If no Firestore doc yet, show by default; if exists, respect enabled flag
-        return !fsEntry || fsEntry.enabled;
-    });
 
     // Load marketplace purchased characters
     useEffect(() => {
@@ -327,8 +317,8 @@ export default function ImageGeneratorPage() {
             isPromptSetByRef.current = false;
         } else {
             setSelectedReference(refImage.id);
-            const fsEntry = refData[refImage.id];
-            const prompt = fsEntry?.prompt || refImage.name;
+            const firestorePrompt = refPrompts[refImage.name.toLowerCase()];
+            const prompt = firestorePrompt || refImage.name;
             form.setFieldValue('prompt', prompt);
             isPromptSetByRef.current = true;
         }
@@ -665,7 +655,7 @@ export default function ImageGeneratorPage() {
                                         }}
                                     >
                                         <Group gap="xs" wrap="nowrap">
-                                            {visibleReferenceImages.map((refImage) => (
+                                            {referenceImages.map((refImage) => (
                                                 <Card
                                                     key={refImage.id}
                                                     p="xs"
@@ -673,8 +663,8 @@ export default function ImageGeneratorPage() {
                                                         backgroundColor: selectedReference === refImage.id ? '#3a5a8a' : '#1a1a1a',
                                                         border: selectedReference === refImage.id ? '2px solid #4a7aba' : '1px solid #333',
                                                         cursor: 'pointer',
-                                                        minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
-                                                        maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
+                                                        minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
+                                                        maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
                                                     }}
                                                     onClick={() => handleSelectReference(refImage)}
                                                 >

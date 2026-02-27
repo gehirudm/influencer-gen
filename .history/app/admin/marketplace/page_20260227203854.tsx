@@ -621,14 +621,6 @@ export default function AdminMarketplacePage() {
         )}
       </Stack>
 
-      <TextInput
-        label="LoRA URL"
-        placeholder="https://huggingface.co/.../model.safetensors?download=true"
-        description="Direct download URL to a .safetensors LoRA file for this character (optional)"
-        value={formData.loraUrl}
-        onChange={(e) => setFormData(prev => ({ ...prev, loraUrl: e.target.value }))}
-      />
-
       <Textarea
         label="About"
         placeholder="Description of the character..."

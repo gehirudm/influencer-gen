@@ -79,39 +79,11 @@ export default function ImageGeneratorPage() {
     const [userId, setUserId] = useState<string | null>(null);
     const charScrollRef = useRef<HTMLDivElement>(null);
 
-    // Reference images - local files, prompts + enabled from Firestore
-    const [refData, setRefData] = useState<Record<string, { prompt: string; enabled: boolean }>>({});
+    // Reference images state
+    const [referenceImages, setReferenceImages] = useState<any[]>([]);
     const [selectedReference, setSelectedReference] = useState<string | null>(null);
     const refScrollRef = useRef<HTMLDivElement>(null);
     const isPromptSetByRef = useRef(false);
-
-    // Hardcoded local reference images (all usable on paid page)
-    const referenceImages = [
-        { id: 'balcony-at-sunset', name: 'Balcony at sunset', image: '/character/premade characters/reference images/Balcony at sunset/0.webp' },
-        { id: 'bathroom-mirror-selfie', name: 'Bathroom mirror selfie', image: '/character/premade characters/reference images/bathroom mirror selfie/0.webp' },
-        { id: 'blowing-a-kiss', name: 'Blowing a kiss', image: '/character/premade characters/reference images/Blowing a kiss/0.webp' },
-        { id: 'cop-girl-cosplay', name: 'Cop girl cosplay', image: '/character/premade characters/reference images/Premium-reference-img/cop girl cosplay 2.webp' },
-        { id: 'countertop-arch-pose', name: 'Countertop Arch Pose', image: '/character/premade characters/reference images/Premium-reference-img/Countertop Arch Pose.webp' },
-        { id: 'gym-fitness-pose', name: 'Gym fitness pose', image: '/character/premade characters/reference images/Gym fitness pose/0.webp' },
-        { id: 'holding-chest', name: 'Holding chest', image: '/character/premade characters/reference images/Premium-reference-img/holding chest.webp' },
-        { id: 'kneeling', name: 'Kneeling', image: '/character/premade characters/reference images/Kneeling/0.webp' },
-        { id: 'kneeling-couch-lean', name: 'Kneeling Couch Lean', image: '/character/premade characters/reference images/Premium-reference-img/Kneeling Couch Lean.webp' },
-        { id: 'leaning-forward', name: 'Leaning forward', image: '/character/premade characters/reference images/Premium-reference-img/leaning forward.webp' },
-        { id: 'lying-on-beach', name: 'Lying on beach', image: '/character/premade characters/reference images/Premium-reference-img/lying on beach.webp' },
-        { id: 'naked-in-bathtub', name: 'Naked in bathtub', image: '/character/premade characters/reference images/Naked in bathtub/0.webp' },
-        { id: 'naked-tongue-out', name: 'Naked tongue out', image: '/character/premade characters/reference images/Premium-reference-img/naked tongue out.webp' },
-        { id: 'picnic-lifestyle', name: 'Picnic lifestyle', image: '/character/premade characters/reference images/Picnic lifestyle/0.webp' },
-        { id: 'pregnant-pose', name: 'Pregnant pose', image: '/character/premade characters/reference images/Premium-reference-img/pregnant pose.webp' },
-        { id: 'santa-outfit', name: 'Santa outfit', image: '/character/premade characters/reference images/Premium-reference-img/santa outfit.webp' },
-        { id: 'school-style', name: 'School style', image: '/character/premade characters/reference images/School-style/0.webp' },
-        { id: 'showing-feet', name: 'Showing feet', image: '/character/premade characters/reference images/Premium-reference-img/showing feet.webp' },
-        { id: 'spiderman-cosplay', name: 'Spiderman cosplay', image: '/character/premade characters/reference images/Spiderman cosplay/0.webp' },
-        { id: 'tight-clothes', name: 'Tight clothes', image: '/character/premade characters/reference images/Premium-reference-img/tight clothes.webp' },
-        { id: 'velma-cosplay', name: 'Velma cosplay', image: '/character/premade characters/reference images/Premium-reference-img/velma cosplay.webp' },
-        { id: 'wearing-hijab', name: 'Wearing hijab', image: '/character/premade characters/reference images/Premium-reference-img/wearing hijab.webp' },
-        { id: 'yellow-bikini', name: 'Yellow bikini', image: '/character/premade characters/reference images/Yellow bikini/0.webp' },
-        { id: 'yoga', name: 'Yoga', image: '/character/premade characters/reference images/Premium-reference-img/yoga.webp' },
-    ];
 
     // Redirect free users to the free generation page
     useEffect(() => {
@@ -206,34 +178,24 @@ export default function ImageGeneratorPage() {
         }
     };
 
-    // Load reference image data (prompt + enabled) from Firestore, keyed by doc ID
+    // Load reference images from Firestore
     useEffect(() => {
         const db = getFirestore(app);
-        const q = query(collection(db, 'reference-images'));
+        const q = query(collection(db, 'reference-images'), orderBy('order', 'asc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data: Record<string, { prompt: string; enabled: boolean }> = {};
-            snapshot.forEach((docSnap) => {
-                const d = docSnap.data();
+            const data: any[] = [];
+            snapshot.forEach((doc) => {
+                const d = doc.data();
                 if (d) {
-                    data[docSnap.id] = {
-                        prompt: d.prompt || '',
-                        enabled: d.enabled !== false,
-                    };
+                    data.push({ id: doc.id, ...d });
                 }
             });
-            setRefData(data);
+            setReferenceImages(data);
         }, (error) => {
-            console.error('Error fetching reference image data:', error);
+            console.error('Error fetching reference images:', error);
         });
         return () => unsubscribe();
     }, []);
-
-    // Filter reference images: only show enabled ones
-    const visibleReferenceImages = referenceImages.filter((ref) => {
-        const fsEntry = refData[ref.id];
-        // If no Firestore doc yet, show by default; if exists, respect enabled flag
-        return !fsEntry || fsEntry.enabled;
-    });
 
     // Load marketplace purchased characters
     useEffect(() => {
@@ -318,7 +280,7 @@ export default function ImageGeneratorPage() {
         return selected ? { width: selected.width, height: selected.height } : { width: 800, height: 1200 };
     };
 
-    // Handle reference image selection - uses Firestore prompt if available, falls back to name
+    // Handle reference image selection
     const handleSelectReference = (refImage: any) => {
         if (selectedReference === refImage.id) {
             // Deselect
@@ -327,8 +289,7 @@ export default function ImageGeneratorPage() {
             isPromptSetByRef.current = false;
         } else {
             setSelectedReference(refImage.id);
-            const fsEntry = refData[refImage.id];
-            const prompt = fsEntry?.prompt || refImage.name;
+            const prompt = refImage.prompt || refImage.name;
             form.setFieldValue('prompt', prompt);
             isPromptSetByRef.current = true;
         }
@@ -641,6 +602,7 @@ export default function ImageGeneratorPage() {
                             </Card>
 
                             {/* Reference Images */}
+                            {referenceImages.length > 0 && (
                             <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
                                 <Text size="sm" fw={500} mb="sm" c="white">Reference Image (optional)</Text>
                                 <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -665,7 +627,7 @@ export default function ImageGeneratorPage() {
                                         }}
                                     >
                                         <Group gap="xs" wrap="nowrap">
-                                            {visibleReferenceImages.map((refImage) => (
+                                            {referenceImages.map((refImage) => (
                                                 <Card
                                                     key={refImage.id}
                                                     p="xs"
@@ -673,8 +635,8 @@ export default function ImageGeneratorPage() {
                                                         backgroundColor: selectedReference === refImage.id ? '#3a5a8a' : '#1a1a1a',
                                                         border: selectedReference === refImage.id ? '2px solid #4a7aba' : '1px solid #333',
                                                         cursor: 'pointer',
-                                                        minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
-                                                        maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
+                                                        minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
+                                                        maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
                                                     }}
                                                     onClick={() => handleSelectReference(refImage)}
                                                 >
@@ -740,6 +702,7 @@ export default function ImageGeneratorPage() {
                                     </Box>
                                 </Box>
                             </Card>
+                            )}
 
                             {/* Image Prompt */}
                             <Textarea

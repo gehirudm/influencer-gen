@@ -10,29 +10,21 @@ import {
     Textarea,
     NumberInput,
     TextInput,
-    Switch,
     Box,
     Text,
-    Title,
     ScrollArea,
     Group,
-    Badge,
     Image,
-    Container,
     SimpleGrid,
-    Accordion
+    Accordion,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useForm } from '@mantine/form';
 import { useRouter } from 'next/navigation';
 import { aspectRatios } from '@/components/ImageGenerationForm/ImageGenerationForm';
-import { useCharacters } from '@/hooks/useUserCharacters';
-import { useUserJobs } from '@/hooks/useUserJobs';
-import { useUserData } from '@/hooks/useUserData';
-import { IconPhoto, IconCrown, IconChevronLeft, IconChevronRight, IconLock, IconUsers, IconCheck, IconAlertCircle, IconPlayerPlay, IconClock } from '@tabler/icons-react';
-import { getFirestore, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { IconPhoto, IconCrown, IconChevronLeft, IconChevronRight, IconCheck } from '@tabler/icons-react';
 import app from '@/lib/firebase';
+import { useUserData } from '@/hooks/useUserData';
 
 // Add CSS for pulse animation
 if (typeof document !== 'undefined') {
@@ -49,399 +41,148 @@ if (typeof document !== 'undefined') {
     }
 }
 
-export default function ImageGeneratorPage() {
+export default function ImageGeneratorFreePage() {
     const form = useForm({
         initialValues: {
-            prompt: '',
+            prompt: 'Generate image with selected character and reference style',
             negative_prompt: '',
             aspectRatio: 'portrait',
             steps: 30,
             cfg_scale: 7,
             seed: '',
         },
-        validate: {
-            steps: (value) => value < 1 || value > 100 ? 'Steps must be between 1 and 100' : null,
-            cfg_scale: (value) => value < 1 || value > 20 ? 'CFG must be between 1 and 20' : null,
-        }
     });
 
-    const { characters, loading: charactersLoading } = useCharacters();
-    const { jobs: userJobs } = useUserJobs();
-    const { systemData, loading: userDataLoading } = useUserData();
     const router = useRouter();
     const isMobile = useMediaQuery('(max-width: 768px)');
+    const { systemData, loading: userDataLoading } = useUserData();
 
     const [loading, setLoading] = useState(false);
-    const [useCharacter, setUseCharacter] = useState(true);
-    const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
-    const [imageBlur, setImageBlur] = useState(0);
-    const [marketplaceCharacters, setMarketplaceCharacters] = useState<any[]>([]);
-    const [userId, setUserId] = useState<string | null>(null);
-    const charScrollRef = useRef<HTMLDivElement>(null);
-
-    // Reference images - local files, prompts + enabled from Firestore
-    const [refData, setRefData] = useState<Record<string, { prompt: string; enabled: boolean }>>({});
+    const [selectedCharacter, setSelectedCharacter] = useState<string | null>('premade-1');
     const [selectedReference, setSelectedReference] = useState<string | null>(null);
+    const [imageBlur, setImageBlur] = useState(0);
+    const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+    const [previousImages, setPreviousImages] = useState<string[]>([]);
     const refScrollRef = useRef<HTMLDivElement>(null);
+    const charScrollRef = useRef<HTMLDivElement>(null);
     const isPromptSetByRef = useRef(false);
 
-    // Hardcoded local reference images (all usable on paid page)
+    // Reference images sorted alphabetically, free and premium mixed
     const referenceImages = [
-        { id: 'balcony-at-sunset', name: 'Balcony at sunset', image: '/character/premade characters/reference images/Balcony at sunset/0.webp' },
-        { id: 'bathroom-mirror-selfie', name: 'Bathroom mirror selfie', image: '/character/premade characters/reference images/bathroom mirror selfie/0.webp' },
-        { id: 'blowing-a-kiss', name: 'Blowing a kiss', image: '/character/premade characters/reference images/Blowing a kiss/0.webp' },
-        { id: 'cop-girl-cosplay', name: 'Cop girl cosplay', image: '/character/premade characters/reference images/Premium-reference-img/cop girl cosplay 2.webp' },
-        { id: 'countertop-arch-pose', name: 'Countertop Arch Pose', image: '/character/premade characters/reference images/Premium-reference-img/Countertop Arch Pose.webp' },
-        { id: 'gym-fitness-pose', name: 'Gym fitness pose', image: '/character/premade characters/reference images/Gym fitness pose/0.webp' },
-        { id: 'holding-chest', name: 'Holding chest', image: '/character/premade characters/reference images/Premium-reference-img/holding chest.webp' },
-        { id: 'kneeling', name: 'Kneeling', image: '/character/premade characters/reference images/Kneeling/0.webp' },
-        { id: 'kneeling-couch-lean', name: 'Kneeling Couch Lean', image: '/character/premade characters/reference images/Premium-reference-img/Kneeling Couch Lean.webp' },
-        { id: 'leaning-forward', name: 'Leaning forward', image: '/character/premade characters/reference images/Premium-reference-img/leaning forward.webp' },
-        { id: 'lying-on-beach', name: 'Lying on beach', image: '/character/premade characters/reference images/Premium-reference-img/lying on beach.webp' },
-        { id: 'naked-in-bathtub', name: 'Naked in bathtub', image: '/character/premade characters/reference images/Naked in bathtub/0.webp' },
-        { id: 'naked-tongue-out', name: 'Naked tongue out', image: '/character/premade characters/reference images/Premium-reference-img/naked tongue out.webp' },
-        { id: 'picnic-lifestyle', name: 'Picnic lifestyle', image: '/character/premade characters/reference images/Picnic lifestyle/0.webp' },
-        { id: 'pregnant-pose', name: 'Pregnant pose', image: '/character/premade characters/reference images/Premium-reference-img/pregnant pose.webp' },
-        { id: 'santa-outfit', name: 'Santa outfit', image: '/character/premade characters/reference images/Premium-reference-img/santa outfit.webp' },
-        { id: 'school-style', name: 'School style', image: '/character/premade characters/reference images/School-style/0.webp' },
-        { id: 'showing-feet', name: 'Showing feet', image: '/character/premade characters/reference images/Premium-reference-img/showing feet.webp' },
-        { id: 'spiderman-cosplay', name: 'Spiderman cosplay', image: '/character/premade characters/reference images/Spiderman cosplay/0.webp' },
-        { id: 'tight-clothes', name: 'Tight clothes', image: '/character/premade characters/reference images/Premium-reference-img/tight clothes.webp' },
-        { id: 'velma-cosplay', name: 'Velma cosplay', image: '/character/premade characters/reference images/Premium-reference-img/velma cosplay.webp' },
-        { id: 'wearing-hijab', name: 'Wearing hijab', image: '/character/premade characters/reference images/Premium-reference-img/wearing hijab.webp' },
-        { id: 'yellow-bikini', name: 'Yellow bikini', image: '/character/premade characters/reference images/Yellow bikini/0.webp' },
-        { id: 'yoga', name: 'Yoga', image: '/character/premade characters/reference images/Premium-reference-img/yoga.webp' },
+        { id: 'balcony-at-sunset', name: 'Balcony at sunset', image: '/character/premade characters/reference images/Balcony at sunset/0.webp', folder: '/character/premade characters/reference images/Balcony at sunset' },
+        { id: 'bathroom-mirror-selfie', name: 'Bathroom mirror selfie', image: '/character/premade characters/reference images/bathroom mirror selfie/0.webp', folder: '/character/premade characters/reference images/bathroom mirror selfie' },
+        { id: 'blowing-a-kiss', name: 'Blowing a kiss', image: '/character/premade characters/reference images/Blowing a kiss/0.webp', folder: '/character/premade characters/reference images/Blowing a kiss' },
+        { id: 'cop-girl-cosplay', name: 'Cop girl cosplay', image: '/character/premade characters/reference images/Premium-reference-img/cop girl cosplay 2.webp', folder: '', premium: true },
+        { id: 'countertop-arch-pose', name: 'Countertop Arch Pose', image: '/character/premade characters/reference images/Premium-reference-img/Countertop Arch Pose.webp', folder: '', premium: true },
+        { id: 'gym-fitness-pose', name: 'Gym fitness pose', image: '/character/premade characters/reference images/Gym fitness pose/0.webp', folder: '/character/premade characters/reference images/Gym fitness pose' },
+        { id: 'holding-chest', name: 'Holding chest', image: '/character/premade characters/reference images/Premium-reference-img/holding chest.webp', folder: '', premium: true },
+        { id: 'kneeling', name: 'Kneeling', image: '/character/premade characters/reference images/Kneeling/0.webp', folder: '/character/premade characters/reference images/Kneeling' },
+        { id: 'kneeling-couch-lean', name: 'Kneeling Couch Lean', image: '/character/premade characters/reference images/Premium-reference-img/Kneeling Couch Lean.webp', folder: '', premium: true },
+        { id: 'leaning-forward', name: 'Leaning forward', image: '/character/premade characters/reference images/Premium-reference-img/leaning forward.webp', folder: '', premium: true },
+        { id: 'lying-on-beach', name: 'Lying on beach', image: '/character/premade characters/reference images/Premium-reference-img/lying on beach.webp', folder: '', premium: true },
+        { id: 'naked-in-bathtub', name: 'Naked in bathtub', image: '/character/premade characters/reference images/Naked in bathtub/0.webp', folder: '/character/premade characters/reference images/Naked in bathtub' },
+        { id: 'naked-tongue-out', name: 'Naked tongue out', image: '/character/premade characters/reference images/Premium-reference-img/naked tongue out.webp', folder: '', premium: true },
+        { id: 'picnic-lifestyle', name: 'Picnic lifestyle', image: '/character/premade characters/reference images/Picnic lifestyle/0.webp', folder: '/character/premade characters/reference images/Picnic lifestyle' },
+        { id: 'pregnant-pose', name: 'Pregnant pose', image: '/character/premade characters/reference images/Premium-reference-img/pregnant pose.webp', folder: '', premium: true },
+        { id: 'santa-outfit', name: 'Santa outfit', image: '/character/premade characters/reference images/Premium-reference-img/santa outfit.webp', folder: '', premium: true },
+        { id: 'school-style', name: 'School style', image: '/character/premade characters/reference images/School-style/0.webp', folder: '/character/premade characters/reference images/School-style' },
+        { id: 'showing-feet', name: 'Showing feet', image: '/character/premade characters/reference images/Premium-reference-img/showing feet.webp', folder: '', premium: true },
+        { id: 'spiderman-cosplay', name: 'Spiderman cosplay', image: '/character/premade characters/reference images/Spiderman cosplay/0.webp', folder: '/character/premade characters/reference images/Spiderman cosplay' },
+        { id: 'tight-clothes', name: 'Tight clothes', image: '/character/premade characters/reference images/Premium-reference-img/tight clothes.webp', folder: '', premium: true },
+        { id: 'velma-cosplay', name: 'Velma cosplay', image: '/character/premade characters/reference images/Premium-reference-img/velma cosplay.webp', folder: '', premium: true },
+        { id: 'wearing-hijab', name: 'Wearing hijab', image: '/character/premade characters/reference images/Premium-reference-img/wearing hijab.webp', folder: '', premium: true },
+        { id: 'yellow-bikini', name: 'Yellow bikini', image: '/character/premade characters/reference images/Yellow bikini/0.webp', folder: '/character/premade characters/reference images/Yellow bikini' },
+        { id: 'yoga', name: 'Yoga', image: '/character/premade characters/reference images/Premium-reference-img/yoga.webp', folder: '', premium: true },
     ];
 
-    // Redirect free users to the free generation page
+    // Redirect paid/admin users to the full generation page
     useEffect(() => {
-        if (!userDataLoading && systemData && !systemData.isPaidCustomer && !systemData.isAdmin) {
-            router.replace('/generate-images-free');
+        if (!userDataLoading && systemData && (systemData.isPaidCustomer || systemData.isAdmin)) {
+            router.replace('/generate-images');
         }
     }, [userDataLoading, systemData, router]);
 
-    // LoRA generation state
-    const [loraJobId, setLoraJobId] = useState<string | null>(null);
-    const [loraJobStatus, setLoraJobStatus] = useState<string>('IDLE');
-    const [loraJobOutput, setLoraJobOutput] = useState<any>(null);
-    const pollingRef = useRef<NodeJS.Timeout | null>(null);
+    // Premade character placeholders
+    const premadeCharacters = [
+        {
+            id: 'premade-1',
+            name: 'Emily Carter',
+            age: '19',
+            image: '/character/premade characters/Emily Carter.webp',
+            tags: ['College', 'Blonde', 'Cheerful']
+        },
+        {
+            id: 'premade-2',
+            name: 'Laura Bennett',
+            age: '38',
+            image: '/character/premade characters/Laura Bennett.webp',
+            tags: ['Mature', 'Confident', 'Caring']
+        },
+        {
+            id: 'premade-3',
+            name: 'Aiko Tanaka',
+            age: '20',
+            image: '/character/premade characters/Aiko Tanaka.webp',
+            tags: ['Anime', 'Energetic', 'Cute']
+        },
+        {
+            id: 'premade-4',
+            name: 'Raven Blackwood',
+            age: '22',
+            image: '/character/premade characters/Raven Blackwood.webp',
+            tags: ['Goth', 'Aesthetic', 'Mysterious']
+        },
+        {
+            id: 'premade-5',
+            name: 'Nyla Monroe',
+            age: '25',
+            image: '/character/premade characters/Nyla Monroe.webp',
+            tags: ['Elegant', 'Bold', 'Stylish']
+        },
+    ];
 
-    // Cleanup polling on unmount
-    useEffect(() => {
-        return () => {
-            if (pollingRef.current) {
-                clearTimeout(pollingRef.current);
-            }
+    // Map premade character id to image number (1-5)
+    const getPremadeCharacterImageNumber = (characterId: string): string | null => {
+        const mapping: { [key: string]: string } = {
+            'premade-1': '1',
+            'premade-2': '2',
+            'premade-3': '3',
+            'premade-4': '4',
+            'premade-5': '5',
         };
-    }, []);
-
-    const pollLoraJobStatus = async (jobId: string) => {
-        try {
-            const response = await fetch(`/api/comfyui/status/${jobId}`);
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to get job status');
-            }
-
-            setLoraJobStatus(data.status);
-
-            if (data.status === 'IN_QUEUE' || data.status === 'IN_PROGRESS') {
-                pollingRef.current = setTimeout(() => pollLoraJobStatus(jobId), 2000);
-            } else if (data.status === 'COMPLETED') {
-                setLoraJobOutput(data.output);
-                setLoading(false);
-                setImageBlur(50);
-                setTimeout(() => {
-                    setImageBlur(20);
-                    setTimeout(() => {
-                        setImageBlur(0);
-                    }, 300);
-                }, 300);
-                notifications.show({
-                    title: 'Generation Complete',
-                    message: 'Your LoRA image has been generated successfully!',
-                    color: 'green',
-                    icon: <IconCheck size={16} />
-                });
-            } else if (data.status === 'FAILED') {
-                setLoading(false);
-                notifications.show({
-                    title: 'Generation Failed',
-                    message: data.error || 'An error occurred during generation',
-                    color: 'red',
-                    icon: <IconAlertCircle size={16} />
-                });
-            }
-        } catch (error: any) {
-            console.error('Polling error:', error);
-            setLoraJobStatus('FAILED');
-            setLoading(false);
-        }
+        return mapping[characterId] || null;
     };
 
     // Scroll functions for characters
-    const scrollCharLeft = () => {
-        if (charScrollRef.current) {
-            charScrollRef.current.scrollBy({ left: -400, behavior: 'smooth' });
-        }
-    };
-
-    const scrollCharRight = () => {
-        if (charScrollRef.current) {
-            charScrollRef.current.scrollBy({ left: 400, behavior: 'smooth' });
-        }
-    };
+    const scrollCharLeft = () => charScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' });
+    const scrollCharRight = () => charScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' });
 
     // Scroll functions for reference images
-    const scrollRefLeft = () => {
-        if (refScrollRef.current) {
-            refScrollRef.current.scrollBy({ left: -400, behavior: 'smooth' });
-        }
-    };
-
-    const scrollRefRight = () => {
-        if (refScrollRef.current) {
-            refScrollRef.current.scrollBy({ left: 400, behavior: 'smooth' });
-        }
-    };
-
-    // Load reference image data (prompt + enabled) from Firestore, keyed by doc ID
-    useEffect(() => {
-        const db = getFirestore(app);
-        const q = query(collection(db, 'reference-images'));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data: Record<string, { prompt: string; enabled: boolean }> = {};
-            snapshot.forEach((docSnap) => {
-                const d = docSnap.data();
-                if (d) {
-                    data[docSnap.id] = {
-                        prompt: d.prompt || '',
-                        enabled: d.enabled !== false,
-                    };
-                }
-            });
-            setRefData(data);
-        }, (error) => {
-            console.error('Error fetching reference image data:', error);
-        });
-        return () => unsubscribe();
-    }, []);
-
-    // Filter reference images: only show enabled ones
-    const visibleReferenceImages = referenceImages.filter((ref) => {
-        const fsEntry = refData[ref.id];
-        // If no Firestore doc yet, show by default; if exists, respect enabled flag
-        return !fsEntry || fsEntry.enabled;
-    });
-
-    // Load marketplace purchased characters
-    useEffect(() => {
-        const auth = getAuth(app);
-        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setUserId(user.uid);
-            } else {
-                setUserId(null);
-            }
-        });
-
-        return () => unsubscribeAuth();
-    }, []);
-
-    useEffect(() => {
-        if (!userId) return;
-
-        let unsubscribe: (() => void) | undefined;
-
-        try {
-            const db = getFirestore(app);
-            const charactersRef = collection(db, 'users', userId, 'characters');
-            const q = query(charactersRef, orderBy('purchasedAt', 'desc'));
-
-            unsubscribe = onSnapshot(
-                q,
-                (snapshot) => {
-                    const characterData: any[] = [];
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        if (data) {
-                            characterData.push({
-                                id: `marketplace-${data.characterId}`,
-                                name: data.characterName,
-                                image: data.characterImage,
-                                age: 'N/A',
-                                purchaseType: data.purchaseType,
-                                loraUrl: data.loraUrl || '',
-                                isMarketplace: true
-                            });
-                        }
-                    });
-                    setMarketplaceCharacters(characterData);
-                },
-                (error) => {
-                    console.error('Error fetching marketplace characters:', error);
-                    setMarketplaceCharacters([]);
-                }
-            );
-        } catch (error) {
-            console.error('Error setting up listener:', error);
-            setMarketplaceCharacters([]);
-        }
-
-        return () => {
-            if (unsubscribe) {
-                unsubscribe();
-            }
-        };
-    }, [userId]);
-
-    // Map user characters to include an 'image' property for consistent rendering
-    const mappedUserCharacters = characters.map(char => ({
-        ...char,
-        image: char.baseImageUrl || (char.imageUrls && char.imageUrls.length > 0 ? char.imageUrls[0] : '/placeholder.png'),
-        age: char.age || char.ageRange || 'N/A'
-    }));
-
-    const allCharacters = [...mappedUserCharacters, ...marketplaceCharacters];
-
-    // Get the selected character's LoRA URL (if it's a marketplace character)
-    const getSelectedCharacterLoraUrl = (): string | null => {
-        if (!selectedCharacter) return null;
-        const character = allCharacters.find(c => c.id === selectedCharacter);
-        return character?.loraUrl || null;
-    };
-
-    // Get dimensions based on selected aspect ratio
-    const getDimensions = () => {
-        const selected = aspectRatios.find(ratio => ratio.value === form.values.aspectRatio);
-        return selected ? { width: selected.width, height: selected.height } : { width: 800, height: 1200 };
-    };
-
-    // Handle reference image selection - uses Firestore prompt if available, falls back to name
-    const handleSelectReference = (refImage: any) => {
-        if (selectedReference === refImage.id) {
-            // Deselect
-            setSelectedReference(null);
-            form.setFieldValue('prompt', '');
-            isPromptSetByRef.current = false;
-        } else {
-            setSelectedReference(refImage.id);
-            const fsEntry = refData[refImage.id];
-            const prompt = fsEntry?.prompt || refImage.name;
-            form.setFieldValue('prompt', prompt);
-            isPromptSetByRef.current = true;
-        }
-    };
+    const scrollRefLeft = () => refScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' });
+    const scrollRefRight = () => refScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' });
 
     const handleGenerate = async () => {
-        const validation = form.validate();
-        if (validation.hasErrors) {
+        if (!selectedCharacter || !selectedReference) {
+            notifications.show({
+                title: 'Selection Required',
+                message: 'Please select both a character and a reference image style',
+                color: 'orange'
+            });
             return;
         }
 
-        // Check if the selected character has a LoRA URL (marketplace character with LoRA)
-        const loraUrl = getSelectedCharacterLoraUrl();
+        const imageNumber = getPremadeCharacterImageNumber(selectedCharacter);
+        const selectedRef = referenceImages.find(ref => ref.id === selectedReference);
 
-        if (loraUrl) {
-            // Use LoRA/ComfyUI generation flow (costs 40 tokens)
-            const promptText = form.values.prompt?.trim();
-            if (!promptText) {
-                notifications.show({
-                    title: 'Validation Error',
-                    message: 'Please enter an image prompt or select a reference image',
-                    color: 'red'
-                });
-                return;
-            }
+        if (!imageNumber || !selectedRef) return;
 
-            setLoading(true);
-            setLoraJobId(null);
-            setLoraJobStatus('IDLE');
-            setLoraJobOutput(null);
-
-            // Clear any existing polling
-            if (pollingRef.current) {
-                clearTimeout(pollingRef.current);
-            }
-
-            try {
-                const response = await fetch('/api/comfyui/generate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        prompt: promptText,
-                        negativePrompt: form.values.negative_prompt?.trim() || '',
-                        loraUrl: loraUrl
-                    })
-                });
-
-                if (response.status === 401) {
-                    notifications.show({
-                        title: 'Session Expired',
-                        message: 'Please log in again to continue generating images.',
-                        color: 'blue'
-                    });
-                    router.push('/auth');
-                    setLoading(false);
-                    return;
-                }
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to submit generation');
-                }
-
-                notifications.show({
-                    title: 'Generation Started',
-                    message: `LoRA generation submitted (40 tokens deducted). Processing...`,
-                    color: 'blue',
-                    icon: <IconPlayerPlay size={16} />
-                });
-
-                setLoraJobId(data.jobId);
-                setLoraJobStatus(data.status || 'IN_QUEUE');
-
-                // Start polling for status
-                pollingRef.current = setTimeout(() => pollLoraJobStatus(data.jobId), 2000);
-
-            } catch (error: any) {
-                console.error('Error generating LoRA image:', error);
-                notifications.show({
-                    title: 'Error',
-                    message: error.message || 'Failed to generate image',
-                    color: 'red'
-                });
-                setLoading(false);
-            }
-
-            return;
-        }
-
-        const { width, height } = getDimensions();
         setLoading(true);
 
+        // Deduct 40 tokens via API
         try {
-            const payload: any = {
-                prompt: form.values.prompt,
-                negative_prompt: form.values.negative_prompt || undefined,
-                width,
-                height,
-                steps: form.values.steps,
-                cfg_scale: form.values.cfg_scale,
-                seed: form.values.seed ? Number(form.values.seed) : undefined,
-                character_id: useCharacter && selectedCharacter ? selectedCharacter : undefined,
-            };
-
-            const response = await fetch('/api/generate', {
+            const response = await fetch('/api/generate/deduct-tokens', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
+                headers: { 'Content-Type': 'application/json' },
             });
 
             if (response.status === 401) {
@@ -455,37 +196,69 @@ export default function ImageGeneratorPage() {
                 return;
             }
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to generate image');
+            if (response.status === 402) {
+                const data = await response.json();
+                notifications.show({
+                    title: 'Insufficient Tokens',
+                    message: data.error || 'You do not have enough tokens to generate an image.',
+                    color: 'red'
+                });
+                setLoading(false);
+                return;
             }
+
+            if (!response.ok) {
+                throw new Error('Failed to deduct tokens');
+            }
+        } catch (error: any) {
+            console.error('Token deduction error:', error);
+            notifications.show({
+                title: 'Error',
+                message: error.message || 'Failed to process generation',
+                color: 'red'
+            });
+            setLoading(false);
+            return;
+        }
+
+        // Build the character-specific result path from the folder
+        // e.g. "/character/premade characters/reference images/Kneeling/1.webp"
+        const resultImage = `${selectedRef.folder}/${imageNumber}.webp`;
+
+        // Random loading time between 8-15 seconds for realistic feel
+        const randomLoadingTime = Math.floor(Math.random() * (15000 - 8000 + 1)) + 8000;
+
+        setTimeout(() => {
+            // Push current generated image to previous list
+            if (generatedImage) {
+                setPreviousImages(prev => [generatedImage, ...prev]);
+            }
+
+            setGeneratedImage(resultImage);
+            setLoading(false);
+
+            // Blur reveal effect
+            setImageBlur(50);
+            setTimeout(() => {
+                setImageBlur(20);
+                setTimeout(() => {
+                    setImageBlur(0);
+                }, 300);
+            }, 300);
 
             notifications.show({
                 title: 'Success',
-                message: 'Image generation started successfully!',
-                color: 'green'
+                message: 'Image generated successfully!',
+                color: 'green',
+                icon: <IconCheck size={16} />
             });
-        } catch (error: any) {
-            console.error('Error generating image:', error);
-            notifications.show({
-                title: 'Error',
-                message: error.message || 'Failed to generate image',
-                color: 'red'
-            });
-        } finally {
-            setLoading(false);
-        }
+        }, randomLoadingTime);
     };
-
-    // Get completed jobs with images
-    const completedJobs = userJobs.filter(job => job.status === 'completed' && job.imageUrls && job.imageUrls.length > 0);
-    const latestJob = completedJobs[0];
-    const previousJobs = completedJobs.slice(1);
 
     return (
         <Box style={{ height: '100%', width: '100%' }} pt={{ base: 'sm', md: 0 }}>
             <Grid gutter="xs" style={{ margin: 0, height: '100%' }}>
-                {/* Left Column - Input Data */}
+                {/* Left Column - Input */}
                 <Grid.Col span={{ base: 12, md: 8 }} style={{ height: isMobile ? 'auto' : 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column', padding: isMobile ? '0.25rem 0.15rem' : '0.75rem' }}>
                     <ScrollArea
                         style={{ flex: 1, marginBottom: isMobile ? '0.5rem' : '1rem' }}
@@ -506,9 +279,6 @@ export default function ImageGeneratorPage() {
                             {/* Character Selection */}
                             <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
                                 <Text size="sm" fw={500} mb="sm" c="white">Select a Character</Text>
-                                {charactersLoading && (
-                                    <Text size="sm" c="dimmed">Loading characters...</Text>
-                                )}
                                 <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     {/* Left Arrow */}
                                     <Box
@@ -533,24 +303,42 @@ export default function ImageGeneratorPage() {
                                         }}
                                     >
                                         <Group gap="xs" wrap="nowrap">
-                                            {/* Create Your Own Character Card */}
+                                            {/* Create Custom Character - Disabled showcase */}
                                             <Card
                                                 p="sm"
                                                 style={{
-                                                    backgroundColor: '#2a2a2a',
-                                                    border: '2px dashed #4a7aba',
-                                                    cursor: 'pointer',
+                                                    backgroundColor: '#1a1a1a',
+                                                    border: '2px dashed #555',
+                                                    cursor: 'not-allowed',
                                                     minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
                                                     maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 32px) / 5)',
+                                                    opacity: 0.5,
+                                                    position: 'relative',
                                                 }}
-                                                onClick={() => router.push('/dashboard/characters')}
                                             >
+                                                <Box
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: 6,
+                                                        right: 6,
+                                                        zIndex: 2,
+                                                        backgroundColor: 'rgba(0,0,0,0.6)',
+                                                        borderRadius: '50%',
+                                                        width: 22,
+                                                        height: 22,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                    }}
+                                                >
+                                                    <IconCrown size={14} color="#FBBF24" />
+                                                </Box>
                                                 <Stack gap="xs">
                                                     <Box
                                                         style={{
                                                             width: '100%',
                                                             aspectRatio: '3/4',
-                                                            backgroundColor: '#1a1a1a',
+                                                            backgroundColor: '#2a2a2a',
                                                             borderRadius: '4px',
                                                             display: 'flex',
                                                             alignItems: 'center',
@@ -558,15 +346,15 @@ export default function ImageGeneratorPage() {
                                                             border: '1px solid #444',
                                                         }}
                                                     >
-                                                        <Text size="2rem" c="#4a7aba">+</Text>
+                                                        <Text size="2rem" c="#555">+</Text>
                                                     </Box>
-                                                    <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
+                                                    <Text size="xs" fw={600} c="dimmed" ta="center" lineClamp={1}>
                                                         Custom
                                                     </Text>
                                                 </Stack>
                                             </Card>
 
-                                            {allCharacters.map((character) => (
+                                            {premadeCharacters.map((character) => (
                                                 <Card
                                                     key={character.id}
                                                     p="sm"
@@ -587,7 +375,6 @@ export default function ImageGeneratorPage() {
                                                                 backgroundColor: '#2a2a2a',
                                                                 borderRadius: '4px',
                                                                 overflow: 'hidden',
-                                                                position: 'relative',
                                                             }}
                                                         >
                                                             <img
@@ -599,21 +386,6 @@ export default function ImageGeneratorPage() {
                                                                     objectFit: 'cover'
                                                                 }}
                                                             />
-                                                            {character.isMarketplace && (
-                                                                <Badge
-                                                                    variant="filled"
-                                                                    color={character.purchaseType === 'full_claim' ? 'violet' : 'blue'}
-                                                                    size="xs"
-                                                                    leftSection={character.purchaseType === 'full_claim' ? <IconLock size={10} /> : <IconUsers size={10} />}
-                                                                    style={{
-                                                                        position: 'absolute',
-                                                                        top: '4px',
-                                                                        left: '4px',
-                                                                    }}
-                                                                >
-                                                                    {character.purchaseType === 'full_claim' ? 'Exclusive' : 'Licensed'}
-                                                                </Badge>
-                                                            )}
                                                         </Box>
                                                         <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
                                                             {character.name} ({character.age})
@@ -640,10 +412,12 @@ export default function ImageGeneratorPage() {
                                 </Box>
                             </Card>
 
-                            {/* Reference Images */}
+                            {/* Reference Image Selection */}
                             <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
-                                <Text size="sm" fw={500} mb="sm" c="white">Reference Image (optional)</Text>
+                                <Text size="sm" fw={500} mb="sm" c="white">Reference Image Style</Text>
+                                <Text size="xs" c="dimmed" mb="sm">Choose a visual style for your generation</Text>
                                 <Box style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {/* Left Arrow */}
                                     <Box
                                         onClick={scrollRefLeft}
                                         style={{
@@ -657,6 +431,7 @@ export default function ImageGeneratorPage() {
                                         <IconChevronLeft size={28} color="#4a7aba" />
                                     </Box>
 
+                                    {/* Cards Container */}
                                     <Box
                                         ref={refScrollRef}
                                         style={{
@@ -665,20 +440,27 @@ export default function ImageGeneratorPage() {
                                         }}
                                     >
                                         <Group gap="xs" wrap="nowrap">
-                                            {visibleReferenceImages.map((refImage) => (
+                                            {referenceImages.map((ref) => (
                                                 <Card
-                                                    key={refImage.id}
-                                                    p="xs"
+                                                    key={ref.id}
+                                                    p="sm"
                                                     style={{
-                                                        backgroundColor: selectedReference === refImage.id ? '#3a5a8a' : '#1a1a1a',
-                                                        border: selectedReference === refImage.id ? '2px solid #4a7aba' : '1px solid #333',
-                                                        cursor: 'pointer',
+                                                        backgroundColor: selectedReference === ref.id ? '#3a5a8a' : '#1a1a1a',
+                                                        border: selectedReference === ref.id ? '2px solid #4a7aba' : '1px solid #333',
+                                                        cursor: ref.premium ? 'not-allowed' : 'pointer',
+                                                        opacity: ref.premium ? 0.6 : 1,
                                                         minWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
                                                         maxWidth: isMobile ? 'calc((100% - 16px) / 3)' : 'calc((100% - 40px) / 6)',
                                                     }}
-                                                    onClick={() => handleSelectReference(refImage)}
+                                                    onClick={() => {
+                                                        if (!ref.premium) {
+                                                            setSelectedReference(ref.id);
+                                                            isPromptSetByRef.current = true;
+                                                            form.setFieldValue('prompt', ref.name);
+                                                        }
+                                                    }}
                                                 >
-                                                    <Stack gap={4}>
+                                                    <Stack gap="xs">
                                                         <Box
                                                             style={{
                                                                 width: '100%',
@@ -690,35 +472,37 @@ export default function ImageGeneratorPage() {
                                                             }}
                                                         >
                                                             <img
-                                                                src={refImage.image}
-                                                                alt={refImage.name}
+                                                                src={ref.image}
+                                                                alt={ref.name}
                                                                 style={{
                                                                     width: '100%',
                                                                     height: '100%',
                                                                     objectFit: 'cover',
+                                                                    transition: 'filter 0.2s ease, transform 0.3s ease',
                                                                 }}
+                                                                onMouseEnter={(e) => !ref.premium && (e.currentTarget.style.transform = 'scale(1.08)')}
+                                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                                             />
-                                                            {selectedReference === refImage.id && (
+                                                            {ref.premium && (
                                                                 <Box
                                                                     style={{
                                                                         position: 'absolute',
-                                                                        top: 4,
-                                                                        right: 4,
-                                                                        backgroundColor: '#4a7aba',
+                                                                        top: '8px',
+                                                                        right: '8px',
+                                                                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                                                        padding: '6px',
                                                                         borderRadius: '50%',
-                                                                        width: 20,
-                                                                        height: 20,
                                                                         display: 'flex',
                                                                         alignItems: 'center',
                                                                         justifyContent: 'center',
                                                                     }}
                                                                 >
-                                                                    <IconCheck size={14} color="white" />
+                                                                    <IconCrown size={20} color="#FFD700" />
                                                                 </Box>
                                                             )}
                                                         </Box>
-                                                        <Text size="xs" fw={500} c="white" ta="center" lineClamp={1}>
-                                                            {refImage.name}
+                                                        <Text size="xs" fw={600} c="white" ta="center" lineClamp={1}>
+                                                            {ref.name}
                                                         </Text>
                                                     </Stack>
                                                 </Card>
@@ -726,6 +510,7 @@ export default function ImageGeneratorPage() {
                                         </Group>
                                     </Box>
 
+                                    {/* Right Arrow */}
                                     <Box
                                         onClick={scrollRefRight}
                                         style={{
@@ -746,14 +531,15 @@ export default function ImageGeneratorPage() {
                                 label="Image Prompt"
                                 placeholder="Describe the image you want to generate..."
                                 minRows={4}
-                                {...form.getInputProps('prompt')}
+                                value={form.values.prompt}
                                 onChange={(e) => {
-                                    form.getInputProps('prompt').onChange(e);
-                                    if (isPromptSetByRef.current) {
-                                        isPromptSetByRef.current = false;
+                                    form.setFieldValue('prompt', e.currentTarget.value);
+                                    if (!isPromptSetByRef.current) {
                                         setSelectedReference(null);
                                     }
+                                    isPromptSetByRef.current = false;
                                 }}
+                                error={form.errors.prompt}
                             />
 
                             {/* Custom Settings Accordion */}
@@ -837,16 +623,14 @@ export default function ImageGeneratorPage() {
 
                     {/* Generate Button - Sticky at bottom */}
                     <Box px={isMobile ? 'sm' : 0}>
-                    <Button
-                        fullWidth
-                        size="lg"
-                        disabled={loading || (loraJobStatus === 'IN_QUEUE' || loraJobStatus === 'IN_PROGRESS')}
-                        onClick={handleGenerate}
-                    >
-                        {loading || loraJobStatus === 'IN_QUEUE' || loraJobStatus === 'IN_PROGRESS'
-                            ? 'Generating...'
-                            : <span>Generate (<span style={{ color: '#FBBF24' }}>40</span> Tokens)</span>}
-                    </Button>
+                        <Button
+                            fullWidth
+                            size="lg"
+                            disabled={loading}
+                            onClick={handleGenerate}
+                        >
+                            {loading ? 'Generating...' : <span>Generate (<span style={{ color: '#FBBF24' }}>40</span> Tokens)</span>}
+                        </Button>
                     </Box>
                 </Grid.Col>
 
@@ -872,20 +656,12 @@ export default function ImageGeneratorPage() {
                                     <Stack align="center" gap="sm">
                                         <IconPhoto size={64} color="#4a7aba" style={{ animation: 'pulse 1.5s ease-in-out infinite' }} />
                                         <Text c="#4a7aba" size="lg" fw={500}>Generating...</Text>
-                                        <Text c="dimmed" size="sm">
-                                            {loraJobStatus === 'IN_QUEUE' ? 'Waiting in queue...' :
-                                             loraJobStatus === 'IN_PROGRESS' ? 'Generating your LoRA image...' :
-                                             'This may take a few moments'}
-                                        </Text>
+                                        <Text c="dimmed" size="sm">This may take a few moments</Text>
                                     </Stack>
-                                ) : loraJobOutput?.images && loraJobOutput.images.length > 0 ? (
+                                ) : generatedImage ? (
                                     <Image
-                                        src={
-                                            loraJobOutput.images[0].type === 'base64'
-                                                ? `data:image/png;base64,${loraJobOutput.images[0].data}`
-                                                : loraJobOutput.images[0].data
-                                        }
-                                        alt="LoRA generated image"
+                                        src={generatedImage}
+                                        alt="Generated image"
                                         fit="contain"
                                         style={{
                                             width: '100%',
@@ -894,38 +670,26 @@ export default function ImageGeneratorPage() {
                                             transition: 'none'
                                         }}
                                     />
-                                ) : !latestJob ? (
+                                ) : (
                                     <Stack align="center" gap="sm">
                                         <IconPhoto size={64} color="#666" />
                                         <Text c="dimmed" size="lg">No images generated yet</Text>
                                         <Text c="dimmed" size="sm">Your generated image will appear here</Text>
                                     </Stack>
-                                ) : (
-                                    <Image
-                                        src={latestJob.imageUrls[0].privateUrl}
-                                        alt="Latest generated image"
-                                        fit="contain"
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            filter: `blur(${imageBlur}px)`,
-                                            transition: 'none'
-                                        }}
-                                    />
                                 )}
                             </Box>
                         </Card>
 
                         {/* Previous Images */}
-                        {previousJobs.length > 0 && (
+                        {previousImages.length > 0 && (
                             <>
                                 <Text size="sm" fw={500} c="white" mb={2}>Previously Generated Images</Text>
                                 <Box style={{ border: '1px solid #333', borderRadius: '6px', padding: '8px', backgroundColor: '#0a0a0a', flexShrink: 0 }}>
                                     <ScrollArea type="scroll" offsetScrollbars scrollbarSize={8}>
                                         <Group gap="xs" wrap="nowrap">
-                                            {previousJobs.map((job, index) => (
+                                            {previousImages.map((img, index) => (
                                                 <Box
-                                                    key={job.id}
+                                                    key={`prev-${index}`}
                                                     style={{
                                                         minWidth: '80px',
                                                         maxWidth: '80px',
@@ -938,7 +702,7 @@ export default function ImageGeneratorPage() {
                                                     }}
                                                 >
                                                     <Image
-                                                        src={job.imageUrls[0].privateUrl}
+                                                        src={img}
                                                         alt={`Generated image ${index + 2}`}
                                                         fit="cover"
                                                         style={{ width: '100%', height: '100%' }}
@@ -951,7 +715,6 @@ export default function ImageGeneratorPage() {
                             </>
                         )}
                     </Stack>
-
                 </Grid.Col>
             </Grid>
         </Box>
