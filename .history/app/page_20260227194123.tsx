@@ -23,7 +23,7 @@ import {
   IconCrown
 } from "@tabler/icons-react";
 import { Header } from "@/components/Header/Header";
-import Footer from "@/components/Footer/Footer";
+import { Footer } from "@/components/Footer/Footer";
 import { useEffect, useState } from "react";
 
 function BackgroundImageCarousel() {
@@ -78,10 +78,10 @@ export default function Home() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen text-white" style={{ background: '#07070e' }}>
+    <div className="min-h-screen bg-black text-white">
 
       {/* SECTION 1: Hero Section */}
-      <div className="relative min-h-screen overflow-x-clip" style={{ background: 'linear-gradient(160deg, #0d0d1a 0%, #07070e 60%)' }}>
+      <div className="relative min-h-screen bg-black overflow-x-clip">
         {/* Navigation */}
         <div className="absolute inset-0 z-20 h-30">
           <Header></Header>
@@ -247,7 +247,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 2: Pick Your Tool */}
-      <div id="pick-your-tool" className="py-20" style={{ background: 'linear-gradient(180deg, #07070e 0%, #0a0a18 100%)' }}>
+      <div id="pick-your-tool" className="bg-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Text
@@ -363,7 +363,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 3: Features */}
-      <div className="py-20 relative" style={{ background: '#0a0a18' }}>
+      <div className="bg-black py-20 relative">
         {/* Background Image */}
         <div className="absolute inset-0 opacity-45">
           <img
@@ -461,7 +461,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 4: See What's Possible */}
-      <div className="py-20" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #07070e 100%)' }}>
+      <div className="bg-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Text
@@ -526,7 +526,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 5: Pay As You Grow - Pricing */}
-      <div className="py-20" style={{ background: 'linear-gradient(180deg, #07070e 0%, #0b0b1c 100%)' }}>
+      <div className="bg-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Text
@@ -706,7 +706,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 6: FAQ */}
-      <div className="py-20" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #07070e 100%)' }}>
+      <div className="bg-black py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Text

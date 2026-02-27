@@ -23,7 +23,6 @@ import {
   IconCrown
 } from "@tabler/icons-react";
 import { Header } from "@/components/Header/Header";
-import Footer from "@/components/Footer/Footer";
 import { useEffect, useState } from "react";
 
 function BackgroundImageCarousel() {
@@ -78,10 +77,10 @@ export default function Home() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen text-white" style={{ background: '#07070e' }}>
+    <div className="min-h-screen bg-black text-white">
 
       {/* SECTION 1: Hero Section */}
-      <div className="relative min-h-screen overflow-x-clip" style={{ background: 'linear-gradient(160deg, #0d0d1a 0%, #07070e 60%)' }}>
+      <div className="relative min-h-screen bg-black overflow-x-clip">
         {/* Navigation */}
         <div className="absolute inset-0 z-20 h-30">
           <Header></Header>
@@ -247,7 +246,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 2: Pick Your Tool */}
-      <div id="pick-your-tool" className="py-20" style={{ background: 'linear-gradient(180deg, #07070e 0%, #0a0a18 100%)' }}>
+      <div id="pick-your-tool" className="bg-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Text
@@ -363,7 +362,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 3: Features */}
-      <div className="py-20 relative" style={{ background: '#0a0a18' }}>
+      <div className="bg-black py-20 relative">
         {/* Background Image */}
         <div className="absolute inset-0 opacity-45">
           <img
@@ -392,66 +391,66 @@ export default function Home() {
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
             {/* Feature 1 */}
-            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 md:p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
-              <div className="text-indigo-400 mb-3">
-                <IconCamera size={32} className="md:w-12 md:h-12" />
+            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
+              <div className="text-indigo-400 mb-4">
+                <IconCamera size={48} />
               </div>
-              <h3 className="text-base md:text-2xl font-bold mb-2 md:mb-4">Reference Images</h3>
+              <h3 className="text-2xl font-bold mb-4">Reference Images</h3>
               <p className="text-gray-400">
                 Upload reference images to guide the AI and create exactly what you envision with precision and consistency.
               </p>
             </div>
 
             {/* Feature 2 */}
-            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 md:p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
-              <div className="text-violet-400 mb-3">
-                <IconStar size={32} className="md:w-12 md:h-12" />
+            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
+              <div className="text-violet-400 mb-4">
+                <IconStar size={48} />
               </div>
-              <h3 className="text-base md:text-2xl font-bold mb-2 md:mb-4">Model Marketplace</h3>
+              <h3 className="text-2xl font-bold mb-4">Model Marketplace</h3>
               <p className="text-gray-400">
                 Access thousands of pre-trained AI models. From celebrities to custom styles, find the perfect model for your creation.
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 md:p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
-              <div className="text-indigo-400 mb-3">
-                <IconShieldCheck size={32} className="md:w-12 md:h-12" />
+            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
+              <div className="text-indigo-400 mb-4">
+                <IconShieldCheck size={48} />
               </div>
-              <h3 className="text-base md:text-2xl font-bold mb-2 md:mb-4">100% Uncensored</h3>
+              <h3 className="text-2xl font-bold mb-4">100% Uncensored</h3>
               <p className="text-gray-400">
                 No limits, no restrictions. Create any content you want without censorship or judgment. Your creativity, your rules.
               </p>
             </div>
 
             {/* Feature 4 */}
-            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 md:p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
-              <div className="text-violet-400 mb-3">
-                <IconBolt size={32} className="md:w-12 md:h-12" />
+            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
+              <div className="text-violet-400 mb-4">
+                <IconBolt size={48} />
               </div>
-              <h3 className="text-base md:text-2xl font-bold mb-2 md:mb-4">Instant Results</h3>
+              <h3 className="text-2xl font-bold mb-4">Instant Results</h3>
               <p className="text-gray-400">
                 Fast generation times mean you spend less time waiting and more time creating. Get results in seconds, not minutes.
               </p>
             </div>
 
             {/* Feature 5 */}
-            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 md:p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
-              <div className="text-indigo-400 mb-3">
-                <IconSparkles size={32} className="md:w-12 md:h-12" />
+            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
+              <div className="text-indigo-400 mb-4">
+                <IconSparkles size={48} />
               </div>
-              <h3 className="text-base md:text-2xl font-bold mb-2 md:mb-4">HD Quality</h3>
+              <h3 className="text-2xl font-bold mb-4">HD Quality</h3>
               <p className="text-gray-400">
                 Generate images in stunning high definition with incredible detail and clarity. Professional quality every time.
               </p>
             </div>
 
             {/* Feature 6 */}
-            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-4 md:p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
-              <div className="text-violet-400 mb-3">
-                <IconInfinity size={32} className="md:w-12 md:h-12" />
+            <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-8 border border-white/10 hover:border-indigo-500/50 hover:bg-white/10 transition">
+              <div className="text-violet-400 mb-4">
+                <IconInfinity size={48} />
               </div>
-              <h3 className="text-base md:text-2xl font-bold mb-2 md:mb-4">Unlimited Creativity</h3>
+              <h3 className="text-2xl font-bold mb-4">Unlimited Creativity</h3>
               <p className="text-gray-400">
                 No creative boundaries. Generate as much as you want with our flexible token system. Scale as you grow.
               </p>
@@ -461,7 +460,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 4: See What's Possible */}
-      <div className="py-20" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #07070e 100%)' }}>
+      <div className="bg-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Text
@@ -526,7 +525,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 5: Pay As You Grow - Pricing */}
-      <div className="py-20" style={{ background: 'linear-gradient(180deg, #07070e 0%, #0b0b1c 100%)' }}>
+      <div className="bg-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Text
@@ -706,7 +705,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 6: FAQ */}
-      <div className="py-20" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #07070e 100%)' }}>
+      <div className="bg-black py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Text
@@ -787,8 +786,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      <Footer />
 
     </div>
   );

@@ -3,14 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, TextInput, PasswordInput, Container, Paper, Title, Text, Divider, Anchor, Group, Transition, Checkbox, Center, Loader, Box } from "@mantine/core";
 import { hasLength, isEmail, useForm } from "@mantine/form";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendSignInLinkToEmail, signInWithPopup, GoogleAuthProvider, ActionCodeSettings, isSignInWithEmailLink, signInWithEmailLink, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendSignInLinkToEmail, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider, ActionCodeSettings, isSignInWithEmailLink, signInWithEmailLink, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import app from "@/lib/firebase";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from 'next/navigation'
 import { useCsrfToken } from "@/hooks/useCsrfToken";
 import { IconBrandGoogle, IconBrandGoogleFilled } from "@tabler/icons-react";
 import { Header } from "@/components/Header/Header";
-import Footer from "@/components/Footer/Footer";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 
 
@@ -204,6 +203,36 @@ export default function AuthPage() {
 		}
 	}, []);
 
+	const handleForgotPassword = async () => {
+		const email = form.values.email;
+		if (!email || !form.isValid('email')) {
+			notifications.show({
+				position: "top-center",
+				color: "yellow",
+				title: "Email Required",
+				message: "Please enter your email address first.",
+			});
+			return;
+		}
+
+		try {
+			await sendPasswordResetEmail(auth, email);
+			notifications.show({
+				position: "top-center",
+				color: "green",
+				title: "Reset Link Sent",
+				message: "If an account exists with that email, a password reset link has been sent.",
+			});
+		} catch (error: any) {
+			notifications.show({
+				position: "top-center",
+				color: "red",
+				title: "Error",
+				message: error.message || "Failed to send password reset email.",
+			});
+		}
+	};
+
 	const handleSubmit = async (values: typeof form.values) => {
 		setIsAuthenticating(true); // Set loading state
 		try {
@@ -226,21 +255,6 @@ export default function AuthPage() {
 
 			const { next } = await res.json();
 
-			// Send welcome notification for new signups
-			if (isSignup) {
-				try {
-					await fetch("/api/notifications/welcome", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({ userId: userCredential.user.uid }),
-					});
-				} catch (error) {
-					console.error("Failed to send welcome notification:", error);
-				}
-			}
-
 			notifications.show({
 				position: "top-center",
 				color: "green",
@@ -251,7 +265,7 @@ export default function AuthPage() {
 			router.replace(next);
 		} catch (error: any) {
 			console.log(error);
-			
+
 			if (error.message.includes('INVALID_LOGIN_CREDENTIALS')) {
 				notifications.show({
 					position: "top-center",
@@ -324,8 +338,8 @@ export default function AuthPage() {
 	return (
 		<>
 			<Header></Header>
-			<Group w="full" my={40} align="center" justify="center" gap={30}>
-				<Box p={30} mt={30} w={380}>
+			<div className="flex items-center justify-center gap-8 px-4 md:px-8" style={{ minHeight: 'calc(100vh - 64px)' }}>
+				<Box p={{ base: 20, sm: 30 }} w="100%" maw={400}>
 					<Title order={2} mt="md">
 						{mode === "signup" ? "Sign Up" : "Login"}
 					</Title>
@@ -362,11 +376,17 @@ export default function AuthPage() {
 							mt="md"
 							{...form.getInputProps('password')}
 						/>
-						<Checkbox
-							label="Remember Me"
-							mt="md"
-							{...form.getInputProps('rememberMe', { type: 'checkbox' })}
-						/>
+						<Group justify="space-between" mt="sm">
+							<Checkbox
+								label="Remember Me"
+								{...form.getInputProps('rememberMe', { type: 'checkbox' })}
+							/>
+							{mode === "signin" && (
+								<Anchor size="sm" component="button" type="button" onClick={handleForgotPassword}>
+									Forgot password?
+								</Anchor>
+							)}
+						</Group>
 						<Button fullWidth mt="xl" type="submit" loading={isAuthenticating}>
 							{mode === "signup" ? "Sign Up" : mode === "signin" ? "Login" : "Send Sign-In Link"}
 						</Button>
@@ -380,14 +400,13 @@ export default function AuthPage() {
 						</Button>
 					</Group>
 				</Box>
-				<div className="relative text-center lg:text-left lg:w-1/2 max-w-lg mantine-visible-from-md">
-					<img src="/landing/signin.png" alt="signup_model" className="rounded-3xl hidden lg:block brightness-80" />
-					<div className="absolute inset-0 flex-col items-center justify-center w-full h-full text-center text-white text-6xl font-bold font-['Outfit'] hidden lg:flex">
+				<div className="relative text-center hidden lg:block" style={{ width: '380px', flexShrink: 0 }}>
+					<img src="/landing/signin.png" alt="signup_model" className="rounded-3xl brightness-80 w-full" style={{ height: '520px', objectFit: 'cover', objectPosition: 'top' }} />
+					<div className="absolute inset-0 flex flex-col items-center justify-center text-white text-3xl font-bold font-['Outfit']">
 						<span>Very good things</span><span>are waiting for</span><span>you!!!</span>
 					</div>
 				</div>
-			</Group>
-			<Footer></Footer>
+			</div>
 		</>
 	);
 }

@@ -3,14 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, TextInput, PasswordInput, Container, Paper, Title, Text, Divider, Anchor, Group, Transition, Checkbox, Center, Loader, Box } from "@mantine/core";
 import { hasLength, isEmail, useForm } from "@mantine/form";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendSignInLinkToEmail, signInWithPopup, GoogleAuthProvider, ActionCodeSettings, isSignInWithEmailLink, signInWithEmailLink, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendSignInLinkToEmail, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider, ActionCodeSettings, isSignInWithEmailLink, signInWithEmailLink, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import app from "@/lib/firebase";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from 'next/navigation'
 import { useCsrfToken } from "@/hooks/useCsrfToken";
 import { IconBrandGoogle, IconBrandGoogleFilled } from "@tabler/icons-react";
 import { Header } from "@/components/Header/Header";
-import Footer from "@/components/Footer/Footer";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 
 
@@ -204,6 +203,36 @@ export default function AuthPage() {
 		}
 	}, []);
 
+	const handleForgotPassword = async () => {
+		const email = form.values.email;
+		if (!email || !form.isValid('email')) {
+			notifications.show({
+				position: "top-center",
+				color: "yellow",
+				title: "Email Required",
+				message: "Please enter your email address first.",
+			});
+			return;
+		}
+
+		try {
+			await sendPasswordResetEmail(auth, email);
+			notifications.show({
+				position: "top-center",
+				color: "green",
+				title: "Reset Link Sent",
+				message: "If an account exists with that email, a password reset link has been sent.",
+			});
+		} catch (error: any) {
+			notifications.show({
+				position: "top-center",
+				color: "red",
+				title: "Error",
+				message: error.message || "Failed to send password reset email.",
+			});
+		}
+	};
+
 	const handleSubmit = async (values: typeof form.values) => {
 		setIsAuthenticating(true); // Set loading state
 		try {
@@ -236,7 +265,7 @@ export default function AuthPage() {
 			router.replace(next);
 		} catch (error: any) {
 			console.log(error);
-			
+
 			if (error.message.includes('INVALID_LOGIN_CREDENTIALS')) {
 				notifications.show({
 					position: "top-center",
@@ -309,8 +338,8 @@ export default function AuthPage() {
 	return (
 		<>
 			<Header></Header>
-			<Group w="full" my={40} align="center" justify="center" gap={30}>
-				<Box p={30} mt={30} w={380}>
+			<div className="flex items-center justify-center gap-8 px-4 md:px-8" style={{ minHeight: 'calc(100vh - 64px)' }}>
+				<Box p={{ base: 20, sm: 30 }} w="100%" maw={400}>
 					<Title order={2} mt="md">
 						{mode === "signup" ? "Sign Up" : "Login"}
 					</Title>
@@ -347,11 +376,17 @@ export default function AuthPage() {
 							mt="md"
 							{...form.getInputProps('password')}
 						/>
-						<Checkbox
-							label="Remember Me"
-							mt="md"
-							{...form.getInputProps('rememberMe', { type: 'checkbox' })}
-						/>
+						<Group justify="space-between" mt="sm">
+							<Checkbox
+								label="Remember Me"
+								{...form.getInputProps('rememberMe', { type: 'checkbox' })}
+							/>
+							{mode === "signin" && (
+								<Anchor size="sm" component="button" type="button" onClick={handleForgotPassword}>
+									Forgot password?
+								</Anchor>
+							)}
+						</Group>
 						<Button fullWidth mt="xl" type="submit" loading={isAuthenticating}>
 							{mode === "signup" ? "Sign Up" : mode === "signin" ? "Login" : "Send Sign-In Link"}
 						</Button>
@@ -360,19 +395,29 @@ export default function AuthPage() {
 					<Divider label="Or continue with" labelPosition="center" my="lg" />
 
 					<Group grow mb="md" mt="md">
-						<Button variant="outline" onClick={handleGoogleSignIn} leftSection={<IconBrandGoogleFilled></IconBrandGoogleFilled>}>
+						<Button
+							variant="outline"
+							onClick={handleGoogleSignIn}
+							leftSection={
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18" height="18">
+									<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+									<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+									<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+									<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+								</svg>
+							}
+						>
 							Google
 						</Button>
 					</Group>
 				</Box>
-				<div className="relative text-center lg:text-left lg:w-1/2 max-w-lg mantine-visible-from-md">
-					<img src="/landing/signin.png" alt="signup_model" className="rounded-3xl hidden lg:block brightness-80" />
-					<div className="absolute inset-0 flex-col items-center justify-center w-full h-full text-center text-white text-6xl font-bold font-['Outfit'] hidden lg:flex">
+				<div className="relative text-center hidden lg:block" style={{ width: '380px', flexShrink: 0 }}>
+					<img src="/landing/signin.png" alt="signup_model" className="rounded-3xl brightness-80 w-full" style={{ height: '520px', objectFit: 'cover', objectPosition: 'top' }} />
+					<div className="absolute inset-0 flex flex-col items-center justify-center text-white text-3xl font-bold font-['Outfit']">
 						<span>Very good things</span><span>are waiting for</span><span>you!!!</span>
 					</div>
 				</div>
-			</Group>
-			<Footer></Footer>
+			</div>
 		</>
 	);
 }

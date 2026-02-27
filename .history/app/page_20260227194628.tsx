@@ -462,16 +462,6 @@ export default function Home() {
 
       {/* SECTION 4: See What's Possible */}
       <div className="py-20" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #07070e 100%)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <Text
-              component="span"
-              variant="gradient"
-              gradient={{ from: 'indigo', to: 'violet' }}
-              className="text-lg font-semibold uppercase tracking-wider"
-            >
-              Gallery
-            </Text>
             <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4">
               See What's Possible
             </h2>
