@@ -100,11 +100,6 @@ const navItems = [
         href: '/admin/reference-images',
         icon: IconPhoto,
     },
-    {
-        label: 'Train Requests',
-        href: '/admin/character-train-requests',
-        icon: IconBrain,
-    },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

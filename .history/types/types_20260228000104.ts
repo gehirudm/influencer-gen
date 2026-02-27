@@ -75,6 +75,35 @@ interface UserCharacter {
     // Draft status for autosave
     isDraft?: boolean;
     lastModified?: string;
+
+    // Training status
+    trainStatus?: 'untrained' | 'pending' | 'completed';
+    loraUrl?: string;
+    loraName?: string;
+    loraKeyword?: string;
+    trainRequestedAt?: string;
+    trainCompletedAt?: string;
+}
+
+// Interface for the 'character-train-requests' collection
+interface CharacterTrainRequest {
+    characterId: string;
+    userId: string;
+    characterName: string;
+    characterGender?: string;
+    characterAge?: string;
+    characterBodyType?: string;
+    characterDescription: string;
+    characterImageUrls: string[];
+    characterBaseImageUrl?: string;
+    status: 'pending' | 'in_progress' | 'completed' | 'rejected';
+    loraUrl?: string;
+    loraName?: string;
+    loraKeyword?: string;
+    adminNotes?: string;
+    requestedAt: string;
+    completedAt?: string;
+    completedBy?: string;
 }
 
 // Interface for the 'images' collection
@@ -260,19 +289,3 @@ type ImageGenerationRequestInput =
         model_name: "lustify" | "realism",
         generation_type: "simple" | "advanced" | "nudify",
     };
-
-// Interface for inbox notifications
-interface InboxNotification {
-    userId: string;
-    type: 'welcome' | 'purchase' | 'credits' | 'low_tokens' | 'first_image' | 'custom';
-    title: string;
-    message: string;
-    read: boolean;
-    createdAt: string;
-    link?: string; // Optional CTA link
-    metadata?: {
-        tokens?: number;
-        package?: string;
-        [key: string]: any;
-    };
-}

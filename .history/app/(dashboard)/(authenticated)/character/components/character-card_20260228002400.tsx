@@ -58,32 +58,27 @@ export function CharacterCard({ character }: CharacterCardProps) {
     const isTrained = trainStatus === 'completed';
 
     // Calculate remaining time for the progress bar
-    // If the 6-hour window expires, restart the cycle with a "long queue" note
     const getTrainingProgress = () => {
-        if (!character.trainRequestedAt) return { progress: 0, remaining: '~2-6 hours remaining', longQueue: false };
+        if (!character.trainRequestedAt) return { progress: 0, remaining: '~6 hours remaining' };
 
         const requestedAt = new Date(character.trainRequestedAt).getTime();
         const now = Date.now();
         const sixHours = 6 * 60 * 60 * 1000;
-        const totalElapsed = now - requestedAt;
+        const elapsed = now - requestedAt;
+        const progress = Math.min((elapsed / sixHours) * 100, 99); // Cap at 99% until admin completes
+        const remainingMs = Math.max(sixHours - elapsed, 0);
 
-        // If beyond the first 6h window, restart cycles
-        const cycleElapsed = totalElapsed % sixHours;
-        const longQueue = totalElapsed >= sixHours;
-        const progress = Math.min((cycleElapsed / sixHours) * 100, 99);
-        const remainingMs = Math.max(sixHours - cycleElapsed, 0);
+        if (remainingMs <= 0) {
+            return { progress: 99, remaining: 'Almost ready...' };
+        }
 
         const hours = Math.floor(remainingMs / (60 * 60 * 1000));
         const minutes = Math.floor((remainingMs % (60 * 60 * 1000)) / (60 * 1000));
 
-        let remaining: string;
         if (hours > 0) {
-            remaining = `~${hours}h ${minutes}m remaining`;
-        } else {
-            remaining = `~${minutes}m remaining`;
+            return { progress, remaining: `~${hours}h ${minutes}m remaining` };
         }
-
-        return { progress, remaining, longQueue };
+        return { progress, remaining: `~${minutes}m remaining` };
     };
 
     const handleTrain = async () => {
@@ -210,54 +205,33 @@ export function CharacterCard({ character }: CharacterCardProps) {
                     <IconTrash size={16} />
                 </ActionIcon>
 
-                {/* Training full overlay with animation */}
+                {/* Training progress overlay */}
                 {isPending && (
-                    <Box className={classes.trainingOverlay}>
-                        {/* Center content */}
-                        <Stack
-                            gap={6}
-                            align="center"
-                            justify="center"
-                            style={{
-                                position: 'absolute',
-                                inset: 0,
-                                zIndex: 2,
-                            }}
-                        >
-                            <Loader size={28} color="violet" type="bars" />
-                            <Text size="xs" c="white" fw={600} ta="center" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
-                                Training...
-                            </Text>
-                        </Stack>
-
-                        {/* Bottom info bar */}
-                        <Box
-                            style={{
-                                position: 'absolute',
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                padding: '10px',
-                                zIndex: 2,
-                            }}
-                        >
-                            {getTrainingProgress().longQueue && (
-                                <Text size="xs" c="yellow" ta="center" mb={4} fw={600}>
-                                    Long queue — hang tight!
-                                </Text>
-                            )}
-                            <Group gap={4} justify="center" mb={6}>
-                                <Text size="sm" c="white" fw={500}>{getTrainingProgress().remaining}</Text>
-                            </Group>
-                            <Progress
-                                value={getTrainingProgress().progress}
-                                color="violet"
-                                size="md"
-                                radius="xl"
-                                animated
-                                striped
-                            />
-                        </Box>
+                    <Box
+                        style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            padding: '10px 8px 8px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '6px',
+                        }}
+                    >
+                        <Group gap={6} justify="center">
+                            <Loader size={12} color="blue" type="dots" />
+                            <Text size="xs" c="white" fw={500}>{getTrainingProgress().remaining}</Text>
+                        </Group>
+                        <Progress 
+                            value={getTrainingProgress().progress} 
+                            color="blue" 
+                            size="sm" 
+                            radius="xl"
+                            animated
+                            striped
+                        />
                     </Box>
                 )}
             </Box>
@@ -363,7 +337,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
                         You currently have <Text component="span" fw={700} c="violet">{systemData?.loraTokens ?? 0}</Text> LoRA token{(systemData?.loraTokens ?? 0) !== 1 ? 's' : ''}.
                     </Text>
                     <Text size="sm" c="dimmed">
-                        Training typically takes around 2–6 hours. You'll be notified when your character is ready.
+                        Training typically takes around 6 hours. You'll be notified when your character is ready.
                     </Text>
                 </Stack>
                 <Group justify="flex-end" mt="lg">

@@ -10,13 +10,19 @@ import {
     ActionIcon,
     Box,
     Modal,
+    Progress,
+    Loader,
+    Stack,
+    Tooltip,
 } from '@mantine/core';
-import { IconTrash, IconPhotoSpark, IconEdit } from '@tabler/icons-react';
+import { IconTrash, IconPhotoSpark, IconEdit, IconBrain, IconClock } from '@tabler/icons-react';
 import classes from './character-card.module.css';
 import { useCharacters } from '@/hooks/useUserCharacters';
 import { notifications } from '@mantine/notifications';
 import { useCharacterContext } from '@/contexts/character-context';
 import { useRouter } from 'next/navigation';
+import { submitTrainRequest } from '@/app/actions/character/train';
+import { useUserData } from '@/hooks/useUserData';
 
 
 interface CharacterCardProps {
@@ -27,6 +33,8 @@ interface CharacterCardProps {
         baseImageUrl?: string;
         age?: string;
         gender?: string;
+        trainStatus?: 'untrained' | 'pending' | 'completed';
+        trainRequestedAt?: string;
     }
 }
 
@@ -72,14 +80,14 @@ export function CharacterCard({ character }: CharacterCardProps) {
 
     const handleUseCharacter = (characterId: string) => {
         selectCharacter(characterId);
-        router.push(`/create?gen_type=advanced`);
+        router.push(`/generate-images?gen_type=advanced`);
     }
 
     // Use base image if available, otherwise fall back to first image
     const displayImage = character.baseImageUrl || character.imageUrls[0];
 
     return (
-        <Card p="md" style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}>
+        <Card p={{ base: 'xs', md: 'md' }} style={{ backgroundColor: '#3a3a3a', border: '1px solid #555', cursor: 'pointer' }}>
             <Box
                 style={{
                     width: '100%',
@@ -88,7 +96,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
                     borderRadius: '8px',
                     overflow: 'hidden',
                     position: 'relative',
-                    marginBottom: '12px',
+                    marginBottom: '8px',
                 }}
             >
                 <img 
@@ -135,7 +143,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
                 </ActionIcon>
             </Box>
             
-            <Text size="sm" c="white" ta="center" mb="sm">
+            <Text size="sm" c="white" ta="center" mb="xs">
                 <Text component="span" fw={600}>{character.name}</Text>
                 {character.age && (
                     <Text component="span" fw={400}> ({character.age})</Text>

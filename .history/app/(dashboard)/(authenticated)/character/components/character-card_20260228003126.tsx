@@ -213,6 +213,9 @@ export function CharacterCard({ character }: CharacterCardProps) {
                 {/* Training full overlay with animation */}
                 {isPending && (
                     <Box className={classes.trainingOverlay}>
+                        {/* Scanning line animation */}
+                        <Box className={classes.scanLine} />
+
                         {/* Center content */}
                         <Stack
                             gap={6}
@@ -224,7 +227,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
                                 zIndex: 2,
                             }}
                         >
-                            <Loader size={28} color="violet" type="bars" />
+                            <Loader size={28} color="cyan" type="bars" />
                             <Text size="xs" c="white" fw={600} ta="center" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
                                 Training...
                             </Text>
@@ -237,22 +240,22 @@ export function CharacterCard({ character }: CharacterCardProps) {
                                 bottom: 0,
                                 left: 0,
                                 right: 0,
-                                padding: '10px',
+                                padding: '8px',
                                 zIndex: 2,
                             }}
                         >
                             {getTrainingProgress().longQueue && (
-                                <Text size="xs" c="yellow" ta="center" mb={4} fw={600}>
+                                <Text size="10px" c="yellow" ta="center" mb={4} fw={600}>
                                     Long queue — hang tight!
                                 </Text>
                             )}
-                            <Group gap={4} justify="center" mb={6}>
-                                <Text size="sm" c="white" fw={500}>{getTrainingProgress().remaining}</Text>
+                            <Group gap={4} justify="center" mb={4}>
+                                <Text size="10px" c="rgba(255,255,255,0.8)">{getTrainingProgress().remaining}</Text>
                             </Group>
                             <Progress
                                 value={getTrainingProgress().progress}
-                                color="violet"
-                                size="md"
+                                color="cyan"
+                                size="xs"
                                 radius="xl"
                                 animated
                                 striped

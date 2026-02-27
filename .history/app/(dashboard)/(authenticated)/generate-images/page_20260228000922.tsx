@@ -659,7 +659,7 @@ export default function ImageGeneratorPage() {
                                                     </Stack>
                                                 </Card>
                                                 );
-                                            })}
+                                            }))
                                         </Group>
                                     </Box>
 
