@@ -75,22 +75,15 @@ function BackgroundImageCarousel() {
 }
 
 const GALLERY_IMAGES = [
-  'anime_girl_2.webp',
   'asian_girl_2.webp',
-  'belt_girl.webp',
-  'blowjob.webp',
   'boobs_to_glass.webp',
   'butt_to_glass.webp',
   'doggy_pose.webp',
   'futuristic_girl.webp',
   'gaming_girl.webp',
   'glass_suit.webp',
-  'goth_girl_2.webp',
   'goth_girl_selfie.webp',
   'horny_pose.webp',
-  'influencer_2.webp',
-  'influencer_4.webp',
-  'influencer_7.webp',
   'manga_shop.webp',
   'mirror_selfie.webp',
   'mirror_selfie_2.webp',
@@ -119,87 +112,28 @@ function shuffleArray<T>(arr: T[]): T[] {
   return shuffled;
 }
 
-function GalleryCard({ filename }: { filename: string }) {
-  const [displayedImages, setDisplayedImages] = useState<{ src: string; opacity: number }[]>([
-    { src: filename, opacity: 1 },
-  ]);
-
-  useEffect(() => {
-    if (displayedImages[displayedImages.length - 1].src === filename) return;
-
-    // Add new image on top with opacity 0, then fade it in
-    setDisplayedImages((prev) => [...prev, { src: filename, opacity: 0 }]);
-
-    // Trigger fade-in on next frame
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setDisplayedImages((prev) =>
-          prev.map((img, i) =>
-            i === prev.length - 1 ? { ...img, opacity: 1 } : { ...img, opacity: 0 }
-          )
-        );
-      });
-    });
-
-    // Clean up old layers after transition
-    const cleanup = setTimeout(() => {
-      setDisplayedImages((prev) => [prev[prev.length - 1]]);
-    }, 700);
-
-    return () => clearTimeout(cleanup);
-  }, [filename]);
-
-  return (
-    <div className="group cursor-pointer">
-      <div className="aspect-[3/4] rounded-xl overflow-hidden relative border border-white/10 hover:border-indigo-500/50 transition-all">
-        {displayedImages.map((img, i) => (
-          <img
-            key={img.src + i}
-            src={`/landing/section 4/${img.src}`}
-            alt={toTitleCase(img.src)}
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              opacity: img.opacity,
-              transition: 'opacity 0.6s ease-in-out',
-              zIndex: i,
-            }}
-          />
-        ))}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/10" style={{ zIndex: 10 }} />
-        <div className="absolute bottom-0 left-0 right-0 p-3" style={{ zIndex: 11 }}>
-          <p
-            className="text-white font-semibold text-sm"
-            style={{
-              opacity: displayedImages[displayedImages.length - 1].opacity,
-              transition: 'opacity 0.5s ease-in-out',
-            }}
-          >
-            {toTitleCase(displayedImages[displayedImages.length - 1].src)}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function GallerySection({ router }: { router: ReturnType<typeof useRouter> }) {
   const [cards, setCards] = useState<string[]>([]);
 
   useEffect(() => {
+    // Pick initial 8 random images
     const initial = shuffleArray(GALLERY_IMAGES).slice(0, 8);
     setCards(initial);
 
+    // Staggered rotation: swap one random card every 2.5s
     const interval = setInterval(() => {
       setCards((prev) => {
         const next = [...prev];
+        // Pick a random card index to replace
         const cardIdx = Math.floor(Math.random() * 8);
+        // Pick a new image not currently displayed
         const available = GALLERY_IMAGES.filter((img) => !next.includes(img));
         if (available.length === 0) return next;
         const newImg = available[Math.floor(Math.random() * available.length)];
         next[cardIdx] = newImg;
         return next;
       });
-    }, 1500);
+    }, 2500);
 
     return () => clearInterval(interval);
   }, []);
@@ -227,7 +161,19 @@ function GallerySection({ router }: { router: ReturnType<typeof useRouter> }) {
         {/* Image Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {cards.map((filename, index) => (
-            <GalleryCard key={index} filename={filename} />
+            <div key={index} className="group cursor-pointer">
+              <div className="aspect-[3/4] rounded-xl overflow-hidden relative border border-white/10 hover:border-indigo-500/50 transition-all">
+                <img
+                  src={`/landing/section 4/${filename}`}
+                  alt={toTitleCase(filename)}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
+                  <p className="text-white font-semibold text-sm">{toTitleCase(filename)}</p>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
 
@@ -528,8 +474,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 3: Features */}
-      <div className="py-20 relative" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #0d0d24 50%, #0a0a18 100%)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="py-20 relative" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #0d0d24 50%, #0a0a18 100%)' }}>\n        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <Text
               component="span"

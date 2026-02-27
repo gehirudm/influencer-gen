@@ -528,8 +528,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 3: Features */}
-      <div className="py-20 relative" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #0d0d24 50%, #0a0a18 100%)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="py-20 relative" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #0d0d24 50%, #0a0a18 100%)' }}>\n        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <Text
               component="span"

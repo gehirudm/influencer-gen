@@ -75,22 +75,15 @@ function BackgroundImageCarousel() {
 }
 
 const GALLERY_IMAGES = [
-  'anime_girl_2.webp',
   'asian_girl_2.webp',
-  'belt_girl.webp',
-  'blowjob.webp',
   'boobs_to_glass.webp',
   'butt_to_glass.webp',
   'doggy_pose.webp',
   'futuristic_girl.webp',
   'gaming_girl.webp',
   'glass_suit.webp',
-  'goth_girl_2.webp',
   'goth_girl_selfie.webp',
   'horny_pose.webp',
-  'influencer_2.webp',
-  'influencer_4.webp',
-  'influencer_7.webp',
   'manga_shop.webp',
   'mirror_selfie.webp',
   'mirror_selfie_2.webp',
@@ -165,7 +158,7 @@ function GalleryCard({ filename }: { filename: string }) {
             }}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/10" style={{ zIndex: 10 }} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" style={{ zIndex: 10 }} />
         <div className="absolute bottom-0 left-0 right-0 p-3" style={{ zIndex: 11 }}>
           <p
             className="text-white font-semibold text-sm"
@@ -528,8 +521,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 3: Features */}
-      <div className="py-20 relative" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #0d0d24 50%, #0a0a18 100%)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="py-20 relative" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #0d0d24 50%, #0a0a18 100%)' }}>\n        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <Text
               component="span"

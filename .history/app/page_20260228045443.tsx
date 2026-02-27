@@ -165,7 +165,7 @@ function GalleryCard({ filename }: { filename: string }) {
             }}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/10" style={{ zIndex: 10 }} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" style={{ zIndex: 10 }} />
         <div className="absolute bottom-0 left-0 right-0 p-3" style={{ zIndex: 11 }}>
           <p
             className="text-white font-semibold text-sm"
@@ -192,11 +192,15 @@ function GallerySection({ router }: { router: ReturnType<typeof useRouter> }) {
     const interval = setInterval(() => {
       setCards((prev) => {
         const next = [...prev];
-        const cardIdx = Math.floor(Math.random() * 8);
+        // Pick 2 different random card indices
+        const idx1 = Math.floor(Math.random() * 8);
+        let idx2 = Math.floor(Math.random() * 7);
+        if (idx2 >= idx1) idx2++;
         const available = GALLERY_IMAGES.filter((img) => !next.includes(img));
-        if (available.length === 0) return next;
-        const newImg = available[Math.floor(Math.random() * available.length)];
-        next[cardIdx] = newImg;
+        if (available.length < 2) return next;
+        const shuffled = shuffleArray(available);
+        next[idx1] = shuffled[0];
+        next[idx2] = shuffled[1];
         return next;
       });
     }, 1500);
@@ -528,8 +532,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 3: Features */}
-      <div className="py-20 relative" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #0d0d24 50%, #0a0a18 100%)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="py-20 relative" style={{ background: 'linear-gradient(180deg, #0a0a18 0%, #0d0d24 50%, #0a0a18 100%)' }}>\n        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <Text
               component="span"
