@@ -188,8 +188,8 @@ export default function UndressPage() {
         }
     }, [exampleLoop, scanDirection]);
 
-    // Get completed undress (nudify) jobs with images — exclude regular generate-images jobs
-    const completedJobs = userJobs.filter(job => job.status === 'completed' && job.imageUrls && job.imageUrls.length > 0 && (job.metadata as any)?.generation_type === 'nudify');
+    // Get completed jobs with images
+    const completedJobs = userJobs.filter(job => job.status === 'completed' && job.imageUrls && job.imageUrls.length > 0);
     const latestJob = completedJobs[0];
     const previousJobs = completedJobs.slice(1);
 
