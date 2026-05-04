@@ -32,6 +32,7 @@ import {
     IconUserCircle,
     IconPhoto,
     IconBrain,
+    IconWand,
 } from '@tabler/icons-react';
 import classes from './admin.module.css';
 import collapsedClasses from './adminCollapsed.module.css';
@@ -99,6 +100,21 @@ const navItems = [
         label: 'Reference Images',
         href: '/admin/reference-images',
         icon: IconPhoto,
+    },
+    {
+        label: 'Generation Requests',
+        href: '/admin/generation-requests',
+        icon: IconWand,
+        subItems: [
+            {
+                label: 'Job List',
+                href: '/admin/generation-requests',
+            },
+            {
+                label: 'Images',
+                href: '/admin/generation-requests/images',
+            },
+        ],
     },
     {
         label: 'Train Requests',
