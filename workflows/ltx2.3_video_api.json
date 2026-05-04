@@ -1,0 +1,235 @@
+{
+  "75": {
+    "inputs": {
+      "filename_prefix": "video/LTX_2.3_t2v",
+      "format": "auto",
+      "codec": "auto",
+      "video": [
+        "310",
+        0
+      ]
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "279": {
+    "inputs": {
+      "UNKNOWN": "ltx-2.3-22b-distilled-fp8.safetensors"
+    },
+    "_meta": {}
+  },
+  "285": {
+    "inputs": {
+      "lora_name": "ostris_webcam_ltx2_3.safetensors",
+      "strength_model": 1.1,
+      "model": [
+        "316",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "295": {
+    "inputs": {
+      "width": 1920,
+      "height": 1088,
+      "length": [
+        "301",
+        0
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLTXVLatentVideo",
+    "_meta": {
+      "title": "EmptyLTXVLatentVideo"
+    }
+  },
+  "297": {
+    "inputs": {
+      "samples": [
+        "307",
+        1
+      ],
+      "audio_vae": [
+        "279",
+        0
+      ]
+    },
+    "_meta": {}
+  },
+  "301": {
+    "inputs": {
+      "value": 241
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "Length"
+    }
+  },
+  "303": {
+    "inputs": {
+      "text": "ostris says \"Hey look at you, someone actually downloaded this template.\"",
+      "clip": [
+        "317",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "304": {
+    "inputs": {
+      "frame_rate": 24,
+      "positive": [
+        "303",
+        0
+      ],
+      "negative": [
+        "313",
+        0
+      ]
+    },
+    "class_type": "LTXVConditioning",
+    "_meta": {
+      "title": "LTXVConditioning"
+    }
+  },
+  "305": {
+    "inputs": {
+      "UNKNOWN": 1,
+      "audio_vae": [
+        "279",
+        0
+      ],
+      "frames_number": [
+        "301",
+        0
+      ]
+    },
+    "_meta": {}
+  },
+  "307": {
+    "inputs": {
+      "av_latent": [
+        "323",
+        0
+      ]
+    },
+    "_meta": {}
+  },
+  "310": {
+    "inputs": {
+      "fps": 24,
+      "images": [
+        "315",
+        0
+      ],
+      "audio": [
+        "297",
+        0
+      ]
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "313": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "317",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "315": {
+    "inputs": {
+      "tile_size": 768,
+      "overlap": 64,
+      "temporal_size": 4096,
+      "temporal_overlap": 4,
+      "samples": [
+        "307",
+        0
+      ],
+      "vae": [
+        "316",
+        2
+      ]
+    },
+    "class_type": "VAEDecodeTiled",
+    "_meta": {
+      "title": "VAE Decode (Tiled)"
+    }
+  },
+  "316": {
+    "inputs": {
+      "ckpt_name": "ltx-2.3-22b-distilled-fp8.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "317": {
+    "inputs": {
+      "UNKNOWN": "default"
+    },
+    "_meta": {}
+  },
+  "322": {
+    "inputs": {
+      "video_latent": [
+        "295",
+        0
+      ],
+      "audio_latent": [
+        "305",
+        0
+      ]
+    },
+    "_meta": {}
+  },
+  "323": {
+    "inputs": {
+      "seed": 689439554396481,
+      "steps": 9,
+      "cfg": 1,
+      "sampler_name": "res_multistep",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "285",
+        0
+      ],
+      "positive": [
+        "304",
+        0
+      ],
+      "negative": [
+        "304",
+        1
+      ],
+      "latent_image": [
+        "322",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  }
+}

@@ -20,6 +20,7 @@ interface UserSystemData {
   loraTokens: number;
   isPaidCustomer: boolean;
   isAdmin?: boolean;
+  role?: string;
 }
 
 interface UserDataHookResult {
@@ -117,9 +118,10 @@ export function useUserData(): UserDataHookResult {
               loraTokens: data.loraTokens || 0,
               isPaidCustomer: data.isPaidCustomer || false,
               isAdmin: data.isAdmin || false,
+              role: data.role || undefined,
             });
           } else {
-            setSystemData({ tokens: 0, loraTokens: 0, isPaidCustomer: false });
+            setSystemData({ tokens: 0, loraTokens: 0, isPaidCustomer: false, role: undefined });
           }
           setLoading(false);
         },
