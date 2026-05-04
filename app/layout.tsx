@@ -38,7 +38,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      // className={`antialiased`}
+        suppressHydrationWarning
       >
         <ColorSchemeScript forceColorScheme="dark" />
         <MantineProvider forceColorScheme="dark" theme={shadcnTheme} cssVariablesResolver={shadcnCssVariableResolver}>

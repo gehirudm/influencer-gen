@@ -19,10 +19,87 @@ import {
     ScrollArea,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { useForm } from '@mantine/form';
-import { useRouter } from 'next/navigation';
 import { useUserJobs } from '@/hooks/useUserJobs';
 import { IconPhoto, IconUpload, IconShirt, IconEye, IconSwimming, IconHanger, IconLink, IconCrown } from '@tabler/icons-react';
+
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_ATTEMPTS = 90;
+
+type UndressOutputImage = {
+    type?: 'base64' | 's3_url';
+    data?: string;
+    url?: string;
+};
+
+type UndressStatusResponse = {
+    id?: string;
+    status?: string;
+    output?: {
+        image?: string;
+        images?: Array<UndressOutputImage | string>;
+    } | string;
+    error?: string;
+};
+
+function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function asImageSrc(value: string) {
+    const trimmed = value.trim();
+    if (!trimmed) {
+        return '';
+    }
+    if (trimmed.startsWith('data:image/')) {
+        return trimmed;
+    }
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return trimmed;
+    }
+    return `data:image/png;base64,${trimmed}`;
+}
+
+function extractOutputImage(output: UndressStatusResponse['output']) {
+    if (!output) {
+        return null;
+    }
+
+    if (typeof output === 'string') {
+        const src = asImageSrc(output);
+        return src || null;
+    }
+
+    if (typeof output.image === 'string') {
+        const src = asImageSrc(output.image);
+        if (src) {
+            return src;
+        }
+    }
+
+    if (Array.isArray(output.images) && output.images.length > 0) {
+        const firstImage = output.images[0];
+
+        if (typeof firstImage === 'string') {
+            const src = asImageSrc(firstImage);
+            return src || null;
+        }
+
+        if (firstImage?.type === 's3_url' && typeof firstImage.data === 'string') {
+            return firstImage.data;
+        }
+
+        if (typeof firstImage?.data === 'string') {
+            const src = asImageSrc(firstImage.data);
+            return src || null;
+        }
+
+        if (typeof firstImage?.url === 'string') {
+            return firstImage.url;
+        }
+    }
+
+    return null;
+}
 
 // Add CSS for pulse animation
 if (typeof document !== 'undefined') {
@@ -40,14 +117,7 @@ if (typeof document !== 'undefined') {
 }
 
 export default function UndressPage() {
-    const form = useForm({
-        initialValues: {
-            mode: 'Undress',
-        },
-    });
-
     const { jobs: userJobs } = useUserJobs();
-    const router = useRouter();
     const isMobile = useMediaQuery('(max-width: 768px)');
 
     const [loading, setLoading] = useState(false);
@@ -63,6 +133,7 @@ export default function UndressPage() {
     const [exampleLoop, setExampleLoop] = useState(0);
     const [exampleOpacity, setExampleOpacity] = useState(0);
     const [scanDirection, setScanDirection] = useState<'down' | 'up'>('down');
+    const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
     const handleImageUpload = (file: File | null) => {
         if (file) {
@@ -76,7 +147,7 @@ export default function UndressPage() {
     };
 
     const handleUndress = async () => {
-        if (!uploadedImage) {
+        if (!uploadedImage || !imagePreview) {
             notifications.show({
                 title: 'Error',
                 message: 'Please upload an image first',
@@ -85,26 +156,101 @@ export default function UndressPage() {
             return;
         }
 
+        if (selectedMode !== 'Undress') {
+            notifications.show({
+                title: 'Unsupported mode',
+                message: 'Only Undress mode is currently available.',
+                color: 'yellow'
+            });
+            return;
+        }
+
         setLoading(true);
 
-        // Simulate processing
-        setTimeout(() => {
+        try {
+            setGeneratedImage(null);
+
+            const startResponse = await fetch('/api/undress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image: imagePreview,
+                    mode: selectedMode,
+                }),
+            });
+
+            const startData = await startResponse.json();
+            if (!startResponse.ok) {
+                throw new Error(startData.error || 'Failed to start undress generation');
+            }
+
+            const jobId = startData.jobId || startData.id;
+            if (!jobId || typeof jobId !== 'string') {
+                throw new Error('RunPod job ID was not returned');
+            }
+
             notifications.show({
                 title: 'Processing',
                 message: 'Image undressing in progress...',
                 color: 'blue'
             });
-            
-            // Simulate completion after a delay
-            setTimeout(() => {
-                setLoading(false);
-                notifications.show({
-                    title: 'Success',
-                    message: 'Image processing completed!',
-                    color: 'green'
-                });
-            }, 8000);
-        }, 1000);
+
+            let completedStatus: UndressStatusResponse | null = null;
+
+            for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
+                await sleep(POLL_INTERVAL_MS);
+
+                const statusResponse = await fetch(`/api/undress/${jobId}`);
+                const statusData: UndressStatusResponse = await statusResponse.json();
+
+                if (!statusResponse.ok) {
+                    throw new Error(statusData.error || 'Failed to check undress job status');
+                }
+
+                if (statusData.status === 'COMPLETED') {
+                    completedStatus = statusData;
+                    break;
+                }
+
+                if (
+                    statusData.status === 'FAILED' ||
+                    statusData.status === 'CANCELLED' ||
+                    statusData.status === 'TIMED_OUT'
+                ) {
+                    throw new Error(statusData.error || `Undress job ${statusData.status.toLowerCase()}`);
+                }
+            }
+
+            if (!completedStatus) {
+                throw new Error('Undress generation timed out. Please try again.');
+            }
+
+            const outputImage = extractOutputImage(completedStatus.output);
+            if (!outputImage) {
+                throw new Error('No image was returned by RunPod.');
+            }
+
+            setGeneratedImage(outputImage);
+            setImageBlur(20);
+            setTimeout(() => setImageBlur(0), 250);
+
+            notifications.show({
+                title: 'Success',
+                message: 'Image processing completed!',
+                color: 'green'
+            });
+        } catch (error: any) {
+            console.error('Undress generation error:', error);
+            notifications.show({
+                title: 'Generation failed',
+                message: error.message || 'Failed to process image',
+                color: 'red'
+            });
+        } finally {
+            setLoading(false);
+        }
     };
 
     // Example animation effect
@@ -249,10 +395,6 @@ export default function UndressPage() {
                                     <Group gap="md">
                                         {[
                                             { value: 'Undress', label: 'Undress', image: '/undress/Undress.webp' },
-                                            { value: 'X-ray', label: 'X-ray', image: '/undress/X-ray.webp' },
-                                            { value: 'Bikini', label: 'Bikini', image: '/undress/Bikini.webp' },
-                                            { value: 'Lingerie', label: 'Lingerie', image: '/undress/Lingerie.webp' },
-                                            { value: 'Shibari', label: 'Shibari', image: '/undress/Shibari.webp' },
                                         ].map((mode) => {
                                             return (
                                                 <Stack key={mode.value} align="center" gap={4}>
@@ -495,6 +637,18 @@ export default function UndressPage() {
                                             <Text c="#4a7aba" size="lg" fw={500}>Processing...</Text>
                                             <Text c="dimmed" size="sm">This may take a few moments</Text>
                                         </Stack>
+                                    ) : generatedImage ? (
+                                        <Image
+                                            src={generatedImage}
+                                            alt="Generated undress result"
+                                            fit="contain"
+                                            style={{ 
+                                                width: '100%', 
+                                                height: '100%',
+                                                filter: `blur(${imageBlur}px)`,
+                                                transition: 'none'
+                                            }}
+                                        />
                                     ) : !latestJob ? (
                                         (!isMobile && showExample) ? (
                                             <Box style={{ position: 'relative', width: '100%', height: '100%', opacity: exampleOpacity, transition: 'none' }}>
