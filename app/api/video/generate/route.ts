@@ -20,7 +20,7 @@ interface VideoGenerateBody {
     prompt: string;
     negativePrompt?: string;
     frameRate?: number;
-    length?: number;
+    durationSeconds?: number;
     resolution?: string;
     steps?: number;
     cfg?: number;
@@ -34,6 +34,8 @@ function updateVideoWorkflow(
     params: Required<Pick<VideoGenerateBody, 'prompt'>> & Omit<VideoGenerateBody, 'prompt'>
 ): any {
     const updated = JSON.parse(JSON.stringify(workflow));
+
+    const fps = params.frameRate ?? 24;
 
     // Node 303 — Positive prompt
     if (updated['303']?.inputs) {
@@ -52,22 +54,34 @@ function updateVideoWorkflow(
         updated['323'].inputs.cfg = params.cfg ?? 1;
     }
 
-    // Node 301 — Length (frames)
+    // Node 301 — Length (frames) = durationSeconds * fps + 1 (base frame)
+    const durationSeconds = params.durationSeconds ?? 10;
+    const totalFrames = durationSeconds * fps + 1;
     if (updated['301']?.inputs) {
-        updated['301'].inputs.value = params.length ?? 241;
+        updated['301'].inputs.value = totalFrames;
     }
 
     // Node 304 — LTXVConditioning (frame_rate)
     if (updated['304']?.inputs) {
-        updated['304'].inputs.frame_rate = params.frameRate ?? 24;
+        updated['304'].inputs.frame_rate = fps;
+    }
+
+    // Node 310 — CreateVideo (fps)
+    if (updated['310']?.inputs) {
+        updated['310'].inputs.fps = fps;
+    }
+
+    // Node 305 — LTXVEmptyLatentAudio (frame_rate)
+    if (updated['305']?.inputs) {
+        updated['305'].inputs.frame_rate = fps;
     }
 
     // Node 295 — EmptyLTXVLatentVideo (width, height)
-    const resolution = params.resolution ?? '1920x1088';
+    const resolution = params.resolution ?? '768x1152';
     const [width, height] = resolution.split('x').map(Number);
     if (updated['295']?.inputs) {
-        updated['295'].inputs.width = width || 1920;
-        updated['295'].inputs.height = height || 1088;
+        updated['295'].inputs.width = width || 768;
+        updated['295'].inputs.height = height || 1152;
     }
 
     // Node 285 — LoraLoaderModelOnly (lora_name, strength_model)
@@ -117,7 +131,7 @@ export async function POST(request: NextRequest) {
         await verifyDennisRole(userId);
 
         const body: VideoGenerateBody = await request.json();
-        const { prompt, negativePrompt, frameRate, length, resolution, steps, cfg, seed, loraStrength, loraName } = body;
+        const { prompt, negativePrompt, frameRate, durationSeconds, resolution, steps, cfg, seed, loraStrength, loraName } = body;
 
         if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
             return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
@@ -145,7 +159,7 @@ export async function POST(request: NextRequest) {
             prompt,
             negativePrompt,
             frameRate,
-            length,
+            durationSeconds,
             resolution,
             steps,
             cfg,
@@ -190,14 +204,13 @@ export async function POST(request: NextRequest) {
                 prompt: prompt.trim(),
                 negative_prompt: (negativePrompt || '').trim(),
                 frame_rate: frameRate ?? 24,
-                length: length ?? 241,
-                resolution: resolution ?? '1920x1088',
+                duration_seconds: durationSeconds ?? 10,
+                resolution: resolution ?? '768x1152',
                 steps: steps ?? 9,
                 cfg: cfg ?? 1,
                 seed: seed ?? null,
                 lora_name: loraName ?? AVAILABLE_LORAS[0].name,
                 lora_strength: loraStrength ?? 1.1,
-                generation_type: 'video',
             },
             createdAt: new Date().toISOString(),
             ['statusTimestamps.IN_QUEUE']: new Date().toISOString(),

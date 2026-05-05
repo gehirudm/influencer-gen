@@ -9,6 +9,7 @@ interface JobData {
     id: string;
     userId: string;
     status: string;
+    generationType?: string;
     metadata: ImageGenerationMetadata;
     createdAt: string;
     imageUrls?: ImageURLS[];

@@ -104,6 +104,7 @@ async function persistCompletedOutput(
             userId,
             jobId,
             isPublic: false,
+            isVideo: true,
             metadata: jobDoc.exists ? (jobDoc.data()?.metadata ?? {}) : {},
             contentModerationStatus: 'pending',
             createdAt: new Date().toISOString(),

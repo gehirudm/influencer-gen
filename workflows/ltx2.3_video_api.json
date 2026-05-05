@@ -16,8 +16,9 @@
   },
   "279": {
     "inputs": {
-      "UNKNOWN": "ltx-2.3-22b-distilled-fp8.safetensors"
+      "ckpt_name": "ltx-2.3-22b-distilled-fp8.safetensors"
     },
+    "class_type": "LTXVAudioVAELoader",
     "_meta": {}
   },
   "285": {
@@ -60,6 +61,7 @@
         0
       ]
     },
+    "class_type": "LTXVAudioVAEDecode",
     "_meta": {}
   },
   "301": {
@@ -103,7 +105,7 @@
   },
   "305": {
     "inputs": {
-      "UNKNOWN": 1,
+      "batch_size": 1,
       "audio_vae": [
         "279",
         0
@@ -111,8 +113,10 @@
       "frames_number": [
         "301",
         0
-      ]
+      ],
+      "frame_rate": 24
     },
+    "class_type": "LTXVEmptyLatentAudio",
     "_meta": {}
   },
   "307": {
@@ -122,6 +126,7 @@
         0
       ]
     },
+    "class_type": "LTXVSeparateAVLatent",
     "_meta": {}
   },
   "310": {
@@ -185,8 +190,11 @@
   },
   "317": {
     "inputs": {
-      "UNKNOWN": "default"
+      "precision": "default",
+      "gemma_path": "gemma_3_12B_it.safetensors",
+      "ltxv_path": "ltx-2.3-22b-distilled-fp8.safetensors"
     },
+    "class_type": "LTXAVTextEncoderLoader",
     "_meta": {}
   },
   "322": {
@@ -200,6 +208,7 @@
         0
       ]
     },
+    "class_type": "LTXVConcatAVLatent",
     "_meta": {}
   },
   "323": {

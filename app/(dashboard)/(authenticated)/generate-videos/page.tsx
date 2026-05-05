@@ -20,8 +20,14 @@ import {
     Loader,
     Alert,
     Center,
+    Modal,
+    Slider,
+    Tabs,
+    SimpleGrid,
+    Badge,
+    ActionIcon,
 } from '@mantine/core';
-import { IconPhoto, IconAlertCircle, IconVideo } from '@tabler/icons-react';
+import { IconAlertCircle, IconVideo, IconPlayerPlay, IconMaximize } from '@tabler/icons-react';
 
 const AVAILABLE_LORAS = [
     { value: 'hxwoman_lora_v1_FINAL.safetensors', label: 'hxwoman v1 Final (Recommended)' },
@@ -29,12 +35,24 @@ const AVAILABLE_LORAS = [
     { value: 'hxwoman_lora_v1_000004000.safetensors', label: 'hxwoman v1 - Iteration 4000' },
 ];
 
-const RESOLUTIONS = [
-    { value: '1920x1088', label: '1920 x 1088 (LTX 2.3)' },
-    { value: '1536x864', label: '1536 x 864' },
-    { value: '1280x768', label: '1280 x 768' },
-    { value: '1024x576', label: '1024 x 576' },
-    { value: '768x512', label: '768 x 512' },
+const RESOLUTION_PRESETS = [
+    { group: 'Portrait (Phone)', items: [
+        { value: '768x1152', label: '768 × 1152 (Recommended)' },
+        { value: '512x768', label: '512 × 768' },
+        { value: '1088x1920', label: '1088 × 1920' },
+    ]},
+    { group: 'Landscape', items: [
+        { value: '1920x1088', label: '1920 × 1088' },
+        { value: '1536x864', label: '1536 × 864' },
+        { value: '1280x768', label: '1280 × 768' },
+        { value: '1024x576', label: '1024 × 576' },
+    ]},
+];
+
+const FPS_MARKS = [
+    { value: 24, label: '24' },
+    { value: 30, label: '30' },
+    { value: 60, label: '60' },
 ];
 
 const COST = 100;
@@ -56,6 +74,14 @@ interface StatusData {
     error?: string;
 }
 
+interface HistoryVideo {
+    jobId: string;
+    imageUrls: Array<{ publicUrl: string; privateUrl: string }>;
+    metadata: Record<string, any>;
+    createdAt: string;
+    executionTime: number | null;
+}
+
 export default function GenerateVideosPage() {
     const router = useRouter();
     const { user, systemData, loading: userLoading } = useUserData();
@@ -63,9 +89,11 @@ export default function GenerateVideosPage() {
 
     const [prompt, setPrompt] = useState('');
     const [negativePrompt, setNegativePrompt] = useState('');
-    const [frameRate, setFrameRate] = useState<number | string>(24);
-    const [length, setLength] = useState<number | string>(241);
-    const [resolution, setResolution] = useState<string>('1920x1088');
+    const [frameRate, setFrameRate] = useState(24);
+    const [durationSeconds, setDurationSeconds] = useState<number | string>(5);
+    const [resolution, setResolution] = useState<string>('768x1152');
+    const [customW, setCustomW] = useState<number | string>('');
+    const [customH, setCustomH] = useState<number | string>('');
     const [steps, setSteps] = useState<number | string>(9);
     const [cfg, setCfg] = useState<number | string>(1);
     const [seed, setSeed] = useState('');
@@ -78,6 +106,11 @@ export default function GenerateVideosPage() {
     const [jobId, setJobId] = useState<string | null>(null);
     const [outputUrl, setOutputUrl] = useState<string | null>(null);
     const [tokensRemaining, setTokensRemaining] = useState<number | null>(null);
+
+    const [modalOpened, setModalOpened] = useState(false);
+    const [history, setHistory] = useState<HistoryVideo[]>([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [modalVideoUrl, setModalVideoUrl] = useState<string | null>(null);
 
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -144,12 +177,37 @@ export default function GenerateVideosPage() {
         return () => stopPolling();
     }, [stopPolling]);
 
+    const fetchHistory = useCallback(async () => {
+        setHistoryLoading(true);
+        try {
+            const res = await fetch('/api/video/history');
+            const data = await res.json();
+            if (data.videos) {
+                setHistory(data.videos);
+            }
+        } catch (err) {
+            console.error('Failed to fetch video history:', err);
+        } finally {
+            setHistoryLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (modalOpened) {
+            fetchHistory();
+        }
+    }, [modalOpened, fetchHistory]);
+
     const handleSubmit = async () => {
         if (!prompt.trim()) return;
         setStatusError(null);
         setOutputUrl(null);
         setStatus(null);
         setGenerating(true);
+
+        const effectiveResolution = resolution === 'custom'
+            ? `${customW || 768}x${customH || 1152}`
+            : resolution;
 
         try {
             const res = await fetch('/api/video/generate', {
@@ -158,9 +216,9 @@ export default function GenerateVideosPage() {
                 body: JSON.stringify({
                     prompt: prompt.trim(),
                     negativePrompt: negativePrompt.trim() || undefined,
-                    frameRate: typeof frameRate === 'number' && !isNaN(frameRate) ? frameRate : 24,
-                    length: typeof length === 'number' && !isNaN(length) ? length : 241,
-                    resolution: resolution || undefined,
+                    frameRate,
+                    durationSeconds: typeof durationSeconds === 'number' && !isNaN(durationSeconds) ? durationSeconds : 5,
+                    resolution: effectiveResolution,
                     steps: typeof steps === 'number' && !isNaN(steps) ? steps : 9,
                     cfg: typeof cfg === 'number' && !isNaN(cfg) ? cfg : 1,
                     seed: seed.trim() ? parseInt(seed.trim(), 10) : undefined,
@@ -187,6 +245,32 @@ export default function GenerateVideosPage() {
             setGenerating(false);
         }
     };
+
+    const openModal = (url?: string) => {
+        setModalVideoUrl(url || outputUrl);
+        setModalOpened(true);
+    };
+
+    const formatDate = (iso: string) => {
+        return new Date(iso).toLocaleDateString(undefined, {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+        });
+    };
+
+    const formatDuration = (seconds: number) => {
+        if (!seconds) return '—';
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    };
+
+    const resolutionOptions = [
+        ...RESOLUTION_PRESETS.flatMap(group => [
+            { value: `__group__${group.group}`, label: `— ${group.group} —`, disabled: true },
+            ...group.items,
+        ]),
+        { value: 'custom', label: 'Custom (W × H)' },
+    ];
 
     if (userLoading) {
         return (
@@ -251,35 +335,72 @@ export default function GenerateVideosPage() {
 
                             <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
                                 <Text size="sm" fw={500} mb="sm" c="white">Settings</Text>
-                                <Group grow align="flex-start">
+                                <Stack gap="md">
+                                    <Box>
+                                        <Text size="sm" fw={500} mb={4} c="dimmed">Frame Rate: {frameRate} fps</Text>
+                                        <Slider
+                                            value={frameRate}
+                                            onChange={setFrameRate}
+                                            min={1}
+                                            max={60}
+                                            step={1}
+                                            marks={FPS_MARKS}
+                                            disabled={generating}
+                                            styles={{
+                                                markLabel: { color: '#888', fontSize: '12px' },
+                                                thumb: { borderColor: '#5a8aca' },
+                                                track: { backgroundColor: '#333' },
+                                                bar: { backgroundColor: '#5a8aca' },
+                                            }}
+                                        />
+                                    </Box>
                                     <NumberInput
-                                        label="Frame Rate"
-                                        description="Frames per second"
+                                        label="Duration"
+                                        description="Length in whole seconds"
                                         min={1}
                                         max={120}
-                                        value={frameRate}
-                                        onChange={(v) => setFrameRate(v)}
+                                        value={durationSeconds}
+                                        onChange={(v) => setDurationSeconds(v)}
                                         disabled={generating}
                                     />
-                                    <NumberInput
-                                        label="Length (frames)"
-                                        description="Total frames"
-                                        min={1}
-                                        max={9999}
-                                        value={length}
-                                        onChange={(v) => setLength(v)}
+                                    <Text size="xs" c="dimmed">
+                                        Total frames: {(
+                                            (typeof durationSeconds === 'number' && !isNaN(durationSeconds) ? durationSeconds : 5) * frameRate + 1
+                                        )} ({(typeof durationSeconds === 'number' && !isNaN(durationSeconds) ? durationSeconds : 5)}s × {frameRate} fps + 1 base)
+                                    </Text>
+                                    <Select
+                                        label="Resolution"
+                                        description="Output size"
+                                        data={resolutionOptions}
+                                        value={resolution}
+                                        onChange={(v) => v && setResolution(v)}
                                         disabled={generating}
                                     />
-                                </Group>
-                                <Select
-                                    mt="sm"
-                                    label="Resolution"
-                                    description="Output size"
-                                    data={RESOLUTIONS}
-                                    value={resolution}
-                                    onChange={(v) => v && setResolution(v)}
-                                    disabled={generating}
-                                />
+                                    {resolution === 'custom' && (
+                                        <Group grow align="flex-start">
+                                            <NumberInput
+                                                label="Width"
+                                                placeholder="768"
+                                                min={64}
+                                                max={4096}
+                                                step={64}
+                                                value={customW}
+                                                onChange={(v) => setCustomW(v)}
+                                                disabled={generating}
+                                            />
+                                            <NumberInput
+                                                label="Height"
+                                                placeholder="1152"
+                                                min={64}
+                                                max={4096}
+                                                step={64}
+                                                value={customH}
+                                                onChange={(v) => setCustomH(v)}
+                                                disabled={generating}
+                                            />
+                                        </Group>
+                                    )}
+                                </Stack>
                             </Card>
 
                             <Card p="md" style={{ backgroundColor: '#0a0a0a', border: '1px solid #333' }}>
@@ -400,17 +521,37 @@ export default function GenerateVideosPage() {
                                 flex: isMobile ? undefined : 1,
                                 minHeight: isMobile ? '200px' : 0,
                                 maxHeight: isMobile ? '260px' : undefined,
+                                position: 'relative',
                             }}
                         >
                             {status === 'COMPLETED' && outputUrl ? (
-                                <Box style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Box
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        position: 'relative',
+                                    }}
+                                >
                                     <video
                                         controls
                                         autoPlay
                                         loop
-                                        style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '8px' }}
+                                        style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '8px', cursor: 'pointer' }}
                                         src={outputUrl}
+                                        onClick={() => openModal()}
                                     />
+                                    <ActionIcon
+                                        variant="filled"
+                                        color="dark"
+                                        radius="xl"
+                                        style={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }}
+                                        onClick={() => openModal()}
+                                    >
+                                        <IconMaximize size={16} />
+                                    </ActionIcon>
                                 </Box>
                             ) : generating ? (
                                 <Box
@@ -457,6 +598,131 @@ export default function GenerateVideosPage() {
                     </Stack>
                 </Grid.Col>
             </Grid>
+
+            {/* Video Modal */}
+            <Modal
+                opened={modalOpened}
+                onClose={() => setModalOpened(false)}
+                size="xl"
+                title="Video Playback"
+                styles={{
+                    title: { color: '#fff', fontWeight: 600 },
+                    content: { backgroundColor: '#1a1a1a' },
+                    header: { backgroundColor: '#1a1a1a', borderBottom: '1px solid #333' },
+                }}
+            >
+                <Tabs defaultValue="current">
+                    <Tabs.List>
+                        <Tabs.Tab value="current" leftSection={<IconPlayerPlay size={14} />}>
+                            Current Video
+                        </Tabs.Tab>
+                        <Tabs.Tab value="history" leftSection={<IconVideo size={14} />}>
+                            Past Videos {history.length > 0 && <Badge ml="xs" size="xs" variant="light">{history.length}</Badge>}
+                        </Tabs.Tab>
+                    </Tabs.List>
+
+                    <Tabs.Panel value="current" pt="md">
+                        {modalVideoUrl ? (
+                            <Box style={{ width: '100%', maxHeight: '70vh' }}>
+                                <video
+                                    controls
+                                    autoPlay
+                                    style={{
+                                        width: '100%',
+                                        maxHeight: '60vh',
+                                        borderRadius: '8px',
+                                        backgroundColor: '#000',
+                                    }}
+                                    src={modalVideoUrl}
+                                />
+                            </Box>
+                        ) : (
+                            <Center py="xl">
+                                <Stack align="center" gap="sm">
+                                    <IconVideo size={48} color="#555" />
+                                    <Text c="dimmed">No video to display</Text>
+                                </Stack>
+                            </Center>
+                        )}
+                    </Tabs.Panel>
+
+                    <Tabs.Panel value="history" pt="md">
+                        {historyLoading ? (
+                            <Center py="xl">
+                                <Loader size="md" />
+                            </Center>
+                        ) : history.length === 0 ? (
+                            <Center py="xl">
+                                <Stack align="center" gap="sm">
+                                    <IconVideo size={48} color="#555" />
+                                    <Text c="dimmed">No past videos yet</Text>
+                                </Stack>
+                            </Center>
+                        ) : (
+                            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md">
+                                {history.map((vid) => (
+                                    <Card
+                                        key={vid.jobId}
+                                        padding="sm"
+                                        style={{
+                                            backgroundColor: '#2a2a2a',
+                                            border: '1px solid #444',
+                                            cursor: 'pointer',
+                                        }}
+                                        onClick={() => {
+                                            if (vid.imageUrls[0]) {
+                                                setModalVideoUrl(vid.imageUrls[0].publicUrl);
+                                            }
+                                        }}
+                                    >
+                                        <Box
+                                            style={{
+                                                width: '100%',
+                                                aspectRatio: '9/16',
+                                                backgroundColor: '#000',
+                                                borderRadius: '4px',
+                                                overflow: 'hidden',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                position: 'relative',
+                                            }}
+                                        >
+                                            <IconVideo size={32} color="#444" />
+                                            <Box
+                                                style={{
+                                                    position: 'absolute',
+                                                    inset: 0,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                }}
+                                            >
+                                                <IconPlayerPlay
+                                                    size={24}
+                                                    color="rgba(255,255,255,0.7)"
+                                                    style={{ filter: 'drop-shadow(0 0 4px rgba(0,0,0,0.6))' }}
+                                                />
+                                            </Box>
+                                        </Box>
+                                        <Stack gap={2} mt="xs">
+                                            <Text size="xs" c="dimmed" lineClamp={2}>
+                                                {vid.metadata?.prompt || 'Untitled'}
+                                            </Text>
+                                            <Text size="xs" c="dimmed">
+                                                {formatDate(vid.createdAt)}
+                                            </Text>
+                                            <Text size="xs" c="dimmed">
+                                                {formatDuration(vid.metadata?.duration_seconds)}
+                                            </Text>
+                                        </Stack>
+                                    </Card>
+                                ))}
+                            </SimpleGrid>
+                        )}
+                    </Tabs.Panel>
+                </Tabs>
+            </Modal>
         </Box>
     );
 }
