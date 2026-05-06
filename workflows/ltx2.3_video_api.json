@@ -190,9 +190,9 @@
   },
   "317": {
     "inputs": {
-      "precision": "default",
-      "gemma_path": "gemma_3_12B_it.safetensors",
-      "ltxv_path": "ltx-2.3-22b-distilled-fp8.safetensors"
+      "text_encoder": "gemma_3_12B_it_fp4_mixed.safetensors",
+      "device": "default",
+      "ckpt_name": "ltx-2.3-22b-distilled-fp8.safetensors"
     },
     "class_type": "LTXAVTextEncoderLoader",
     "_meta": {}

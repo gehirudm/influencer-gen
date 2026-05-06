@@ -30,9 +30,7 @@ import {
 import { IconAlertCircle, IconVideo, IconPlayerPlay, IconMaximize } from '@tabler/icons-react';
 
 const AVAILABLE_LORAS = [
-    { value: 'hxwoman_lora_v1_FINAL.safetensors', label: 'hxwoman v1 Final (Recommended)' },
-    { value: 'hxwoman_lora_v1_000005500.safetensors', label: 'hxwoman v1 - Iteration 5500' },
-    { value: 'hxwoman_lora_v1_000004000.safetensors', label: 'hxwoman v1 - Iteration 4000' },
+    { value: 'hxwoman_lora_v1_FINAL.safetensors', label: 'hxwoman v1' },
 ];
 
 const RESOLUTION_PRESETS = [

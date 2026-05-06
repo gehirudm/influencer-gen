@@ -11,9 +11,7 @@ const VIDEO_ENDPOINT_ID = process.env.VIDEO_RUNPOD_ENDPOINT_ID;
 const VIDEO_GENERATION_COST = 100;
 
 const AVAILABLE_LORAS = [
-    { name: 'hxwoman_lora_v1_FINAL.safetensors', label: 'hxwoman v1 Final (Recommended)' },
-    { name: 'hxwoman_lora_v1_000005500.safetensors', label: 'hxwoman v1 — Iteration 5500' },
-    { name: 'hxwoman_lora_v1_000004000.safetensors', label: 'hxwoman v1 — Iteration 4000' },
+    { name: 'hxwoman_lora_v1_FINAL.safetensors', label: 'hxwoman v1' },
 ] as const;
 
 interface VideoGenerateBody {
