@@ -951,7 +951,7 @@ export default function ImageGeneratorPage() {
                                     </Stack>
                                 ) : (
                                     <Image
-                                        src={latestJob.imageUrls[0].privateUrl}
+                                        src={latestJob.imageUrls?.[0]?.privateUrl}
                                         alt="Latest generated image"
                                         fit="contain"
                                         style={{
@@ -987,7 +987,7 @@ export default function ImageGeneratorPage() {
                                                     }}
                                                 >
                                                     <Image
-                                                        src={job.imageUrls[0].privateUrl}
+                                                        src={job.imageUrls?.[0]?.privateUrl}
                                                         alt={`Generated image ${index + 2}`}
                                                         fit="cover"
                                                         style={{ width: '100%', height: '100%' }}

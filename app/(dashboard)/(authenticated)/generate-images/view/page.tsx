@@ -158,7 +158,6 @@ export default function ViewGeneratedImagePage() {
                 <Carousel
                   withIndicators
                   height={500}
-                  loop
                   classNames={{
                     root: classes.carousel,
                     controls: classes.carouselControls,

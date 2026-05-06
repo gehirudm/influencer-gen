@@ -109,7 +109,6 @@ export function GenJobCard({
             <Card.Section mb={10}>
                 <Carousel
                     withIndicators
-                    loop={true}
                     classNames={{
                         root: classes.carousel,
                         controls: classes.carouselControls,

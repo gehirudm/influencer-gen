@@ -62,7 +62,7 @@ export default function AssetsPage() {
     // Flatten jobs to individual images
     const allImages = useMemo(() => {
         return completedJobs.flatMap(job => 
-            job.imageUrls.map((url, idx) => ({
+            (job.imageUrls ?? []).map((url, idx) => ({
                 id: `${job.id}-${idx}`,
                 jobId: job.id,
                 url: url.privateUrl,

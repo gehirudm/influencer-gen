@@ -1,10 +1,19 @@
-import { ImagePost } from "@/app/(dashboard)/discover/page";
 import { Card, Badge, ActionIcon, Box, Group, Image, Text, Modal, Button, Switch, Code, ScrollArea } from "@mantine/core";
 import { IconHeart, IconBookmark, IconShare, IconChevronLeft, IconChevronRight, IconX } from "@tabler/icons-react";
 import { Carousel } from '@mantine/carousel';
 import { useState } from "react";
 
 import classes from './DiscoverPageCard.module.css';
+
+interface ImagePost {
+    id: string;
+    title: string;
+    isMultiImage?: boolean;
+    imageUrls?: string[];
+    currentImageIndex?: number;
+    nsfw?: boolean;
+    params?: Record<string, unknown>;
+}
 
 export default function DiscoverPageCard({ post }: { post: ImagePost }) {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -18,9 +27,11 @@ export default function DiscoverPageCard({ post }: { post: ImagePost }) {
     };
 
     // Prepare images array for carousel
-    const images = post.isMultiImage && post.imageUrls ?
-        post.imageUrls :
-        [post.imageUrls[0]];
+    const images: string[] = (() => {
+        const urls = post.imageUrls;
+        if (!urls || urls.length === 0) return [];
+        return post.isMultiImage ? urls : [urls[0]];
+    })();
 
     // Mock image parameters for demonstration
     const imageParams = {
@@ -54,7 +65,6 @@ export default function DiscoverPageCard({ post }: { post: ImagePost }) {
                 <Card.Section className={classes.imageContainer} onClick={handleOpenPreview}>
                     <Carousel
                         withIndicators
-                        loop
                         onSlideChange={handleSlideChange}
                         initialSlide={post.currentImageIndex || 0}
                         classNames={{

@@ -75,7 +75,7 @@ export function StepBasics({ data, onUpdate }: StepBasicsProps) {
                     min={18}
                     max={99}
                     value={data.age}
-                    onChange={(value) => onUpdate({ age: value })}
+                    onChange={(value) => onUpdate({ age: value === '' ? '' : Number(value) })}
                 />
             </SimpleGrid>
 
