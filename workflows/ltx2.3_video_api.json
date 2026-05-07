@@ -16,7 +16,7 @@
   },
   "279": {
     "inputs": {
-      "ckpt_name": "ltx-2.3-22b-distilled-fp8.safetensors"
+      "ckpt_name": "ltx-2.3-22b-dev.safetensors"
     },
     "class_type": "LTXVAudioVAELoader",
     "_meta": {}
@@ -24,7 +24,7 @@
   "285": {
     "inputs": {
       "lora_name": "ostris_webcam_ltx2_3.safetensors",
-      "strength_model": 1.1,
+      "strength_model": 0.9,
       "model": [
         "316",
         0
@@ -181,7 +181,7 @@
   },
   "316": {
     "inputs": {
-      "ckpt_name": "ltx-2.3-22b-distilled-fp8.safetensors"
+      "ckpt_name": "ltx-2.3-22b-dev.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
@@ -190,9 +190,9 @@
   },
   "317": {
     "inputs": {
-      "text_encoder": "gemma_3_12B_it_fp4_mixed.safetensors",
+      "text_encoder": "gemma_3_12B_it_heretic.safetensors",
       "device": "default",
-      "ckpt_name": "ltx-2.3-22b-distilled-fp8.safetensors"
+      "ckpt_name": "ltx-2.3-22b-dev.safetensors"
     },
     "class_type": "LTXAVTextEncoderLoader",
     "_meta": {}

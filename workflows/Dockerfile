@@ -10,17 +10,17 @@ RUN comfy node install --mode remote https://github.com/Lightricks/ComfyUI-LTXVi
 # LTX Video checkpoint model (~27.4 GB)
 # -------------------------------------------------------------------
 RUN comfy model download \
-  --url https://huggingface.co/Lightricks/LTX-2.3-fp8/resolve/main/ltx-2.3-22b-distilled-fp8.safetensors \
+  --url https://huggingface.co/Lightricks/LTX-2.3/resolve/main/ltx-2.3-22b-dev.safetensors \
   --relative-path models/checkpoints \
-  --filename ltx-2.3-22b-distilled-fp8.safetensors
+  --filename ltx-2.3-22b-dev.safetensors
 
 # -------------------------------------------------------------------
 # Gemma 3 text encoder (~8.8 GB)
 # -------------------------------------------------------------------
 RUN comfy model download \
-  --url https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors \
+  --url https://huggingface.co/DreamFast/gemma-3-12b-it-heretic/resolve/main/comfyui/gemma_3_12B_it_heretic.safetensors \
   --relative-path models/text_encoders \
-  --filename gemma_3_12B_it_fp4_mixed.safetensors
+  --filename gemma_3_12B_it_heretic.safetensors
 
 # -------------------------------------------------------------------
 # hxwoman LoRAs (~643 MB each)
